@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --brand-bg: #F5F3F0;
+  --brand-accent: #C4DD03;
+  --brand-dark: #212121;
+  --brand-footer: #373737;
+  --brand-orange: #E87500;
+}
+
+.heading {
+  font-family: 'Archivo Black', sans-serif;
+}
+body {
+  font-family: 'Inter', sans-serif;
+}
