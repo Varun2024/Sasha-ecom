@@ -43,7 +43,7 @@ const Footer = () => {
                 </div>
             </div>
             <div>
-                <h3 className="font-heading uppercase mb-4">Sign up for our newsletter</h3>
+                <h3 className="font-heading uppercase mb-4">Have any query? mails us</h3>
                 <form>
                     <label htmlFor="email" className="text-sm text-gray-300">Your email *</label>
                     <div className="flex flex-col sm:flex-row gap-4 mt-2">
@@ -54,7 +54,7 @@ const Footer = () => {
             </div>
         </div>
         <div className="mt-12 pt-8 border-t border-gray-600 text-sm text-gray-400">
-          <p>© 2035 by PUFFERS. Built on Wix Studio</p>
+          <p>© 2025 by Sasha Store. All rights reserved.</p>
         </div>
       </div>
     </footer>
