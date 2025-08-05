@@ -4,7 +4,7 @@ const ProductCard = ({ name, price, oldPrice, imageUrl, isBestSeller }) => {
   return (
     <div className="bg-[#e0ddd9] rounded-2xl p-4 flex flex-col relative">
       {isBestSeller && (
-        <span className="absolute top-4 left-4 bg-[var(--brand-accent)] text-[var(--brand-dark)] text-xs font-bold uppercase px-3 py-1 rounded-full">
+        <span className="absolute top-4 left-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white text-xs font-bold uppercase px-3 py-1 rounded-full">
           Best Seller
         </span>
       )}

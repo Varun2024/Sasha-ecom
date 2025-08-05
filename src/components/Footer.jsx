@@ -43,18 +43,18 @@ const Footer = () => {
                 </div>
             </div>
             <div>
-                <h3 className="font-heading uppercase mb-4">Sign up for our newsletter</h3>
+                <h3 className="font-heading uppercase mb-4">Have any query? mails us</h3>
                 <form>
                     <label htmlFor="email" className="text-sm text-gray-300">Your email *</label>
                     <div className="flex flex-col sm:flex-row gap-4 mt-2">
                         <input type="email" id="email" className="w-full bg-transparent border-b border-gray-400 focus:border-white focus:outline-none py-2" />
-                        <button type="submit" className="bg-[var(--brand-orange)] text-white font-heading uppercase py-3 px-8 rounded-full w-full sm:w-auto whitespace-nowrap">Submit</button>
+                        <button type="submit" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 text-white font-heading uppercase py-3 px-8 rounded-full w-full sm:w-auto whitespace-nowrap">Submit</button>
                     </div>
                 </form>
             </div>
         </div>
         <div className="mt-12 pt-8 border-t border-gray-600 text-sm text-gray-400">
-          <p>© 2035 by PUFFERS. Built on Wix Studio</p>
+          <p>© 2025 by Sasha Store. All rights reserved.</p>
         </div>
       </div>
     </footer>
