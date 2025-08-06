@@ -42,16 +42,26 @@ const NewInSection = () => {
           style={{ backgroundImage: "url('https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')" }}
         >
           <h2 className="text-white font-heading text-6xl uppercase">New In</h2>
+<<<<<<< HEAD
           <a href="#" className="mt-4 inline-block bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 text-white font-heading uppercase py-4 px-10 rounded-full w-fit hover:bg-gray-500/40 hover:text-white transition-colors">
+=======
+          <a href="#" className="mt-4 inline-block bg-white text-[var(--brand-dark)] font-heading uppercase py-4 px-10 rounded-full w-fit hover:bg-gray-500/40 hover:text-white transition-colors">
+>>>>>>> 24ff6001aa417e3043f026c808dd8a7ddc0e0f5e
             Shop Now
           </a>
         </div>
         {/* Right Side */}
         <div
           className="grid grid-cols-2 gap-5">
+<<<<<<< HEAD
           {products.map((product,index) => (
             <Link to={`/product/${product.id}`} key={index} >
               <ProductCard {...product} />
+=======
+          {products.map((product) => (
+            <Link to={`/product/${product.id}`}>
+              <ProductCard key={product.name} {...product} />
+>>>>>>> 24ff6001aa417e3043f026c808dd8a7ddc0e0f5e
             </Link>
           ))}
         </div>
