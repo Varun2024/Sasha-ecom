@@ -4,15 +4,9 @@ import { useRef } from "react";
 
 const ShopByCategory = () => {
     return (
-<<<<<<< HEAD
         <div className="rounded-4xl mb-8 md:max-w-full mx-4 md:mx-6 bg-[#e0ddd9]">
             <div className=" mt-10 flex flex-col justify-center items-center ">
                 <div className="font-semibold uppercase text-neutral-500 mt-10 md:text-7xl text-3xl">
-=======
-        <div className="border-1 mb-8 w-[90%] mx-auto">
-            <div className=" mt-10 flex flex-col justify-center items-center ">
-                <div className="font-semibold uppercase text-neutral-500 md:text-7xl text-3xl">
->>>>>>> 24ff6001aa417e3043f026c808dd8a7ddc0e0f5e
                     Shop By Category
                 </div>
             </div>
@@ -27,19 +21,11 @@ const HorizontalScrollCarousel = () => {
         target: targetRef,
     });
 
-<<<<<<< HEAD
     const x = useTransform(scrollYProgress, [0, 1], ["10%", "-75%"]);
 
     return (
         <section ref={targetRef} className=" h-[300vh]  ">
             <div className="sticky top-20 md:top-10 flex h-[30%] items-center overflow-hidden">
-=======
-    const x = useTransform(scrollYProgress, [0, 1], ["1%", "-60%"]);
-
-    return (
-        <section ref={targetRef} className="relative md:h-[300vh] h-[200vh] ">
-            <div className="sticky top-0 flex h-[100vh] items-center overflow-hidden">
->>>>>>> 24ff6001aa417e3043f026c808dd8a7ddc0e0f5e
                 <motion.div style={{ x }} className="flex gap-4">
                     {cards.map((card) => {
                         return <Card card={card} key={card.id} />;
@@ -54,11 +40,7 @@ const Card = ({ card }) => {
     return (
         <div
             key={card.id}
-<<<<<<< HEAD
             className="group relative h-[450px] w-[450px] overflow-hidden bg-neutral-200 rounded-4xl"
-=======
-            className="group relative h-[350px] w-[400px] md:h-[450px] md:w-[450px] overflow-hidden bg-neutral-200"
->>>>>>> 24ff6001aa417e3043f026c808dd8a7ddc0e0f5e
         >
             <div
                 style={{
@@ -110,19 +92,11 @@ const cards = [
         title: "Title 1",
         id: 6,
     },
-<<<<<<< HEAD
     // {
     //     img: 'https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', alt: 'Puffer Bag',
     //     title: "Title 1",
     //     id: 7,
     // },
-=======
-    {
-        img: 'https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', alt: 'Puffer Bag',
-        title: "Title 1",
-        id: 7,
-    },
->>>>>>> 24ff6001aa417e3043f026c808dd8a7ddc0e0f5e
 ];
 
 // const cards = [

@@ -14,11 +14,7 @@ const Hero = () => {
           Winter Collection
         </h1>
         <p className="text-md md:text-xl font-body mt-2">Everyday Essential Apparel</p>
-<<<<<<< HEAD
         <a href="#" className="mt-8 inline-block bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 text-white font-heading uppercase py-2 px-10 md:px-30 rounded-full hover:bg-gray-700 transition-colors">
-=======
-        <a href="#" className="mt-8 inline-block bg-white text-black hover:text-white font-heading uppercase py-2 px-10 md:px-30 rounded-full hover:bg-gray-700/80 transition-colors">
->>>>>>> 24ff6001aa417e3043f026c808dd8a7ddc0e0f5e
           Shop Now  
         </a>
       </div>
