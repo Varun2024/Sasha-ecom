@@ -6,7 +6,9 @@ import { ChevronDown, ShoppingCart, Star, X, Filter } from 'lucide-react';
 import DataContext from '../../context/Context';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
-import { Toastify } from 'toastify';
+import { ToastContainer, toast } from 'react-toastify';
+
+import { v4 as uuid } from 'uuid';
 // --- Mock Product Data (Unchanged) ---
 const products = [
   // ... (same product data as in the prompt)
@@ -95,13 +97,23 @@ const allCategories = [...new Set(products.map(p => p.category))];
 
 
 
-// --- Product Card Component (with bug fix) ---
+// --- Product Card Component ---
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
   const { setProductData } = useContext(DataContext);
   const { cart, dispatch } = useCart();
   const addCartItem = (item) => {
-    dispatch({ type: 'ADD', payload: { ...item } });
+    dispatch({ type: 'ADD', payload: { ...item, id: uuid() } });
+    localStorage.setItem("cartCount", JSON.stringify(cart.length + 1));
+    toast.success(`${item.name} added!`, {
+      position: "bottom-right",
+      autoClose: 3000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
   };
 
   const handleProductClick = () => {
@@ -145,7 +157,7 @@ const ProductCard = ({ product }) => {
         <div className="flex items-center justify-between mt-4">
           <span className="text-2xl font-bold text-gray-900">${product.price.toFixed(2)}</span>
           <button
-            onClick={() => { addCartItem(product); console.log(cart); ; }}
+            onClick={() => { addCartItem(product); console.log(cart);; }}
             className="flex items-center justify-center bg-gray-900 text-white px-3 py-2 rounded-lg font-semibold text-sm hover:bg-gray-700 transition-colors duration-300">
             <ShoppingCart className="w-4 h-4 mr-2" />
             Add to Cart
@@ -196,6 +208,18 @@ export default function ProductListingPage() {
 
   return (
     <div className="bg-gray-100 min-h-screen">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+         />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
 
         <header className="text-center mb-12 mt-10">

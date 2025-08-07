@@ -1,43 +1,13 @@
-import { useState, useMemo } from 'react';
+/* eslint-disable no-unused-vars */
+import { useState, useMemo, useId } from 'react';
 
 // You can install this icon library with: npm install lucide-react
 import { Trash2, Plus, Minus, Tag, ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext.jsx'; // Import the custom hook to access cart context
-import { v4 as uuid } from 'uuid';
-import { Toastify } from 'toastify';
+import { useCart } from '../context/CartContext.jsx';
 
-// --- Mock Cart Data ---
-// In a real application, this data would come from context, state management, or an API.
-const initialCartItems = [
-    {
-        id: 1,
-        name: 'Classic White Tee',
-        category: 'TopWear',
-        price: 29.99,
-        imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=800&fit=crop',
-        quantity: 2,
-        size: 'M',
-    },
-    {
-        id: 3,
-        name: 'Slim Fit Jeans',
-        category: 'BottomWear',
-        price: 89.99,
-        imageUrl: 'https://images.unsplash.com/photo-1602293589914-9FF0554c671e?w=600&h=800&fit=crop',
-        quantity: 1,
-        size: '32/34',
-    },
-    {
-        id: 4,
-        name: 'Quilted Bomber Jacket',
-        category: 'OuterWear',
-        price: 199.50,
-        imageUrl: 'https://images.unsplash.com/photo-1591047139829-d919b5ca2373?w=600&h=800&fit=crop',
-        quantity: 1,
-        size: 'L',
-    },
-];
+
+
 
 
 
@@ -124,31 +94,36 @@ const OrderSummary = ({ subtotal }) => {
 
 // --- Main Cart Page Component ---
 export default function CartPage() {
-    const { cart } = useCart();
-    const carts = cart.map(item => ({
-        ...item,
-        id:uuid()
-    }));
-    const [cartItems, setCartItems] = useState(initialCartItems);
+    const { cart, dispatch } = useCart();
+    const carts = cart
+    const [cartItems, setCartItems] = useState(() => {
+        const savedCart = localStorage.getItem('cart');
+        return savedCart ? JSON.parse(savedCart) : carts;
+    });
     const navigate = useNavigate();
 
     const handleUpdateQuantity = (id, newQuantity) => {
         if (newQuantity > 0) {
             setCartItems(
-                carts.map(item =>
+                cartItems.map(item =>
                     item.id === id ? { ...item, quantity: newQuantity } : item
                 )
             );
+            dispatch({ type: 'INC', payload: id });
+            ;
         }
     };
 
     const handleRemoveItem = (id) => {
-        setCartItems(cartItems.filter(item => item.id !== id));
+        setCartItems(cart.filter(item => item.id !== id));
+        dispatch({ type: 'REMOVE', payload: id });
+        console.log(`Item with id ${id} removed from cart`);
+        
     };
 
     const subtotal = useMemo(() => {
-        return carts.reduce((total, item) => total + item.price * item.quantity, 0);
-    }, [carts]);
+        return cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
+    }, [cartItems]);
 
     return (
         <div className="bg-gray-50 min-h-screen py-8">
@@ -158,7 +133,7 @@ export default function CartPage() {
                     <p className="mt-2 text-lg text-gray-600">Review your items and proceed to checkout.</p>
                 </header>
 
-                {carts.length > 0 ? (
+                {cartItems.length > 0 ? (
                     <div className="flex flex-col md:flex-row gap-8">
                         {/* Cart Items Section */}
                         <main className="md:w-2/3 bg-white p-6 rounded-lg shadow-md">
@@ -170,7 +145,7 @@ export default function CartPage() {
                                 </button>
                             </div>
                             <div>
-                                {carts.map(item => (
+                                {cartItems.map(item => (
                                     <CartItem
                                         key={item.id}
                                         item={item}
