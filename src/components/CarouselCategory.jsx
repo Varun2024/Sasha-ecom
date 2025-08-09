@@ -24,7 +24,7 @@ const HorizontalScrollCarousel = () => {
     const x = useTransform(scrollYProgress, [0, 1], ["10%", "-75%"]);
 
     return (
-        <section ref={targetRef} className=" h-[300vh]  ">
+        <section ref={targetRef} className=" md:h-[300vh] h-[350vh]  ">
             <div className="sticky top-20 md:top-10 flex h-[30%] items-center overflow-hidden">
                 <motion.div style={{ x }} className="flex gap-4">
                     {cards.map((card) => {
@@ -92,47 +92,6 @@ const cards = [
         title: "Title 1",
         id: 6,
     },
-    // {
-    //     img: 'https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', alt: 'Puffer Bag',
-    //     title: "Title 1",
-    //     id: 7,
-    // },
+ 
 ];
 
-// const cards = [
-//     {
-//         url: "/imgs/abstract/1.jpg",
-//         title: "Title 1",
-//         id: 1,
-//     },
-//     {
-//         url: "/imgs/abstract/2.jpg",
-//         title: "Title 2",
-//         id: 2,
-//     },
-//     {
-//         url: "/imgs/abstract/3.jpg",
-//         title: "Title 3",
-//         id: 3,
-//     },
-//     {
-//         url: "/imgs/abstract/4.jpg",
-//         title: "Title 4",
-//         id: 4,
-//     },
-//     {
-//         url: "/imgs/abstract/5.jpg",
-//         title: "Title 5",
-//         id: 5,
-//     },
-//     {
-//         url: "/imgs/abstract/6.jpg",
-//         title: "Title 6",
-//         id: 6,
-//     },
-//     {
-//         url: "/imgs/abstract/7.jpg",
-//         title: "Title 7",
-//         id: 7,
-//     },
-// ];

@@ -48,7 +48,10 @@ const Header = () => {
       </nav> */}
 
       <div className="flex items-center space-x-4 text-sm font-heading gap-1">
-        <FiUser size={20} />
+        <div className="flex flex-col items-center gap-1 cursor-pointer" >
+        <FiUser size={15} />
+        profile
+        </div>
         <span className='flex items-center gap-2 cursor-pointer' onClick={() => navigate('/cart')}><FaBagShopping/> Cart ({cartCount ? cartCount : 0})</span>
       </div>
     </header>

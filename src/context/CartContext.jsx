@@ -7,8 +7,6 @@ import { createContext, useContext, useReducer } from "react";
 const cartContext = createContext()
 
 const cartReducer = (state, action) => {
-
-
     switch (action.type) {
         case "ADD":
             localStorage.setItem("cart", JSON.stringify([...state, action.payload]))

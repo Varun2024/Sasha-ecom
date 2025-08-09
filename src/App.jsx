@@ -12,6 +12,7 @@ import ProductListingPage from './pages/Products/ProductLists';
 import ReactLenis from 'lenis/react';
 import CartPage from './components/Cart';
 import CartProvider from './context/CartContext';
+import CheckoutPage from './components/Checkout';
 
 function App() {
 
@@ -25,6 +26,7 @@ function App() {
         <Route path="/product" element={<ProductDetailsPage />} />
         <Route path="/all" element={<ProductListingPage />} />
         <Route path='/cart' element={<CartPage />} />
+        <Route path="/checkout" element={<CheckoutPage />} />
       </Routes>
       <Footer />
     </>

@@ -59,6 +59,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => (
 const OrderSummary = ({ subtotal }) => {
     const taxes = subtotal * TAX_RATE;
     const total = subtotal + taxes + SHIPPING_COST;
+    const navigate = useNavigate();
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-md md:sticky md:top-24">
@@ -81,7 +82,9 @@ const OrderSummary = ({ subtotal }) => {
                 <span className="text-xl font-bold text-gray-900">Total</span>
                 <span className="text-xl font-bold text-gray-900">{total.toFixed(2)}</span>
             </div>
-            <button className="w-full mt-6 bg-gray-900 text-white font-bold py-3 rounded-lg hover:bg-gray-700 transition-colors duration-300">
+            <button
+            onClick={() => navigate('/checkout')} 
+            className="w-full mt-6 bg-gray-900 text-white font-bold py-3 rounded-lg hover:bg-gray-700 transition-colors duration-300">
                 Proceed to Checkout
             </button>
             <div className="flex items-center gap-2 mt-4 text-sm text-gray-500">
@@ -96,10 +99,12 @@ const OrderSummary = ({ subtotal }) => {
 export default function CartPage() {
     const { cart, dispatch } = useCart();
     const carts = cart
+
     const [cartItems, setCartItems] = useState(() => {
         const savedCart = localStorage.getItem('cart');
         return savedCart ? JSON.parse(savedCart) : carts;
     });
+    
     const navigate = useNavigate();
 
     const handleUpdateQuantity = (id, newQuantity) => {
@@ -126,7 +131,7 @@ export default function CartPage() {
     }, [cartItems]);
 
     return (
-        <div className="bg-gray-50 min-h-screen py-8">
+        <div className="bg-gray-50 min-h-screen py-16">
             <div className="container mx-auto px-4">
                 <header className="text-center mb-8">
                     <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Your Shopping Cart</h1>

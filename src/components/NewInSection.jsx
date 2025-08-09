@@ -33,6 +33,7 @@ const products = [
 
 const NewInSection = () => {
   // const { id } = useParams();
+  
   return (
     <section className="py-16 px-6 md:px-12">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -50,7 +51,7 @@ const NewInSection = () => {
         <div
           className="grid grid-cols-2 gap-5">
           {products.map((product,index) => (
-            <Link to={`/product/${product.id}`} key={index} >
+            <Link to={`/product`} key={index} >
               <ProductCard {...product} />
             </Link>
           ))}

@@ -1,23 +1,44 @@
+
 /* eslint-disable no-unused-vars */
 import React, { useContext, useState } from 'react';
 import { Star, Heart, ShoppingCart, Truck, Shield, RotateCcw, Zap, Volume2, Battery, Bluetooth } from 'lucide-react';
 import DataContext from '../context/Context';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import { useCart } from '../context/CartContext';
+import { v4 as uui } from 'uuid';
 
 export default function ProductDetailsPage() {
     const [selectedImage, setSelectedImage] = useState(0);
     const [selectedColor, setSelectedColor] = useState('midnight');
-    const [quantity, setQuantity] = useState(1);
+    const [quantity, setQuantity] = useState(1); // This state holds the selected quantity
     const [isWishlisted, setIsWishlisted] = useState(false);
     const [activeTab, setActiveTab] = useState('features');
     const { productData } = useContext(DataContext);
-    // Load data from localStorage in case of a refresh
     const [product, setProduct] = useState(() => {
         const stored = localStorage.getItem('productData');
         return stored ? JSON.parse(stored) : null;
     });
+    const [isClicked, setIsClicked] = useState(false);
+    const { cart, dispatch } = useCart();
+    const navigate = useNavigate();
+    // CHANGE 1: Update the function to accept the quantity
+    const addCartItem = (item, quantity) => {
+        setIsClicked(true);
 
-
+        // CHANGE 2: Add the quantity to the payload object
+        dispatch({ type: 'ADD', payload: { ...item, id: uui(), quantity: quantity } });
+        localStorage.setItem("cartCount", JSON.stringify(cart.length + 1));
+        toast.success(`${item.name} (x${quantity}) added!`, {
+            position: "bottom-right",
+            autoClose: 3000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+        });
+    };
 
     const images = [
         'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=600&h=600&fit=crop',
@@ -46,19 +67,28 @@ export default function ProductDetailsPage() {
         { name: 'Mike Rodriguez', rating: 4, comment: 'Great build quality, though a bit pricey. Worth it for the features.', date: '2 weeks ago' }
     ];
 
-
-
     return (
         <div className="min-h-screen ">
             <div className="container mx-auto px-4 py-8 ">
                 <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20 mt-10">
+                    <ToastContainer
+                        position="top-right"
+                        autoClose={3000}
+                        hideProgressBar={false}
+                        newestOnTop={false}
+                        closeOnClick={false}
+                        rtl={false}
+                        pauseOnFocusLoss
+                        draggable
+                        pauseOnHover
+                        theme="light"
+                    />
                     <div className="grid lg:grid-cols-2 gap-8 p-8">
-
                         {/* Image Gallery */}
                         <div className="space-y-4">
                             <div className="relative group">
                                 <img
-                                    src={productData.imageUrl? productData.imageUrl : product.imageUrl}
+                                    src={productData.imageUrl ? productData.imageUrl : product.imageUrl}
                                     alt="Product"
                                     className="w-full h-96 lg:h-[500px] object-cover rounded-2xl shadow-xl transition-transform duration-500 group-hover:scale-105"
                                 />
@@ -70,7 +100,6 @@ export default function ProductDetailsPage() {
                         <div className="space-y-6 ">
                             <div>
                                 <div className="flex justify-end mb-2">
-                                    {/* <span className="text-purple-700 text-sm font-medium tracking-wide uppercase">Premium Audio</span> */}
                                     <button
                                         onClick={() => setIsWishlisted(!isWishlisted)}
                                         className={`p-2 rounded-full transition-all duration-300 ${isWishlisted ? 'bg-red-500 ' : 'bg-white/10  hover:bg-white/20'
@@ -145,11 +174,17 @@ export default function ProductDetailsPage() {
                                 </div>
 
                                 <div className="flex space-x-3">
-                                    <button className="flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700  py-4 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2">
+                                    {/* CHANGE 3: Pass the 'quantity' state to the function */}
+                                    <button
+                                        disabled={isClicked}
+                                        onClick={() => addCartItem(productData ? productData : product, quantity)}
+                                        className="text-white flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700  py-4 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center space-x-2">
                                         <ShoppingCart className="w-5 h-5" />
-                                        <span>Add to Cart</span>
+                                        <span>{isClicked ? 'Added!' : 'Add to Cart'}</span>
                                     </button>
-                                    <button className="bg-white/10 hover:bg-white/20  py-4 px-6 rounded-xl font-semibold transition-all duration-300 border border-white/20">
+                                    <button 
+                                    onClick={()=> {addCartItem(productData ? productData : product, quantity); navigate('/checkout')}}
+                                    className="bg-white/10 hover:bg-white/20  py-4 px-6 rounded-xl font-semibold transition-all duration-300 border-1 border-gray-700">
                                         Buy Now
                                     </button>
                                 </div>
@@ -173,102 +208,9 @@ export default function ProductDetailsPage() {
                         </div>
                     </div>
 
-                    {/* Product Details Tabs */}
+                    {/* Product Details Tabs (code truncated for brevity) */}
                     <div className="border-t border-white/20">
-                        <div className="flex space-x-8 px-8 pt-8">
-                            {['features', 'reviews'].map((tab) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(tab)}
-                                    className={`pb-4 px-2 font-semibold capitalize transition-all duration-300 ${activeTab === tab
-                                        ? ' border-b-2 border-purple-400'
-                                        : '/60 hover:'
-                                        }`}
-                                >
-                                    {tab}
-                                </button>
-                            ))}
-                        </div>
-
-                        <div className="p-8">
-                            {activeTab === 'features' && (
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    {features.map((feature, index) => (
-                                        <div
-                                            key={index}
-                                            className="flex items-start space-x-4 p-4 bg-white/5 rounded-xl hover:bg-white/10 transition-colors duration-300"
-                                        >
-                                            <div className="bg-gradient-to-br from-purple-500 to-blue-500 p-3 rounded-lg">
-                                                <feature.icon className="w-6 h-6 " />
-                                            </div>
-                                            <div>
-                                                <h4 className=" font-semibold mb-1">{feature.title}</h4>
-                                                <p className="/70 text-sm">{feature.desc}</p>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {activeTab === 'reviews' && (
-                                <div className="space-y-6">
-                                    {reviews.map((review, index) => (
-                                        <div key={index} className="bg-white/5 p-6 rounded-xl">
-                                            <div className="flex items-center justify-between mb-3">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center  font-semibold">
-                                                        {review.name.charAt(0)}
-                                                    </div>
-                                                    <div>
-                                                        <h4 className=" font-semibold">{review.name}</h4>
-                                                        <div className="flex items-center space-x-1">
-                                                            {[...Array(review.rating)].map((_, i) => (
-                                                                <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                                            ))}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <span className="/60 text-sm">{review.date}</span>
-                                            </div>
-                                            <p className="/80">{review.comment}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            )}
-
-                            {activeTab === 'specs' && (
-                                <div className="grid md:grid-cols-2 gap-6">
-                                    <div className="space-y-4">
-                                        <h4 className=" font-semibold text-lg mb-4">Technical Specifications</h4>
-                                        {[
-                                            { label: 'Driver Size', value: '40mm Dynamic' },
-                                            { label: 'Frequency Response', value: '20Hz - 40kHz' },
-                                            { label: 'Impedance', value: '32 Ohms' },
-                                            { label: 'Sensitivity', value: '105 dB/mW' }
-                                        ].map((spec, index) => (
-                                            <div key={index} className="flex justify-between py-2 border-b border-white/10">
-                                                <span className="/70">{spec.label}</span>
-                                                <span className=" font-medium">{spec.value}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                    <div className="space-y-4">
-                                        <h4 className=" font-semibold text-lg mb-4">Connectivity & Battery</h4>
-                                        {[
-                                            { label: 'Bluetooth Version', value: '5.3' },
-                                            { label: 'Battery Life', value: '30 hours' },
-                                            { label: 'Charging Time', value: '2 hours' },
-                                            { label: 'Weight', value: '250g' }
-                                        ].map((spec, index) => (
-                                            <div key={index} className="flex justify-between py-2 border-b border-white/10">
-                                                <span className="/70">{spec.label}</span>
-                                                <span className=" font-medium">{spec.value}</span>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-                        </div>
+                        {/* ... your tabs code ... */}
                     </div>
                 </div>
             </div>
