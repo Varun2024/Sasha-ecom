@@ -6,14 +6,18 @@ import { BrowserRouter } from 'react-router-dom'
 import DataProvider from './context/DataContext.jsx'
 import CartProvider from './context/CartContext';
 
+import WishlistProvider from './context/WishlistContext.jsx'
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <CartProvider>
-        <DataProvider>
-          <App />
-        </DataProvider>
-      </CartProvider>
+      <WishlistProvider>
+        <CartProvider>
+          <DataProvider>
+            <App />
+          </DataProvider>
+        </CartProvider>
+      </WishlistProvider>
     </BrowserRouter>
   </StrictMode>,
 )

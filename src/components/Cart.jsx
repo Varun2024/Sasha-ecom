@@ -122,8 +122,7 @@ export default function CartPage() {
     const handleRemoveItem = (id) => {
         setCartItems(cart.filter(item => item.id !== id));
         dispatch({ type: 'REMOVE', payload: id });
-        console.log(`Item with id ${id} removed from cart`);
-        
+        localStorage.setItem('cart', JSON.stringify(cartItems.filter(item => item.id !== id)));
     };
 
     const subtotal = useMemo(() => {
@@ -131,7 +130,7 @@ export default function CartPage() {
     }, [cartItems]);
 
     return (
-        <div className="bg-gray-50 min-h-screen py-16">
+        <div className="bg-gray-50 min-h-screen py-8 mt-20">
             <div className="container mx-auto px-4">
                 <header className="text-center mb-8">
                     <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Your Shopping Cart</h1>

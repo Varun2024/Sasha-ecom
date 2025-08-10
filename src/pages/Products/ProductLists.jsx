@@ -111,7 +111,6 @@ const ProductCard = ({ product }) => {
     };
     
     setProductData(productInfo);
-    console.log('Product clicked:', productInfo);
     localStorage.setItem('productData', JSON.stringify(productInfo));
     navigate(`/product`);
   };

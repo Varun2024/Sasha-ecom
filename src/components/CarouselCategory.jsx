@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 import { motion, useTransform, useScroll } from "framer-motion";
+import { nav } from "motion/react-client";
 import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 const ShopByCategory = () => {
     return (
@@ -21,7 +23,7 @@ const HorizontalScrollCarousel = () => {
         target: targetRef,
     });
 
-    const x = useTransform(scrollYProgress, [0, 1], ["10%", "-75%"]);
+    const x = useTransform(scrollYProgress, [0, 1], ["10%", "-45%"]);
 
     return (
         <section ref={targetRef} className=" md:h-[300vh] h-[350vh]  ">
@@ -37,10 +39,12 @@ const HorizontalScrollCarousel = () => {
 };
 
 const Card = ({ card }) => {
+    const navigate = useNavigate();
     return (
         <div
             key={card.id}
             className="group relative h-[450px] w-[450px] overflow-hidden bg-neutral-200 rounded-4xl"
+            onClick={() => navigate(card.href)}
         >
             <div
                 style={{
@@ -51,7 +55,7 @@ const Card = ({ card }) => {
                 className="absolute inset-0 z-0 transition-transform duration-300 group-hover:scale-110"
             ></div>
             <div className="absolute inset-0 z-10 grid place-content-center">
-                <p className="bg-gradient-to-br from-white/20 to-white/0 p-8 text-6xl font-black uppercase text-white backdrop-blur-lg">
+                <p className="bg-gradient-to-br from-white/20 to-white/0 p-8 text-3xl font-black uppercase text-white backdrop-blur-lg">
                     {card.title}
                 </p>
             </div>
@@ -64,34 +68,38 @@ export default ShopByCategory ;
 const cards = [
     {
         img: 'https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', alt: 'Men Puffer',
-        title: "Title 1",
+        title: "Top Wear",
         id: 1,
+        href: '/top'
     },
     {
         img: 'https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', alt: 'Women Puffer',
-        title: "Title 1",
+        title: "Bottom Wear",
         id: 2,
+        href: '/bottom'
     },
     {
         img: 'https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', alt: 'Puffer Bag',
-        title: "Title 1",
+        title: "Inner Wear",
         id: 3,
+        href: '/inner'
     },
     {
         img: 'https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', alt: 'Puffer Bag',
-        title: "Title 1",
+        title: "Accessories",
         id: 4,
+        href: '/accessories'
     },
-    {
-        img: 'https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', alt: 'Puffer Bag',
-        title: "Title 1",
-        id: 5,
-    },
-    {
-        img: 'https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', alt: 'Puffer Bag',
-        title: "Title 1",
-        id: 6,
-    },
+    // {
+    //     img: 'https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', alt: 'Puffer Bag',
+    //     title: "Title 1",
+    //     id: 5,
+    // },
+    // {
+    //     img: 'https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', alt: 'Puffer Bag',
+    //     title: "Title 1",
+    //     id: 6,
+    // },
  
 ];
 
