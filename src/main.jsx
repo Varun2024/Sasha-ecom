@@ -7,17 +7,21 @@ import DataProvider from './context/DataContext.jsx'
 import CartProvider from './context/CartContext';
 
 import WishlistProvider from './context/WishlistContext.jsx'
+import { AuthProvider } from './context/AuthContext/index.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
-      <WishlistProvider>
-        <CartProvider>
-          <DataProvider>
-            <App />
-          </DataProvider>
-        </CartProvider>
-      </WishlistProvider>
+      <AuthProvider>
+        <WishlistProvider>
+          <CartProvider>
+            <DataProvider>
+              <App />
+            </DataProvider>
+          </CartProvider>
+        </WishlistProvider>
+      </AuthProvider>
     </BrowserRouter>
   </StrictMode>,
 )
+

@@ -9,7 +9,9 @@ import CartPage from './components/Cart';
 import CheckoutPage from './components/Checkout';
 import WishlistPage from './components/WishList';
 import StoreLocation from './pages/StoreLocation/Location';
-
+import AdminPanel from './Admin/AdminPanel';
+import Login from './components/auth/Login';
+import Register from './components/auth/Register';
 function App() {
 
 
@@ -18,6 +20,8 @@ function App() {
     <ReactLenis root/>
       <Header />
       <Routes>
+        <Route path='login' element={<Login />} />
+        <Route path='register' element={<Register />} />
         <Route path="/" element={<Home />} />
         <Route path="/product" element={<ProductDetailsPage />} />
         <Route path="/all" element={<ProductListingPage />} />
@@ -25,6 +29,9 @@ function App() {
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/store-locator" element={<StoreLocation />} />
+        <Route path="/admin" element={<AdminPanel />} />
+        <Route path="*" element={<h1 className="text-center text-2xl font-bold mt-20">404 - Page Not Found</h1>} />
+
       </Routes>
       <Footer />
     </>
