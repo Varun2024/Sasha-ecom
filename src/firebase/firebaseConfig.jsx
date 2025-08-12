@@ -3,19 +3,21 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth"; 
+// import { getfirestor } from "firebase/firestore";
 const firebaseConfig = {
-    apiKey: "AIzaSyDBhnqn_HY49VOnKLTKNuOUvUxuAwDEphM",
-    authDomain: "sashastore000.firebaseapp.com",
-    projectId: "sashastore000",
-    storageBucket: "sashastore000.firebasestorage.app",
-    messagingSenderId: "357704353862",
-    appId: "1:357704353862:web:40252e2613b4455125a247",
-    measurementId: "G-W08820FG2E"
+    apiKey: import.meta.env.VITE_API_KEY,
+    authDomain: import.meta.env.VITE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_APP_ID,
+    measurementId: import.meta.env.VITE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+// const db = getfirestor(app);
 const analytics = getAnalytics(app);
 
 export { auth, app };
