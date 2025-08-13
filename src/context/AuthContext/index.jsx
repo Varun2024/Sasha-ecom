@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
 
     async function initializeUser(user) {
         if (user) {
-            setCurrentUser({...user});
+            setCurrentUser({user});
             setUserLoggedIn(true);
         } else {
             setCurrentUser(null);
@@ -28,11 +28,12 @@ export function AuthProvider({ children }) {
     const value = {
         currentUser,
         userLoggedIn,
+        
         loading
     };
     return (
-        <AuthContext.Provider value={{value}}>
-            {!loading && children}
+        <AuthContext.Provider value={value}>
+            {children}
         </AuthContext.Provider>
     );
 }

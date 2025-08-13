@@ -14,6 +14,7 @@ export const signInWithEmail = async (email,password) => {
 export const doCreateUserWithEmailAndPassword = async (email, password) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        // console.log('User created:', userCredential);
         return userCredential;
     } catch (error) {
         console.error("Error creating user with email:", error);

@@ -1,13 +1,14 @@
 /* eslint-disable no-unused-vars */
 
 import { FaBagShopping } from 'react-icons/fa6';
-import { FiUser,FiMenu, FiX } from 'react-icons/fi'; // Example icon
+import { FiUser,FiMenu, FiX } from 'react-icons/fi'; 
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useEffect, useState } from 'react';
 import ProfileContainer from './ProfileContainer';
 import { Heart } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
+import { useAuth } from '../context/AuthContext';
 
 const navLinks = [
   { name: 'All', path: '/all' },
@@ -29,7 +30,7 @@ const Header = () => {
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
+  const { currentUser } = useAuth();
   const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
 
   // Effect to lock body scroll when mobile menu is open
@@ -79,7 +80,7 @@ const Header = () => {
             ) : (
               <>
                 <FiUser size={15} />
-                <span>Profile</span>
+                <span>{currentUser ? currentUser.user.displayName : 'Profile'}</span>
               </>
             )}
           </div>

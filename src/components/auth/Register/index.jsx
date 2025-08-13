@@ -1,14 +1,18 @@
 import { useState } from 'react';
 import { doCreateUserWithEmailAndPassword, signInWithGoogle } from '../../../firebase/auth';
 import { useNavigate } from 'react-router-dom';
-
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../../../firebase/firebaseConfig'; // Adjust the import path as necessary
+import { toast, ToastContainer } from 'react-toastify';
 export default function Register() {
+    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
     const navigate = useNavigate();
+
     const handleRegister = async (e) => {
         e.preventDefault();
         setError('');
@@ -21,10 +25,26 @@ export default function Register() {
         }
 
         try {
-            await doCreateUserWithEmailAndPassword(email, password);
-            // The onAuthStateChanged listener in your AuthProvider will handle the redirect/state change.
+            const user = await doCreateUserWithEmailAndPassword(email, password);
+            // console.log('User registered:', user);
+            // Add user to Firestore
+            if (user) {
+                await setDoc(doc(db, 'users', user.user.uid), {
+                    email,
+                    displayName: name,
+                    createdAt: new Date(),
+                });
+            }
+            toast.success('Registration successful! Redirecting to cart...', {
+                position: "bottom-right",
+                autoClose: 2000,
+                hideProgressBar: true,
+            });
+
+            setTimeout(() => {
+                navigate('/cart'); // Redirect to cart after successful registration
+            }, 3000);
         } catch (err) {
-            // Provide more user-friendly error messages
             if (err.code === 'auth/email-already-in-use') {
                 setError('This email address is already in use.');
             } else if (err.code === 'auth/weak-password') {
@@ -43,20 +63,40 @@ export default function Register() {
         setGoogleLoading(true);
         setError('');
         try {
-            await signInWithGoogle();
+            const guser = await signInWithGoogle();
+            if (guser) {
+                await setDoc(doc(db, 'users', guser.user.uid), {
+                    email: guser.user.email,
+                    firstName: guser.user.displayName,
+                    createdAt: new Date(),
+                });
+            }
+            toast.success('Registration successful! Redirecting to cart...', {
+                position: "bottom-right",
+                autoClose: 2000,
+                hideProgressBar: true,
+            });
+            setTimeout(() => {
+                navigate('/cart'); // Redirect to cart after successful registration
+            }, 3000);
+
         } catch (err) {
-            setError('Failed to log in with Google. Please try again.');
-            console.error('Google Login Error:', err);
+            if (err.code === 'auth/popup-closed-by-user') {
+                setError('Google sign-in was cancelled.');
+            } else {
+                setError('Failed to log in with Google. Please try again.');
+                console.error('Google Login Error:', err);
+            }
         } finally {
             setLoading(false);
         }
-        navigate('/cart'); // Redirect to cart after successful login
+
     };
 
     return (
-        <div className="min-h-screen bg-gray-100 flex items-center justify-center mt-10">
+        <div className="min-h-[90vh] bg-gray-100 flex items-center justify-center mt-16">
             <div className="bg-white rounded-2xl shadow-xl flex flex-col md:flex-row w-full max-w-4xl overflow-hidden m-4">
-
+                <ToastContainer />
                 {/* Visual Section */}
                 <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center items-center bg-gradient-to-br from-blue-500 to-indigo-600 text-white">
                     <h1 className="text-4xl font-bold mb-3">Welcome!</h1>
@@ -71,6 +111,25 @@ export default function Register() {
                     {error && <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-md" role="alert"><p>{error}</p></div>}
 
                     <form onSubmit={handleRegister}>
+                        <div className="mb-5 relative">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+                                Name
+                            </label>
+                            <div className="relative">
+                                <span className="absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <svg className="h-5 w-5 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor"><path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                </span>
+                                <input
+                                    className="shadow-sm appearance-none border rounded-lg w-full py-3 pl-10 pr-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow"
+                                    id="name"
+                                    type="text"
+                                    placeholder="Sasha"
+                                    value={name}
+                                    onChange={(e) => setName(e.target.value)}
+                                    required
+                                />
+                            </div>
+                        </div>
                         <div className="mb-5 relative">
                             <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email-register">
                                 Email Address
@@ -102,6 +161,7 @@ export default function Register() {
                                     className="shadow-sm appearance-none border rounded-lg w-full py-3 pl-10 pr-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-shadow"
                                     id="password-register"
                                     type="password"
+                                    autoComplete='current-password'
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}

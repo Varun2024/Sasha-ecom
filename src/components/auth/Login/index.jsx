@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { signInWithEmail, signInWithGoogle } from '../../../firebase/auth';
 import { useNavigate } from 'react-router-dom';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '../../../firebase/firebaseConfig';
+import { toast, ToastContainer } from 'react-toastify';
 
 
 export default function Login() {
@@ -22,7 +25,23 @@ export default function Login() {
         }
 
         try {
-            await signInWithEmail(email, password);
+            const user = await signInWithEmail(email, password);
+            if (user) {
+                await setDoc(doc(db, 'users', user.user.uid), {
+                    email,
+                    displayName: name,
+                    createdAt: new Date(),
+                });
+            }
+            toast.success('Registration successful! Redirecting to cart...', {
+                position: "bottom-right",
+                autoClose: 2000,
+                hideProgressBar: true,
+            });
+            
+            setTimeout(() => {
+                navigate('/cart'); // Redirect to cart after successful registration
+            }, 3000);
             // The onAuthStateChanged listener in your AuthProvider will handle the redirect/state change.
         } catch (err) {
             // Provide more user-friendly error messages
@@ -41,21 +60,35 @@ export default function Login() {
         setGoogleLoading(true);
         setError('');
         try {
-            await signInWithGoogle();
+            const guser =await signInWithGoogle();
+            if (guser) {
+                await setDoc(doc(db, 'users', guser.user.uid), {
+                    email: guser.user.email,
+                    firstName: guser.user.displayName,
+                    createdAt: new Date(),
+                });
+            }
+            toast.success('Registration successful! Redirecting to cart...', {
+                position: "bottom-right",
+                autoClose: 2000,
+                hideProgressBar: true,
+            });
+            setTimeout(() => {
+                navigate('/cart'); // Redirect to cart after successful registration
+            }, 3000);
         } catch (err) {
             setError('Failed to log in with Google. Please try again.');
             console.error('Google Login Error:', err);
         } finally {
             setLoading(false);
         }
-        navigate('/cart'); // Redirect to cart after successful login
     };
 
     const navigate = useNavigate();
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center mt-10">
             <div className="bg-white rounded-2xl shadow-xl flex flex-col md:flex-row-reverse w-full max-w-4xl overflow-hidden m-4">
-                
+                <ToastContainer/>
                 {/* Visual Section */}
                 <div className="w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center items-center bg-gradient-to-br from-green-400 to-teal-500 text-white">
                     <h1 className="text-4xl font-bold mb-3">Welcome Back!</h1>
@@ -101,6 +134,7 @@ export default function Login() {
                                     className="shadow-sm appearance-none border rounded-lg w-full py-3 pl-10 pr-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-teal-500 transition-shadow"
                                     id="password-login"
                                     type="password"
+                                    autoComplete='current-password'
                                     placeholder="••••••••"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
