@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { LayoutDashboard, ShoppingBag, Package, Users, Settings, MoreVertical, Search, Menu, X, PlusCircle, Filter, MapPin } from 'lucide-react';
+import ProductsView from './ProductView';
 
 // --- MOCK DATA ---
 // In a real application, this data would come from an API.
@@ -22,14 +23,6 @@ const allOrdersData = [
     { id: "ORD008", customer: "Laura Garcia", date: "2024-08-07", total: "$84.25", status: "Processing" },
 ];
 
-const productsData = [
-    { id: 1, name: "Classic Crewneck T-Shirt", sku: "CL-TS-001", category: "T-Shirts", price: "$25.00", stock: 150, imageUrl: "https://placehold.co/80x80/f0f0f0/4A5568?text=T-Shirt" },
-    { id: 2, name: "Slim-Fit Denim Jeans", sku: "CL-JN-001", category: "Jeans", price: "$79.99", stock: 80, imageUrl: "https://placehold.co/80x80/f0f0f0/4A5568?text=Jeans" },
-    { id: 3, name: "Wool Blend Peacoat", sku: "CL-CT-001", category: "Coats", price: "$199.50", stock: 30, imageUrl: "https://placehold.co/80x80/f0f0f0/4A5568?text=Coat" },
-    { id: 4, name: "V-Neck Cashmere Sweater", sku: "CL-SW-001", category: "Sweaters", price: "$120.00", stock: 55, imageUrl: "https://placehold.co/80x80/f0f0f0/4A5568?text=Sweater" },
-    { id: 5, name: "Leather Ankle Boots", sku: "SH-BT-001", category: "Shoes", price: "$150.00", stock: 40, imageUrl: "https://placehold.co/80x80/f0f0f0/4A5568?text=Boots" },
-    { id: 6, name: "Silk Scarf", sku: "AC-SC-001", category: "Accessories", price: "$45.00", stock: 120, imageUrl: "https://placehold.co/80x80/f0f0f0/4A5568?text=Scarf" },
-];
 
 
 // --- HELPER FUNCTIONS ---
@@ -44,7 +37,7 @@ const getStatusColor = (status) => {
     }
 };
 
-// --- MAIN APP COMPONENT ---
+// --- MAIN APP COMPONENT --- 
 
 export default function AdminPanel() {
     const [activeView, setActiveView] = useState('Dashboard');
@@ -280,52 +273,7 @@ const OrdersView = () => {
     );
 };
 
-const ProductsView = () => {
-    return (
-        <div className="bg-white p-6 rounded-xl shadow-sm space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <h3 className="text-xl font-semibold text-gray-800">Product Catalog</h3>
-                <button className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
-                    <PlusCircle size={20} />
-                    <span>Add New Product</span>
-                </button>
-            </div>
-            <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead >
-                        <tr className="border-b bg-gray-50">
-                            <th className="p-4 text-sm font-semibold text-gray-600">Product</th>
-                            <th className="p-4 text-sm font-semibold text-gray-600 hidden sm:table-cell">SKU</th>
-                            <th className="p-4 text-sm font-semibold text-gray-600 hidden md:table-cell">Category</th>
-                            <th className="p-4 text-sm font-semibold text-gray-600">Price</th>
-                            <th className="p-4 text-sm font-semibold text-gray-600">Stock</th>
-                            <th className="p-4 text-sm font-semibold text-gray-600"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {productsData.map((product) => (
-                            <tr key={product.id} className="border-b hover:bg-gray-50">
-                                <td className="p-4 text-sm text-gray-800 font-medium">
-                                    <div className="flex items-center gap-4">
-                                        <img src={product.imageUrl} alt={product.name} className="w-12 h-12 rounded-md object-cover"/>
-                                        <span>{product.name}</span>
-                                    </div>
-                                </td>
-                                <td className="p-4 text-sm text-gray-600 hidden sm:table-cell">{product.sku}</td>
-                                <td className="p-4 text-sm text-gray-600 hidden md:table-cell">{product.category}</td>
-                                <td className="p-4 text-sm text-gray-800 font-medium">{product.price}</td>
-                                <td className="p-4 text-sm text-gray-600">{product.stock}</td>
-                                <td className="p-4 text-sm text-gray-600">
-                                    <button className="hover:text-gray-900"><MoreVertical size={20} /></button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
-};
+
 
 const LocationView = () => {
     return (
