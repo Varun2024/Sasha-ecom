@@ -48,7 +48,7 @@ const Footer = () => {
                     <label htmlFor="email" className="text-sm text-gray-300">Your email *</label>
                     <div className="flex flex-col sm:flex-row gap-4 mt-2">
                         <input type="email" id="email" className="w-full bg-transparent border-b border-gray-400 focus:border-white focus:outline-none py-2" />
-                        <button type="submit" className="inline-block mt-6 rounded-2xl border-2 border-dashed border-black bg-white px-8 py-2 font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none">Submit</button>
+                        <button type="submit" className="inline-block mt-6 rounded-xl border-2  border-black bg-white px-8 py-2 font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none">Submit</button>
                     </div>
                 </form>
             </div>

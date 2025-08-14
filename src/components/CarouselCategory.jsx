@@ -43,7 +43,7 @@ const Card = ({ card }) => {
     return (
         <div
             key={card.id}
-            className="group relative h-[450px] w-[450px] overflow-hidden bg-neutral-200 rounded-4xl"
+            className="group relative md:h-[450px] md:w-[450px] h-[300px] w-[350px]  overflow-hidden bg-neutral-200 rounded-4xl"
             onClick={() => navigate(card.href)}
         >
             <div
