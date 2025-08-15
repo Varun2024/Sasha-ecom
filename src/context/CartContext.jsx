@@ -1,56 +1,88 @@
 /* eslint-disable react-refresh/only-export-components */
-
 import { createContext, useContext, useReducer } from "react";
 
+// --- Context Creation ---
+const CartContext = createContext();
 
-// context creation
-const cartContext = createContext()
+// --- Load Initial State from LocalStorage ---
+const getInitialState = () => {
+    try {
+        const savedCart = localStorage.getItem('cart');
+        return savedCart ? JSON.parse(savedCart) : [];
+    } catch (error) {
+        console.error("Could not parse cart from localStorage", error);
+        return [];
+    }
+};
 
+// --- Cart Reducer with Improved Logic ---
 const cartReducer = (state, action) => {
+    let newState;
+
     switch (action.type) {
-        case "ADD":
-            localStorage.setItem("cart", JSON.stringify([...state, action.payload]))
-            return [...state, action.payload]
+        // "ADD" now handles both adding new items and incrementing existing ones
+        case "ADD": {
+            const itemInCart = state.find(item => item.id === action.payload.id);
+            if (itemInCart) {
+                newState = state.map(item =>
+                    item.id === action.payload.id
+                        ? { ...item, quantity: item.quantity + action.payload.quantity }
+                        : item
+                );
+            } else {
+                newState = [...state, action.payload];
+            }
+            break;
+        }
 
-        case "INC":
-            return state.map(item => item.id === action.payload ? { ...item, qty: item.qty + 1 } : item)
-        case "DEC":
+        case "REMOVE": {
+            newState = state.filter((item) => item.id !== action.payload);
+            break;
+        }
 
-            return state.map(item =>
-                item.id === action.payload
-                    ? { ...item, qty: item.qty > 1 ? item.qty - 1 : 1 }
+        // New action to handle specific quantity changes from the cart page
+        case "UPDATE_QUANTITY": {
+            newState = state.map(item =>
+                item.id === action.payload.id
+                    ? { ...item, quantity: action.payload.quantity }
                     : item
             );
+            break;
+        }
 
-        case "REMOVE":
-            localStorage.setItem("cart", JSON.stringify(state.filter((item) => item.id !== action.payload)))
-            localStorage.setItem("cartCount", JSON.stringify(state.length - 1))
-            return state.filter((item) => item.id !== action.payload)
+        // New action to clear the entire cart
+        case "CLEAR": {
+            newState = [];
+            break;
+        }
+
         default:
-            throw new Error(`Unknown action-type: ${action.type}`)
+            throw new Error(`Unknown action-type: ${action.type}`);
     }
+    
+    // Persist the new state to localStorage after any change
+    localStorage.setItem("cart", JSON.stringify(newState));
+    return newState;
+};
 
-}
-
+// --- Cart Provider Component ---
 const CartProvider = ({ children }) => {
-    const [cart, dispatch] = useReducer(cartReducer, [])
+    const [cart, dispatch] = useReducer(cartReducer, getInitialState());
 
     return (
-        // value passing throught cartcontext via contextProvider
-        <cartContext.Provider value={{ cart, dispatch }}>
+        <CartContext.Provider value={{ cart, dispatch }}>
             {children}
-        </cartContext.Provider>
-    )
-}
+        </CartContext.Provider>
+    );
+};
 
 export default CartProvider;
 
-// custom hook for ease of use - good practice
+// --- Custom Hook for ease of use ---
 export const useCart = () => {
-    // context consumption
-    const context = useContext(cartContext)
+    const context = useContext(CartContext);
     if (!context) {
-        throw new Error("useCart must be within a cartprovider")
+        throw new Error("useCart must be used within a CartProvider");
     }
-    return context
-}
+    return context;
+};

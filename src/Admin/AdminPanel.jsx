@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LayoutDashboard, ShoppingBag, Package, Users, Settings, MoreVertical, Search, Menu, X, PlusCircle, Filter, MapPin } from 'lucide-react';
 import ProductsView from './ProductView';
+import CustomersView from './CustomerList';
 
 // --- MOCK DATA ---
 // In a real application, this data would come from an API.
@@ -49,7 +50,7 @@ export default function AdminPanel() {
             case 'Dashboard': return <DashboardView />;
             case 'Orders': return <OrdersView />;
             case 'Products': return <ProductsView />;
-            case 'Customers': return <PlaceholderView title="Customer List" />;
+            case 'Customers': return <CustomersView/>;
             case 'Location': return <LocationView />;
             case 'Settings': return <PlaceholderView title="Admin Settings" />;
             default: return <DashboardView />;
@@ -84,10 +85,10 @@ const Sidebar = ({ activeView, setActiveView, isSidebarOpen, setIsSidebarOpen })
     return (
         <>
             <div 
-                className={`fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden ${isSidebarOpen ? 'block' : 'hidden'}`}
+                className={`fixed inset-0 bg-black bg-opacity-50  md:hidden ${isSidebarOpen ? 'block' : 'hidden'}`}
                 onClick={() => setIsSidebarOpen(false)}
             ></div>
-            <aside className={`fixed top-0 left-0 z-40 w-64 h-full bg-white shadow-lg transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:shadow-none`}>
+            <aside className={`fixed top-0 left-0 z-0 w-64 h-full bg-white shadow-lg transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:shadow-none`}>
                 <div className="flex items-center justify-between p-4 border-b">
                     <h1 className="text-2xl font-bold text-gray-800">CLOTHIFY</h1>
                     <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-gray-600 hover:text-gray-900">

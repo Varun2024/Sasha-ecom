@@ -42,7 +42,7 @@ export default function Register() {
             });
 
             setTimeout(() => {
-                navigate('/cart'); // Redirect to cart after successful registration
+                navigate('/cart'); 
             }, 3000);
         } catch (err) {
             if (err.code === 'auth/email-already-in-use') {

@@ -36,9 +36,9 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
                  <div className="flex space-x-4">
-                    <a href="#" aria-label="TikTok"><FaTiktok size={20} /></a>
+                    {/* <a href="#" aria-label="TikTok"><FaTiktok size={20} /></a> */}
                     <a href="#" aria-label="Instagram"><FaInstagram size={20} /></a>
-                    <a href="#" aria-label="YouTube"><FaYoutube size={20} /></a>
+                    {/* <a href="#" aria-label="YouTube"><FaYoutube size={20} /></a> */}
                     <a href="#" aria-label="Facebook"><FaFacebookF size={20} /></a>
                 </div>
             </div>

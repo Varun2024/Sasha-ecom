@@ -1,189 +1,202 @@
 /* eslint-disable no-unused-vars */
-
-import { FaBagShopping } from 'react-icons/fa6';
-import { FiUser,FiMenu, FiX } from 'react-icons/fi'; 
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { useEffect, useState } from 'react';
-import ProfileContainer from './ProfileContainer';
-import { Heart } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
+import { useEffect, useState, useMemo, useRef } from 'react';
+
+// --- Firebase ---
+import { db } from '../firebase/firebaseConfig'
+import { collection, getDocs } from 'firebase/firestore';
+
+// --- UI & Animation ---
+import { AnimatePresence, motion } from 'framer-motion';
+import { Heart, Menu, Search, ShoppingBag, User, X, LoaderCircle } from 'lucide-react';
+import ProfileContainer from './ProfileContainer';
+
 
 const navLinks = [
-  { name: 'All', path: '/all' },
-  // {name: 'TopWear', path: '/top'},
-  // {name: 'BottomWear', path: '/bottom'},
-  // {name: 'InnerWear', path: '/inner'},
-  // {name: 'Accessories', path: '/accessories'},
-  { name: 'Store locator', path: '/store-locator' },
+    { name: 'All Products', path: '/all' },
+    { name: 'Store Locator', path: '/store-locator' },
 ];
 
-
-
-
-const Header = () => {
-  // --- Using your hooks and state logic ---
-  const navigate = useNavigate();
-  const { cart } = useCart();
-  const cartCount = localStorage.getItem("cartCount") ? JSON.parse(localStorage.getItem("cartCount")) : cart.length;
-
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { currentUser } = useAuth();
-  const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
-
-  // Effect to lock body scroll when mobile menu is open
-  useEffect(() => {
-    if (isMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-    return () => {
-      document.body.style.overflow = 'auto';
-    };
-  }, [isMenuOpen]);
-
-  return (
-    <>
-      <header className="fixed top-0 z-40 w-full text-black bg-white/80 backdrop-blur-lg shadow-md flex justify-between items-center py-2 px-4 md:px-8">
-        <div
-          onClick={() => navigate('/')}
-          className="text-2xl cursor-pointer w-24 h-10flex items-center justify-center font-bold" // Placeholder style for the logo
-        >
-           
-          <div className="w-36 h-14 bg-[url('./logo-nbg.png')] bg-cover bg-center" />
-        </div>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center space-x-8">
-          <ul className="flex items-center space-x-6 uppercase text-sm font-medium text-gray-700">
-            {navLinks.map((link) => (
-              <li key={link.name}>
-                <div onClick={() => navigate(link.path)} className="bg-gradient-to-r from-black to-gray-800 bg-no-repeat [background-position:0%_100%] [background-size:0%_2px] transition-all duration-300 hover:[background-size:100%_2px]  hover:text-black cursor-pointer">{link.name}</div>
-                {/* <div className='w-1 hover:w-full border-b border-gray-700 border-2 transition-all duration-300' /> */}
-              </li>
-            ))}
-          </ul>
-          <input type="text" className="border border-gray-300 rounded-full px-4 py-2 text-sm focus:outline-none" placeholder="Search..." />
-        </nav>
-
-        {/* Desktop User Actions - using your implementation */}
-        <div className="hidden lg:flex items-center space-x-6 text-sm text-gray-700 ">
-          <div className="relative flex flex-col items-center gap-1 cursor-pointer bg-gradient-to-r from-black to-gray-800 bg-no-repeat [background-position:0%_100%] [background-size:0%_2px] transition-all duration-300 hover:[background-size:100%_2px] " onClick={toggleProfile}>
-            {isProfileOpen ? (
-              <>
-                <FiX size={15} />
-                <span>Close</span>
-              </>
-            ) : (
-              <>
-                <FiUser size={15} />
-                <span>{currentUser ? currentUser.user.displayName : 'Profile'}</span>
-              </>
-            )}
-          </div>
-          <div className="flex flex-col items-center gap-1 cursor-pointer bg-gradient-to-r from-black to-gray-800 bg-no-repeat [background-position:0%_100%] [background-size:0%_2px] transition-all duration-300 hover:[background-size:100%_2px]" onClick={() => navigate('/cart')}>
-            <FaBagShopping size={15} />
-            <span>Cart ({cartCount>=0?cartCount:0})</span>
-          </div>
-          <div className="flex flex-col items-center gap-1 cursor-pointer bg-gradient-to-r from-black to-gray-800 bg-no-repeat [background-position:0%_100%] [background-size:0%_2px] transition-all duration-300 hover:[background-size:100%_2px]" onClick={() => navigate('/wishlist')}>
-            <Heart size={15} />
-            <span>Wishlist</span>
-          </div>
-        </div>
-
-        {/* Mobile Menu Button */}
-        <div className="lg:hidden">
-          <button onClick={() => setIsMenuOpen(true)} className="p-2 rounded-md hover:bg-gray-200 transition-colors">
-            <FiMenu size={24} />
-          </button>
-        </div>
-      </header>
-
-      {/* Your ProfileContainer logic */}
-      <ProfileContainer isOpen={isProfileOpen} onClose={toggleProfile} />
-
-
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-white shadow-2xl lg:hidden"
-          >
-            <div className="flex flex-col h-full p-6">
-              <div className="flex justify-between items-center mb-8">
-                <h2 className="text-xl font-bold">Menu</h2>
-                <button onClick={() => setIsMenuOpen(false)} className="p-2 rounded-md hover:bg-gray-200 transition-colors">
-                  <FiX size={24} />
-                </button>
-              </div>
-
-              <nav className="flex-grow">
-                <ul className="flex flex-col space-y-6 text-lg">
-                  {navLinks.map((link) => (
-                    <li key={link.name}>
-                      <div onClick={() => { navigate(link.path); setIsMenuOpen(false); }} className="cursor-pointer hover:underline">
-                        {link.name}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-
-              <div className="space-y-6 border-t border-gray-200 pt-6">
-                 <input type="text" className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm" placeholder="Search..." />
-                 <div className="space-y-4 text-md">
-                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => { toggleProfile(); setIsMenuOpen(false); }}>
-                        <FiUser size={20} />
-                        <span>Profile</span>
-                    </div>
-                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => { navigate('/cart'); setIsMenuOpen(false); }}>
-                        <FaBagShopping size={20} />
-                        <span>Cart ({cartCount})</span>
-                    </div>
-                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => { navigate('/wishlist'); setIsMenuOpen(false); }}>
-                        <Heart size={20} />
-                        <span>Wishlist</span>
-                    </div>
-                 </div>
-              </div>
+// --- New Search Results Component ---
+const SearchResults = ({ results, loading, query, onResultClick }) => {
+    if (loading) {
+        return (
+            <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-lg p-4 text-center">
+                <LoaderCircle className="w-6 h-6 animate-spin mx-auto text-gray-500" />
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
+        );
+    }
+
+    if (query && results.length === 0) {
+        return (
+            <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-lg p-4 text-center text-gray-500">
+                No results found for "{query}"
+            </div>
+        );
+    }
+    
+    if (results.length === 0) return null;
+
+    return (
+        <div className="absolute top-full mt-2 w-full max-h-96 overflow-y-auto bg-white rounded-lg shadow-lg border">
+            <ul>
+                {results.map(product => (
+                    <li key={product.id} onClick={() => onResultClick(product.id)} className="flex items-center gap-4 p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0">
+                        <img src={product.imageUrl} alt={product.name} className="w-12 h-16 object-cover rounded-md" />
+                        <div className="flex-grow">
+                            <p className="font-semibold text-gray-800">{product.name}</p>
+                            <p className="text-sm text-purple-600 font-bold">${product.price}</p>
+                        </div>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
 };
 
 
-/*
-================================================================================
-  App.jsx - (This would be your main app file: src/App.jsx)
-================================================================================
-*/
+const Header = () => {
+    const navigate = useNavigate();
+    const { cart } = useCart();
+    const { wishlist } = useWishlist();
+    const { currentUser } = useAuth();
+    const searchRef = useRef(null); // Ref for the search container
 
-// import Header from './components/Header'; // You would import the Header like this
+    // --- Component State ---
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-function App() {
-  // The state that was in Header is now managed here, so it can be passed down.
-  // In a real app, this might be handled by a global state manager (Redux, Zustand)
-  
-  return (
-    // In your real app, you would have your CartProvider and Router wrapping the app
-    <div className="bg-gray-100 min-h-screen font-sans">
-       <Header />
-       <div className="pt-24 p-8">
-         <h1 className="text-3xl font-bold">Page Content</h1>
-         <p className="mt-4">Scroll down to see the header stays fixed.</p>
-         <div className="h-[200vh] bg-gray-200 mt-4 rounded-lg p-4">This is a long content area to demonstrate the sticky header.</div>
-       </div>
-    </div>
-  );
-}
+    // --- Search State ---
+    const [allProducts, setAllProducts] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearchLoading, setIsSearchLoading] = useState(false);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+    // Fetch all products once on component mount for client-side search
+    useEffect(() => {
+        const fetchProductsForSearch = async () => {
+            setIsSearchLoading(true);
+            const querySnapshot = await getDocs(collection(db, "products"));
+            const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setAllProducts(productsData);
+            setIsSearchLoading(false);
+        };
+        fetchProductsForSearch();
+    }, []);
+
+    // Effect to perform search when query changes
+    useEffect(() => {
+        if (searchQuery.trim() === '') {
+            setSearchResults([]);
+            return;
+        }
+        const filtered = allProducts.filter(product =>
+            product.name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setSearchResults(filtered);
+    }, [searchQuery, allProducts]);
+    
+    // Effect to handle clicks outside the search component to close results
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (searchRef.current && !searchRef.current.contains(event.target)) {
+                setIsSearchFocused(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+
+    // --- Memoized Calculations ---
+    const totalCartItems = useMemo(() => cart.reduce((total, item) => total + item.quantity, 0), [cart]);
+    const wishlistCount = wishlist.length;
+
+    // --- Handlers ---
+    const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
+    const handleResultClick = (productId) => {
+        navigate(`/product/${productId}`);
+        setSearchQuery('');
+        setIsSearchFocused(false);
+    };
+
+    // Effect to lock body scroll when mobile menu is open
+    useEffect(() => {
+        document.body.style.overflow = isMenuOpen ? 'hidden' : 'auto';
+        return () => { document.body.style.overflow = 'auto'; };
+    }, [isMenuOpen]);
+
+    return (
+        <>
+            <header className="fixed top-0 z-40 w-full text-black bg-white/80 backdrop-blur-lg shadow-md flex justify-between items-center py-2 px-4 md:px-8">
+                <div onClick={() => navigate('/')} className="cursor-pointer">
+                    <div className="w-36 h-14 bg-[url('./logo-nbg.png')] bg-cover bg-center" />
+                </div>
+
+                {/* Desktop Navigation & Search */}
+                <nav className="hidden lg:flex items-center gap-8">
+                    <ul className="flex items-center gap-6 uppercase text-sm font-medium text-gray-700">
+                        {navLinks.map((link) => (
+                            <li key={link.name}><div onClick={() => navigate(link.path)} className="bg-gradient-to-r from-black to-gray-800 bg-no-repeat [background-position:0%_100%] [background-size:0%_2px] transition-all duration-300 hover:[background-size:100%_2px] hover:text-black cursor-pointer pb-1">{link.name}</div></li>
+                        ))}
+                    </ul>
+                    <div className="relative" ref={searchRef}>
+                        <input
+                            type="text"
+                            className="border border-gray-300 rounded-full pl-10 pr-4 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                            placeholder="Search for products..."
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onFocus={() => setIsSearchFocused(true)}
+                        />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                        {isSearchFocused && <SearchResults results={searchResults} loading={isSearchLoading} query={searchQuery} onResultClick={handleResultClick} />}
+                    </div>
+                </nav>
+
+                {/* Desktop User Actions */}
+                <div className="hidden lg:flex items-center gap-6 text-gray-700">
+                    <div className="relative flex flex-col items-center gap-1 cursor-pointer" onClick={toggleProfile}><User size={20} /><span className="text-xs font-medium">{currentUser?.displayName || 'Profile'}</span></div>
+                    <div className="relative flex flex-col items-center gap-1 cursor-pointer" onClick={() => navigate('/wishlist')}><Heart size={20} /><span className="text-xs font-medium">Wishlist</span>{wishlistCount > 0 && (<div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">{wishlistCount}</div>)}</div>
+                    <div className="relative flex flex-col items-center gap-1 cursor-pointer" onClick={() => navigate('/cart')}><ShoppingBag size={20} /><span className="text-xs font-medium">Cart</span>{totalCartItems > 0 && (<div className="absolute -top-2 -right-3 bg-purple-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">{totalCartItems}</div>)}</div>
+                </div>
+
+                {/* Mobile Menu Button */}
+                <div className="lg:hidden"><button onClick={() => setIsMenuOpen(true)} className="p-2"><Menu size={24} /></button></div>
+            </header>
+
+            <ProfileContainer isOpen={isProfileOpen} onClose={toggleProfile} />
+
+            {/* Mobile Menu */}
+            <AnimatePresence>
+                {isMenuOpen && (
+                    <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", stiffness: 300, damping: 30 }} className="fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-white shadow-2xl lg:hidden">
+                        <div className="flex flex-col h-full p-6">
+                            <div className="flex justify-between items-center mb-8"><h2 className="text-xl font-bold">Menu</h2><button onClick={() => setIsMenuOpen(false)} className="p-2"><X size={24} /></button></div>
+                            <nav className="flex-grow"><ul className="flex flex-col space-y-6 text-lg">{navLinks.map((link) => (<li key={link.name}><div onClick={() => { navigate(link.path); setIsMenuOpen(false); }} className="cursor-pointer">{link.name}</div></li>))}</ul></nav>
+                            <div className="space-y-6 border-t pt-6">
+                                {/* Mobile Search */}
+                                <div className="relative" ref={searchRef}>
+                                    <input type="text" className="w-full border border-gray-300 rounded-full pl-10 pr-4 py-2 text-sm" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setIsSearchFocused(true)} />
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                                    {isSearchFocused && <SearchResults results={searchResults} loading={isSearchLoading} query={searchQuery} onResultClick={handleResultClick} />}
+                                </div>
+                                <div className="space-y-4 text-md">
+                                    <div className="flex items-center gap-4 cursor-pointer" onClick={() => { toggleProfile(); setIsMenuOpen(false); }}><User size={22} /><span>{currentUser?.displayName || 'Profile'}</span></div>
+                                    <div className="flex items-center gap-4 cursor-pointer" onClick={() => { navigate('/wishlist'); setIsMenuOpen(false); }}><Heart size={22} /><span>Wishlist ({wishlistCount})</span></div>
+                                    <div className="flex items-center gap-4 cursor-pointer" onClick={() => { navigate('/cart'); setIsMenuOpen(false); }}><ShoppingBag size={22} /><span>Cart ({totalCartItems})</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </>
+    );
+};
+
 export default Header;

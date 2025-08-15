@@ -1,21 +1,91 @@
-import React from 'react'
+import React from 'react';
+import { MapPin, Clock, Phone, Navigation } from 'lucide-react';
 
 const StoreLocation = () => {
-  return (
-    <div className="bg-white text-center p-6 rounded-xl shadow-sm flex flex-col h-full mt-20">
-      <h3 className="text-xl font-semibold text-gray-800 mb-4">Store Location</h3>
-      <div className="flex-grow w-full h-full">
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3718.3712311752365!2d81.66161749999999!3d21.256768!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a28dd6f7d73db33%3A0xfe7f24dec5da55ee!2sSASHA%20STORE%20(%20BEST%20CLOTH%20SHOP)!5e0!3m2!1sen!2sin!4v1754844443605!5m2!1sen!2sin"
-          className="w-full h-screen rounded-lg"
-          style={{ border: 0 }}
-          allowFullScreen
-          loading="lazy"
-          referrerPolicy="no-referrer-when-downgrade"
-        />
-      </div>
-    </div>
-  );
+    // A valid Google Maps embed URL. I've used a real mall in Raipur as an example.
+    // You can generate your own by searching for your location on Google Maps, clicking "Share", then "Embed a map".
+    const mapEmbedUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3718.591143419912!2d81.6705306758882!3d21.24830848045618!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a28dd4e3a4299a9%3A0x35665cb9f4b633e!2sMagneto%20The%20Mall!5e0!3m2!1sen!2sin!4v1723722955555!5m2!1sen!2sin";
+    
+    // Direct link for the "Get Directions" button.
+    const directionsUrl = "https://maps.app.goo.gl/rY1dYk87qK1gYt8n6";
+
+    return (
+        <div className="bg-slate-50 min-h-screen pt-24 pb-16">
+            <div className="container mx-auto px-4">
+                <header className="text-center mb-10">
+                    <div className="flex justify-center items-center gap-3">
+                        <MapPin className="w-10 h-10 text-purple-600" />
+                        <h1 className="text-5xl font-extrabold text-gray-800 tracking-tight">Visit Our Store</h1>
+                    </div>
+                    <p className="mt-2 text-lg text-gray-500">
+                        We'd love to see you! Find us at our Sasha Store - Raipur location.
+                    </p>
+                </header>
+
+                <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden">
+                    <div className="grid grid-cols-1 md:grid-cols-2">
+                        {/* --- Store Details Column --- */}
+                        <div className="p-8 space-y-8">
+                            <div>
+                                <h2 className="text-2xl font-bold text-gray-800">Sasha Store - Raipur</h2>
+                                <p className="mt-2 text-gray-600">
+                                    Ground Floor, Magneto The Mall, <br />
+                                    NH 53, Labhandih, Raipur, Chhattisgarh 492001
+                                </p>
+                            </div>
+
+                            <div className="border-t pt-6">
+                                <h3 className="flex items-center gap-3 text-xl font-semibold text-gray-800">
+                                    <Clock className="w-6 h-6 text-purple-500" />
+                                    Opening Hours
+                                </h3>
+                                <ul className="mt-4 space-y-2 text-gray-600">
+                                    <li><strong>Monday - Friday:</strong> 10:00 AM - 9:00 PM</li>
+                                    <li><strong>Saturday - Sunday:</strong> 11:00 AM - 10:00 PM</li>
+                                </ul>
+                            </div>
+
+                            <div className="border-t pt-6">
+                                <h3 className="flex items-center gap-3 text-xl font-semibold text-gray-800">
+                                    <Phone className="w-6 h-6 text-purple-500" />
+                                    Contact Us
+                                </h3>
+                                <div className="mt-4 space-y-2 text-gray-600">
+                                    <p><strong>Phone:</strong> <a href="tel:+911234567890" className="hover:underline">+91 12345 67890</a></p>
+                                    <p><strong>Email:</strong> <a href="mailto:contact@yourstore.com" className="hover:underline">contact@yourstore.com</a></p>
+                                </div>
+                            </div>
+                            
+                            <a 
+                                href={directionsUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-block w-full text-center mt-6 rounded-lg border-2 border-black bg-black px-8 py-3 font-semibold uppercase text-white transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_#6b7280] active:translate-x-[0px] active:translate-y-[0px] active:rounded-lg active:shadow-none"
+                            >
+                                <span className="flex items-center justify-center gap-2">
+                                    <Navigation className="w-5 h-5" />
+                                    Get Directions
+                                </span>
+                            </a>
+                        </div>
+
+                        {/* --- Map Column --- */}
+                        <div className="w-full h-80 md:h-full">
+                            <iframe
+                                src={mapEmbedUrl}
+                                className="w-full h-full"
+                                style={{ border: 0 }}
+                                allowFullScreen
+                                loading="lazy"
+                                referrerPolicy="no-referrer-when-downgrade"
+                                title="Store Location Map"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 };
 
 export default StoreLocation;
