@@ -726,7 +726,7 @@ export default function ProductDetailsPage() {
                             
                             <div className="space-y-2">
                                 <div className="flex items-center space-x-3">
-                                    <span className="text-3xl font-bold">${product.price}</span>
+                                    <span className="text-3xl font-bold">₹{product.price}</span>
                                     <span className="bg-gradient-to-r from-green-400 to-green-600 px-3 py-1 rounded-full text-sm font-medium">25% OFF</span>
                                 </div>
                             </div>

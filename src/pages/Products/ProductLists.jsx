@@ -73,7 +73,7 @@ const ProductCard = ({ product, addCartItem, addWishlistItem, wishlist }) => {
             <span className="text-gray-500 text-sm ml-2">({product.reviewCount} reviews)</span></div>
         </div>
         <div className="flex items-center justify-between mt-4">
-          <span className="text-2xl font-bold text-gray-900">${product.price}</span>
+          <span className="text-2xl font-bold text-gray-900">₹{product.price}</span>
           <button
             onClick={() => addCartItem(product)}
             className="flex items-center justify-center bg-gray-900 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gray-700 transition-colors duration-300">
@@ -219,8 +219,8 @@ export default function ProductListingPage() {
               <div className="space-y-2">
                 <input type="range" min="0" max={maxPrice} value={priceRange} onChange={(e) => setPriceRange(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
                 <div className="flex justify-between text-xs text-gray-500">
-                  <span>$0</span>
-                  <span>Up to ${priceRange}</span>
+                  <span>₹0</span>
+                  <span>Up to ₹{priceRange}</span>
                 </div>
               </div>
             </div>
