@@ -8,7 +8,7 @@ import {
     deleteDoc,
     updateDoc,
     query,
-    where,
+    where,    
 } from "firebase/firestore";
 import { PlusCircle, MoreVertical } from "lucide-react";
 import { v4 as uuid } from "uuid";
