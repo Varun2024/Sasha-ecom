@@ -73,7 +73,7 @@ const NewInSection = () => {
           className="grid grid-cols-2 gap-5">
           {products.map((product, index) => (
             <Link 
-            to={`/product`} 
+            to={`/product/${product.id}`} 
             key={index} 
             onClick={() => handleClick(product)}
             >

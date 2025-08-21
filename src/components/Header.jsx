@@ -160,9 +160,21 @@ const Header = () => {
 
                 {/* Desktop User Actions */}
                 <div className="hidden lg:flex items-center gap-6 text-gray-700">
-                    <div className="relative flex flex-col items-center gap-1 cursor-pointer" onClick={toggleProfile}><User size={20} /><span className="text-xs font-medium">{currentUser?.displayName || 'Profile'}</span></div>
-                    <div className="relative flex flex-col items-center gap-1 cursor-pointer" onClick={() => navigate('/wishlist')}><Heart size={20} /><span className="text-xs font-medium">Wishlist</span>{wishlistCount > 0 && (<div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">{wishlistCount}</div>)}</div>
-                    <div className="relative flex flex-col items-center gap-1 cursor-pointer" onClick={() => navigate('/cart')}><ShoppingBag size={20} /><span className="text-xs font-medium">Cart</span>{totalCartItems > 0 && (<div className="absolute -top-2 -right-3 bg-purple-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">{totalCartItems}</div>)}</div>
+                    <div className="relative flex flex-col items-center gap-1 cursor-pointer" onClick={toggleProfile}>
+                        <User size={20} /><span className="text-xs font-medium">{currentUser?.displayName || 'Profile'}</span>
+                    </div>
+                    <div className="relative flex flex-col items-center gap-1 cursor-pointer" onClick={() => navigate('/wishlist')}>
+                        <Heart size={20} /><span className="text-xs font-medium">Wishlist</span>
+                        {wishlistCount > 0 && (
+                            <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">{wishlistCount}</div>
+                        )}
+                    </div>
+                    <div className="relative flex flex-col items-center gap-1 cursor-pointer" onClick={() => navigate('/cart')}>
+                        <ShoppingBag size={20} /><span className="text-xs font-medium">Cart</span>
+                        {totalCartItems > 0 && (
+                            <div className="absolute -top-2 -right-3 bg-purple-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">{totalCartItems}</div>
+                        )}
+                    </div>
                 </div>
 
                 {/* Mobile Menu Button */}
@@ -176,8 +188,19 @@ const Header = () => {
                 {isMenuOpen && (
                     <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", stiffness: 300, damping: 30 }} className="fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-white shadow-2xl lg:hidden">
                         <div className="flex flex-col h-full p-6">
-                            <div className="flex justify-between items-center mb-8"><h2 className="text-xl font-bold">Menu</h2><button onClick={() => setIsMenuOpen(false)} className="p-2"><X size={24} /></button></div>
-                            <nav className="flex-grow"><ul className="flex flex-col space-y-6 text-lg">{navLinks.map((link) => (<li key={link.name}><div onClick={() => { navigate(link.path); setIsMenuOpen(false); }} className="cursor-pointer">{link.name}</div></li>))}</ul></nav>
+                            <div className="flex justify-between items-center mb-8">
+                                <h2 className="text-xl font-bold">Menu</h2>
+                                <button onClick={() => setIsMenuOpen(false)} className="p-2"><X size={24} /></button>
+                            </div>
+                            <nav className="flex-grow">
+                                <ul className="flex flex-col space-y-6 text-lg">
+                                    {navLinks.map((link) => (
+                                        <li key={link.name}>
+                                            <div onClick={() => { navigate(link.path); setIsMenuOpen(false); }} className="cursor-pointer">{link.name}</div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </nav>
                             <div className="space-y-6 border-t pt-6">
                                 {/* Mobile Search */}
                                 <div className="relative" ref={searchRef}>

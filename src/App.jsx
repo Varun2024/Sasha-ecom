@@ -12,12 +12,13 @@ import StoreLocation from './pages/StoreLocation/Location';
 import AdminPanel from './Admin/AdminPanel';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
+import FuzzyText from './pages/404';
 function App() {
 
 
   return (
     <>
-    <ReactLenis root/>
+      <ReactLenis root />
       <Header />
       <Routes>
         <Route path='login' element={<Login />} />
@@ -30,7 +31,20 @@ function App() {
         <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/store-locator" element={<StoreLocation />} />
         <Route path="/admin" element={<AdminPanel />} />
-        <Route path="*" element={<h1 className="text-center text-2xl font-bold mt-20">404 - Page Not Found</h1>} />
+
+        <Route path="*" element={
+          <div 
+          className='w-full h-[50vh] flex items-center justify-center'>
+            <FuzzyText
+            baseIntensity={0.3}
+            hoverIntensity={0.5}
+            enableHover={true}
+          >
+            404 - Not Found
+          </FuzzyText>
+          </div>
+        } />
+
       </Routes>
       <Footer />
     </>
