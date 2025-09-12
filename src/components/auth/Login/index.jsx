@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { signInWithEmail, signInWithGoogle } from '../../../firebase/auth';
 import { useNavigate } from 'react-router-dom';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { db } from '../../../firebase/firebaseConfig';
 import { toast, ToastContainer } from 'react-toastify';
+import { useWishlist } from '../../../context/WishlistContext';
 
 
 export default function Login() {
@@ -13,6 +14,39 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const [googleLoading, setGoogleLoading] = useState(false);
 
+    const {wishlist: localWishlist, dispatch} = useWishlist()
+
+     const handleSuccessfulLogin = async (user) => {
+        if (!user) return;
+
+        const userDocRef = doc(db, 'users', user.user.uid);
+        const docSnap = await getDoc(userDocRef);
+
+        // 1. Get existing wishlist from Firestore
+        const firestoreWishlist = docSnap.data()?.wishlist || [];
+
+        // 2. Merge Firestore wishlist with local (guest) wishlist
+        const allItems = [...firestoreWishlist, ...localWishlist];
+        // Remove duplicates, giving priority to items from the local list if IDs match
+        const mergedWishlist = Array.from(new Map(allItems.map(item => [item.id, item])).values());
+
+        // 3. Prepare user data, preserving original creation date
+        const userData = {
+            email: user.email,
+            displayName: user.displayName,
+            lastLogin: new Date(),
+            wishlist: mergedWishlist, // Add the merged wishlist
+        };
+        if (!docSnap.exists()) {
+            userData.createdAt = new Date();
+        }
+
+        // 4. Save updated user data and wishlist to Firestore
+        await setDoc(userDocRef, userData, { merge: true });
+
+        // 5. Update the global wishlist state
+        dispatch({ type: 'SET_WISHLIST', payload: mergedWishlist });
+    };
     const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
@@ -33,6 +67,7 @@ export default function Login() {
                     createdAt: new Date(),
                 });
             }
+            await handleSuccessfulLogin(user.user);
             toast.success('Registration successful! Redirecting to cart...', {
                 position: "bottom-right",
                 autoClose: 2000,
@@ -60,7 +95,7 @@ export default function Login() {
         setGoogleLoading(true);
         setError('');
         try {
-            const guser =await signInWithGoogle();
+            const guser = await signInWithGoogle();
             if (guser) {
                 await setDoc(doc(db, 'users', guser.user.uid), {
                     email: guser.user.email,
@@ -68,6 +103,7 @@ export default function Login() {
                     createdAt: new Date(),
                 });
             }
+            await handleSuccessfulLogin(guser.user);
             toast.success('Registration successful! Redirecting to cart...', {
                 position: "bottom-right",
                 autoClose: 2000,
@@ -119,6 +155,7 @@ export default function Login() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     required
+                                    autoComplete='email'
                                 />
                             </div>
                         </div>

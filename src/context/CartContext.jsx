@@ -15,7 +15,7 @@ const getInitialState = () => {
     }
 };
 
-// --- Cart Reducer with Improved Logic ---
+// --- Cart Reducer ---
 const cartReducer = (state, action) => {
     let newState;
 

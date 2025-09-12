@@ -13,17 +13,17 @@ import AdminPanel from './Admin/AdminPanel';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import FuzzyText from './pages/404';
+
+
 function App() {
-
-
   return (
     <>
       <ReactLenis root />
       <Header />
       <Routes>
+        <Route path="/" element={<Home />} />
         <Route path='login' element={<Login />} />
         <Route path='register' element={<Register />} />
-        <Route path="/" element={<Home />} />
         <Route path="/product/:productId" element={<ProductDetailsPage />} />
         <Route path="/all" element={<ProductListingPage />} />
         <Route path='/cart' element={<CartPage />} />
@@ -31,7 +31,6 @@ function App() {
         <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/store-locator" element={<StoreLocation />} />
         <Route path="/admin" element={<AdminPanel />} />
-
         <Route path="*" element={
           <div 
           className='w-full h-[50vh] flex items-center justify-center'>
@@ -44,7 +43,6 @@ function App() {
           </FuzzyText>
           </div>
         } />
-
       </Routes>
       <Footer />
     </>
