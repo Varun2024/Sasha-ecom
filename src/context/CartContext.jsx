@@ -1,5 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useReducer } from "react";
+import { doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { createContext, useContext, useEffect, useReducer } from "react";
+import { auth, db } from "../firebase/firebaseConfig";
 
 // --- Context Creation ---
 const CartContext = createContext();
@@ -55,11 +57,14 @@ const cartReducer = (state, action) => {
             newState = [];
             break;
         }
+        case "SET_CART":
+            newState = action.payload;
+            break;
 
         default:
             throw new Error(`Unknown action-type: ${action.type}`);
     }
-    
+
     // Persist the new state to localStorage after any change
     localStorage.setItem("cart", JSON.stringify(newState));
     return newState;
@@ -68,9 +73,47 @@ const cartReducer = (state, action) => {
 // --- Cart Provider Component ---
 const CartProvider = ({ children }) => {
     const [cart, dispatch] = useReducer(cartReducer, getInitialState());
+    useEffect(() => {
+        const unsubscribe = auth.onAuthStateChanged((user) => {
+            if (user) {
+                const userRef = doc(db, "users", user.uid);
+                return onSnapshot(userRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        dispatch({
+                            type: "SET_CART",
+                            payload: snapshot.data().cart || [],
+                        });
+                    }
+                });
+            } else {
+                dispatch({ type: "SET_CART", payload: [] });
+            }
+        });
+        return unsubscribe;
+    }, []);
 
+    // 🔹 Update Firestore when cart changes
+    const updateCartInFirestore = async (newCart) => {
+        const user = auth.currentUser;
+        if (!user) return;
+        const userRef = doc(db, "users", user.uid);
+        await updateDoc(userRef, { cart: newCart });
+    };
+
+    // 🔹 Wrapper around dispatch to also persist
+    const enhancedDispatch = (action) => {
+        const newState = cartReducer(cart, action);
+
+        if (
+            ["ADD", "REMOVE", "UPDATE_QUANTITY", "CLEAR"].includes(action.type)
+        ) {
+            updateCartInFirestore(newState);
+        }
+
+        dispatch(action);
+    };
     return (
-        <CartContext.Provider value={{ cart, dispatch }}>
+        <CartContext.Provider value={{ cart, dispatch: enhancedDispatch }}>
             {children}
         </CartContext.Provider>
     );
