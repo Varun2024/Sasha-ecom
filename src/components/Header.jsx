@@ -48,7 +48,7 @@ const SearchResults = ({ results, loading, query, onResultClick }) => {
                         <img src={product.imageUrl} alt={product.name} className="w-12 h-16 object-cover rounded-md" />
                         <div className="flex-grow">
                             <p className="font-semibold text-gray-800">{product.name}</p>
-                            <p className="text-sm text-purple-600 font-bold">${product.price}</p>
+                            <p className="text-sm text-purple-600 font-bold">₹{product.price}</p>
                         </div>
                     </li>
                 ))}
@@ -119,7 +119,7 @@ const Header = () => {
     // --- Handlers ---
     const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
     const handleResultClick = (productId) => {
-        navigate(`/product/${productId}`);
+        window.location.href = `/product/${productId}`;
         setSearchQuery('');
         setIsSearchFocused(false);
     };

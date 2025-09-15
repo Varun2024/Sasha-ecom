@@ -2,56 +2,30 @@
 import ProductCard from './ProductCard';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import DataContext from '../context/Context';
-import { useContext } from 'react';
-
-const products = [
-  {
-    id: 1,
-    name: 'Scarf',
-    category: 'TopWear',
-    price: 29.99,
-    rating: 4.5,
-    reviewCount: 120,
-    imageUrl: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=800&fit=crop'
-  },
-  {
-    id: 2,
-    name: 'Bucket Hat',
-    category: 'Accessories',
-    price: 149.99,
-    rating: 4.8,
-    reviewCount: 85,
-    imageUrl: 'https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=600&h=800&fit=crop'
-  },
-  {
-    id: 3,
-    name: 'Best Seller Jacket',
-    category: 'BottomWear',
-    price: 89.99,
-    rating: 4.7,
-    reviewCount: 210,
-    imageUrl: 'https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=600&h=800&fit=crop',
-    isBestSeller: true
-  },
-  {
-    id: 4,
-    name: 'Puffer Bag',
-    category: 'OuterWear',
-    price: 199.50,
-    rating: 4.9,
-    reviewCount: 350,
-    imageUrl: 'https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=600&h=800&fit=crop'
-  },
-];
+import { useContext, useEffect, useState } from 'react';
+import {  collection, getDocs } from 'firebase/firestore';
+import { db } from '../firebase/firebaseConfig';
 
 const NewInSection = () => {
+  const [products, setProducts] = useState([]);
   // const { id } = useParams();
-  
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const res = await getDocs(collection(db, 'products'));
+      const productsData = res.docs.map(doc => ({ id: doc.id, ...doc.data() })).slice(0, 4); //to get 4 items there
+      setProducts(productsData);
+    }
+    fetchProducts();
+  }, [products]);
+  const navigate = useNavigate();
+
+
   const { setProductData } = useContext(DataContext);
 
   const handleClick = (product) => {
-    console.log('Product clicked:', product);
     setProductData(product);
+    // window.location.href = `/product/${product.id}`;
+    navigate(`/product/${product.id}`);
     localStorage.setItem("productData", JSON.stringify(product));
   }
 
@@ -72,13 +46,12 @@ const NewInSection = () => {
         <div      
           className="grid grid-cols-2 gap-5">
           {products.map((product, index) => (
-            <Link 
-            to={`/product/${product.id}`} 
+            <div  
             key={index} 
             onClick={() => handleClick(product)}
             >
               <ProductCard {...product} />
-            </Link>
+            </div>
           ))}
         </div>
       </div>

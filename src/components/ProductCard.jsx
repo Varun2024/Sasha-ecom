@@ -13,7 +13,7 @@ const ProductCard = ({ name, price, oldPrice, imageUrl, isBestSeller }) => {
         <h3 className="font-heading uppercase">{name}</h3>
         <p className="font-body text-sm">
           {oldPrice && <span className="line-through text-gray-500 mr-2">{oldPrice}</span>}
-          {price}
+          ₹{price}
         </p>
       </div>
     </div>
