@@ -105,7 +105,7 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
     };
 
     return (
-        <div className="bg-white p-6 rounded-xl shadow-sm space-y-6">
+        <div className="relative bg-white p-6 rounded-xl shadow-sm space-y-6 z-10">
             <h2>{isEditMode ? "Edit Product" : "Add New Product"}</h2>
             <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 gap-4 mb-10">
@@ -114,7 +114,7 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
                     <input className="border p-2 rounded-md" type="text" name="category" placeholder="Category" required value={formData.category} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="number" name="price" placeholder="Price" required value={formData.price} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="number" name="stock" placeholder="Stock Quantity" required value={formData.stock} onChange={handleChange} />
-                    <input className="border p-2 rounded-md" type="text" name="imageUrl" placeholder="Image URL" required value={formData.imageUrl} onChange={handleChange} />
+                    <input className="border p-2 rounded-md" type="file" name="image" placeholder="Image URL" required value={formData.imageUrl} onChange={handleChange} />
                 </div>
                 <div className="flex items-center justify-between">
                     <button type="submit" className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">

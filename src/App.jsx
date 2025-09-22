@@ -9,10 +9,10 @@ import CartPage from './components/Cart';
 import CheckoutPage from './components/Checkout';
 import WishlistPage from './components/WishList';
 import StoreLocation from './pages/StoreLocation/Location';
-import AdminPanel from './Admin/AdminPanel';
+import AdminPanel from './admin/AdminPanel';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
-import FuzzyText from './pages/404';
+import FuzzyText from '../public/404';
 
 
 function App() {
@@ -22,15 +22,15 @@ function App() {
       <Header />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path='login' element={<Login />} />
-        <Route path='register' element={<Register />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/register' element={<Register />} />
+        <Route path="/admin" element={<AdminPanel />} />
         <Route path="/product/:productId" element={<ProductDetailsPage />} />
         <Route path="/all" element={<ProductListingPage />} />
         <Route path='/cart' element={<CartPage />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/store-locator" element={<StoreLocation />} />
-        <Route path="/admin" element={<AdminPanel />} />
         <Route path="*" element={
           <div 
           className='w-full h-[50vh] flex items-center justify-center'>

@@ -45,7 +45,7 @@ export default function Login() {
             
             setTimeout(() => {
                 navigate('/cart'); 
-            }, 3000);
+            }, 1500);
            
         } catch (err) {
            

@@ -134,7 +134,7 @@ const Header = () => {
         <>
             <header className="fixed top-0 z-40 w-full text-black bg-white/80 backdrop-blur-lg shadow-md flex justify-between items-center py-2 px-4 md:px-8">
                 <div onClick={() => navigate('/')} className="cursor-pointer">
-                    <div className="w-36 h-14 bg-[url('./logo-nbg.png')] bg-cover bg-center" />
+                    <div className="w-36 h-14 bg-[url('/public/logo-nbg.png')] bg-cover bg-center" />
                 </div>
 
                 {/* Desktop Navigation & Search */}

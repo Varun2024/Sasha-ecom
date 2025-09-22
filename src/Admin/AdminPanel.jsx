@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { LayoutDashboard, ShoppingBag, Package, Users, Settings, MoreVertical, Search, Menu, X, PlusCircle, Filter, MapPin } from 'lucide-react';
 import ProductsView from './ProductView';
 import CustomersView from './CustomerList';
+import OrdersView from './OrdersView';
 
 // --- MOCK DATA ---
 // In a real application, this data would come from an API.
@@ -58,7 +59,7 @@ export default function AdminPanel() {
     };
 
     return (
-        <div className="flex h-screen bg-gray-50 font-sans">
+        <div className="flex h-full bg-gray-50 font-sans">
             <Sidebar activeView={activeView} setActiveView={setActiveView} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Header setIsSidebarOpen={setIsSidebarOpen} activeView={activeView} />
@@ -216,64 +217,6 @@ const DashboardView = () => {
         </div>
     );
 };
-
-const OrdersView = () => {
-    const [filter, setFilter] = useState('All');
-    const filteredOrders = filter === 'All' ? allOrdersData : allOrdersData.filter(o => o.status === filter);
-    const statuses = ['All', 'Shipped', 'Processing', 'Pending', 'Delivered'];
-
-    return (
-        <div className="bg-white p-6 rounded-xl shadow-sm space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <h3 className="text-xl font-semibold text-gray-800">All Orders</h3>
-                <div className="flex items-center gap-2 overflow-x-auto pb-2">
-                    {statuses.map(status => (
-                        <button 
-                            key={status}
-                            onClick={() => setFilter(status)}
-                            className={`px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap ${filter === status ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                        >
-                            {status}
-                        </button>
-                    ))}
-                </div>
-            </div>
-            <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="border-b bg-gray-50">
-                            <th className="p-4 text-sm font-semibold text-gray-600">Order ID</th>
-                            <th className="p-4 text-sm font-semibold text-gray-600">Customer</th>
-                            <th className="p-4 text-sm font-semibold text-gray-600 hidden md:table-cell">Date</th>
-                            <th className="p-4 text-sm font-semibold text-gray-600">Total</th>
-                            <th className="p-4 text-sm font-semibold text-gray-600">Status</th>
-                            <th className="p-4 text-sm font-semibold text-gray-600"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {filteredOrders.map((order) => (
-                            <tr key={order.id} className="border-b hover:bg-gray-50">
-                                <td className="p-4 text-sm text-gray-800 font-medium">{order.id}</td>
-                                <td className="p-4 text-sm text-gray-600">{order.customer}</td>
-                                <td className="p-4 text-sm text-gray-600 hidden md:table-cell">{order.date}</td>
-                                <td className="p-4 text-sm text-gray-800 font-medium">{order.total}</td>
-                                <td className="p-4 text-sm">
-                                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
-                                        {order.status}
-                                    </span>
-                                </td>
-                                <td className="p-4 text-sm text-gray-600">
-                                    <button className="hover:text-gray-900"><MoreVertical size={20} /></button>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
-};
-
 
 
 const LocationView = () => {

@@ -11,7 +11,7 @@ import { AuthProvider } from './context/AuthContext/index.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename='/'>
       <AuthProvider>
         <WishlistProvider>
           <CartProvider>
