@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ProductCard = ({ name, price, oldPrice, imageUrl, isBestSeller }) => {
+const ProductCard = ({ name, mrp, sale, imageUrl, isBestSeller }) => {
   return (
     <div className="bg-[#e0ddd9] rounded-2xl p-4 flex flex-col relative">
       {isBestSeller && (
@@ -12,8 +12,8 @@ const ProductCard = ({ name, price, oldPrice, imageUrl, isBestSeller }) => {
       <div className="mt-4">
         <h3 className="font-heading uppercase">{name}</h3>
         <p className="font-body text-sm">
-          {oldPrice && <span className="line-through text-gray-500 mr-2">{oldPrice}</span>}
-          ₹{price}
+          {sale && <span className="line-through text-gray-500 mr-2">{sale}</span>}
+          ₹{mrp}
         </p>
       </div>
     </div>

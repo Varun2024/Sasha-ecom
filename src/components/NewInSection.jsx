@@ -12,7 +12,7 @@ const NewInSection = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       const res = await getDocs(collection(db, 'products'));
-      const productsData = res.docs.map(doc => ({ id: doc.id, ...doc.data() })).slice(0, 4); //to get 4 items there
+      const productsData = res.docs.map(doc => ({ id: doc.id, ...doc.data() })).slice(0, 6); //to get 4 items there
       setProducts(productsData);
     }
     fetchProducts();
@@ -35,10 +35,10 @@ const NewInSection = () => {
         {/* Left Side */}
         <div
           className="min-h-[500px] bg-cover bg-center rounded-2xl flex flex-col justify-end p-8"
-          style={{ backgroundImage: "url('https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')" }}
+          style={{ backgroundImage: "url('https://res.cloudinary.com/doftlqnmi/image/upload/v1758710466/express-uploads/bb5zvu2gqv3tunowazfc.jpg')" }}
         >
           <h2 className="text-white font-heading text-6xl uppercase">New In</h2>
-          <a href="#" className="flex justify-center mt-6 rounded-xl border-2 border-black bg-white px-8 py-2 font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_white] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none">
+          <a href="/all" className="flex justify-center mt-6 rounded-xl border-2 border-black bg-white px-8 py-2 font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_white] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none">
             Shop Now
           </a>
         </div>

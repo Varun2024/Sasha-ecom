@@ -3,6 +3,7 @@ import { LayoutDashboard, ShoppingBag, Package, Users, Settings, MoreVertical, S
 import ProductsView from './ProductView';
 import CustomersView from './CustomerList';
 import OrdersView from './OrdersView';
+import CollectionsView from './Collection';
 
 // --- MOCK DATA ---
 // In a real application, this data would come from an API.
@@ -50,6 +51,7 @@ export default function AdminPanel() {
         switch (activeView) {
             case 'Dashboard': return <DashboardView />;
             case 'Orders': return <OrdersView />;
+            case 'Collections': return <CollectionsView />;
             case 'Products': return <ProductsView />;
             case 'Customers': return <CustomersView/>;
             case 'Location': return <LocationView />;
@@ -81,6 +83,7 @@ const Sidebar = ({ activeView, setActiveView, isSidebarOpen, setIsSidebarOpen })
         { name: 'Customers', icon: Users },
         { name: 'Location', icon: MapPin },
         { name: 'Settings', icon: Settings },
+        { name: 'Collections', icon: PlusCircle },
     ];
 
     return (

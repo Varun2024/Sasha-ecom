@@ -204,22 +204,29 @@ export default function ProductDetailsPage() {
                             {/* ... Rest of your product info JSX ... */}
                             <div className="space-y-2">
                                 <div className="flex items-center space-x-3">
-                                    <span className="text-3xl font-bold">₹{product.price}</span>
-                                    <span className="bg-gradient-to-r from-green-400 to-green-600 px-3 py-1 rounded-full text-sm font-medium">25% OFF</span>
+                                    <span className="text-3xl font-bold">₹{product.sale}</span>
+                                    <span className="line-through text-gray-500 mr-2">₹{product.mrp}</span>
+                                    <span className="bg-gradient-to-r from-green-400 to-green-600 px-3 py-1 rounded-full text-sm font-medium"> 25% OFF</span>
                                 </div>
                             </div>
 
                             <div className="space-y-3">
-                                <h3 className="text-lg font-semibold">Color: {colors.find(c => c.name === selectedColor)?.label}</h3>
+                                <h3 className="text-lg font-semibold">Color: {product.color}</h3>
                                 <div className="flex space-x-3">
-                                    {colors.map((color) => (
+                                    <button
+                                        key={product.color}
+                                        onClick={() => setSelectedColor(product.color)}
+                                        className={`w-12 h-12 rounded-full border-2 transition-all duration-300 ${selectedColor === product.color ? 'border-white scale-110 shadow-lg' : 'border-white/30 hover:border-white/60'}`}
+                                        style={{ backgroundColor: product.color }}
+                                    />
+                                    {/* {colors.map((color) => (
                                         <button
                                             key={color.name}
                                             onClick={() => setSelectedColor(color.name)}
                                             className={`w-12 h-12 rounded-full border-2 transition-all duration-300 ${selectedColor === color.name ? 'border-white scale-110 shadow-lg' : 'border-white/30 hover:border-white/60'}`}
                                             style={{ backgroundColor: color.value }}
                                         />
-                                    ))}
+                                    ))} */}
                                 </div>
                             </div>
 
@@ -251,8 +258,8 @@ export default function ProductDetailsPage() {
                             </div>
 
                             <div className="grid grid-cols-3 gap-4 pt-6 border-t border-white/20">
-                                <div className="flex items-center space-x-2 text-sm"><Truck className="w-5 h-5 text-green-400" /><span>Free Shipping</span></div>
-                                <div className="flex items-center space-x-2 text-sm"><Shield className="w-5 h-5 text-blue-400" /><span>2 Year Warranty</span></div>
+                                <div className="flex items-center space-x-2 text-sm"><Truck className="w-5 h-5 text-green-400" /><span>Free Shipping over ₹2000</span></div>
+                                <div className="flex items-center space-x-2 text-sm"><Shield className="w-5 h-5 text-blue-400" /><span>Fine Quality</span></div>
                                 <div className="flex items-center space-x-2 text-sm"><RotateCcw className="w-5 h-5 text-purple-400" /><span>30 Day Returns</span></div>
                             </div>
                         </div>

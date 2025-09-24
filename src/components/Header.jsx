@@ -16,7 +16,7 @@ import ProfileContainer from './ProfileContainer';
 
 
 const navLinks = [
-    { name: 'All Products', path: '/all' },
+    // { name: 'All Products', path: '/all' },
     { name: 'Store Locator', path: '/store-locator' },
 ];
 
@@ -37,7 +37,7 @@ const SearchResults = ({ results, loading, query, onResultClick }) => {
             </div>
         );
     }
-    
+
     if (results.length === 0) return null;
 
     return (
@@ -99,7 +99,7 @@ const Header = () => {
         );
         setSearchResults(filtered);
     }, [searchQuery, allProducts]);
-    
+
     // Effect to handle clicks outside the search component to close results
     useEffect(() => {
         const handleClickOutside = (event) => {
@@ -134,7 +134,8 @@ const Header = () => {
         <>
             <header className="fixed top-0 z-40 w-full text-black bg-white/80 backdrop-blur-lg shadow-md flex justify-between items-center py-2 px-4 md:px-8">
                 <div onClick={() => navigate('/')} className="cursor-pointer">
-                    <div className="w-36 h-14 bg-[url('/public/logo-nbg.png')] bg-cover bg-center" />
+                    <img src="/logo-nbg.png" className="md:w-42 w-28 " alt="" />
+                    {/* <div className="w-32 h-16 bg-[url('/public/logo1.png')] bg-cover bg-center" /> */}
                 </div>
 
                 {/* Desktop Navigation & Search */}
@@ -178,7 +179,17 @@ const Header = () => {
                 </div>
 
                 {/* Mobile Menu Button */}
-                <div className="lg:hidden"><button onClick={() => setIsMenuOpen(true)} className="p-2"><Menu size={24} /></button></div>
+                <div className="lg:hidden flex items-center gap-4">
+                    
+                    <div className="relative" ref={searchRef}>
+                        <input type="text" className="w-[70%] border border-gray-300 rounded-full pl-10 pr-4 py-2 text-sm" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setIsSearchFocused(true)} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                        {isSearchFocused && <SearchResults results={searchResults} loading={isSearchLoading} query={searchQuery} onResultClick={handleResultClick} />}
+                    </div>
+                    <button onClick={() => setIsMenuOpen(true)} className="p-2">
+                        <Menu size={24} />
+                    </button>
+                </div>
             </header>
 
             <ProfileContainer isOpen={isProfileOpen} onClose={toggleProfile} />
@@ -186,7 +197,13 @@ const Header = () => {
             {/* Mobile Menu */}
             <AnimatePresence>
                 {isMenuOpen && (
-                    <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", stiffness: 300, damping: 30 }} className="fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-white shadow-2xl lg:hidden">
+                    <motion.div
+                        initial={{ x: "100%" }}
+                        animate={{ x: 0 }}
+                        exit={{ x: "100%" }}
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                        className="fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-white shadow-2xl lg:hidden"
+                    >
                         <div className="flex flex-col h-full p-6">
                             <div className="flex justify-between items-center mb-8">
                                 <h2 className="text-xl font-bold">Menu</h2>
@@ -203,11 +220,7 @@ const Header = () => {
                             </nav>
                             <div className="space-y-6 border-t pt-6">
                                 {/* Mobile Search */}
-                                <div className="relative" ref={searchRef}>
-                                    <input type="text" className="w-full border border-gray-300 rounded-full pl-10 pr-4 py-2 text-sm" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setIsSearchFocused(true)} />
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                                    {isSearchFocused && <SearchResults results={searchResults} loading={isSearchLoading} query={searchQuery} onResultClick={handleResultClick} />}
-                                </div>
+
                                 <div className="space-y-4 text-md">
                                     <div className="flex items-center gap-4 cursor-pointer" onClick={() => { toggleProfile(); setIsMenuOpen(false); }}><User size={22} /><span>{currentUser?.displayName || 'Profile'}</span></div>
                                     <div className="flex items-center gap-4 cursor-pointer" onClick={() => { navigate('/wishlist'); setIsMenuOpen(false); }}><Heart size={22} /><span>Wishlist ({wishlistCount})</span></div>

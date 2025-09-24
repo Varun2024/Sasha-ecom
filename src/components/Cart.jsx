@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext.jsx';
@@ -42,7 +43,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => (
             </button>
         </div>
         <div className="w-28 text-center sm:text-right">
-            <p className="text-xl font-bold text-gray-900">${(item.price * item.quantity).toFixed(2)}</p>
+            <p className="text-xl font-bold text-gray-900">₹{(item.sale * item.quantity).toFixed(2)}</p>
         </div>
     </div>
 );
@@ -51,27 +52,27 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => (
 const OrderSummary = ({ subtotal }) => {
     const navigate = useNavigate();
     const TAX_RATE = 0.08;
-    const SHIPPING_COST = subtotal > 50 ? 0 : 15.00; // Free shipping over $50
+    const SHIPPING_COST = subtotal > 2000 ? 0 : 99; // Free shipping over ₹2000
 
     const taxes = subtotal * TAX_RATE;
-    const total = subtotal + taxes + SHIPPING_COST;
+    const total = subtotal + SHIPPING_COST;
 
     return (
         <div className="bg-white p-6 rounded-xl shadow-lg md:sticky md:top-24">
             <h2 className="text-2xl font-bold text-gray-800 border-b pb-4 mb-4">Order Summary</h2>
             <div className="space-y-3 text-gray-700">
-                <div className="flex justify-between"><span>Subtotal</span><span className="font-medium">${subtotal.toFixed(2)}</span></div>
+                <div className="flex justify-between"><span>Subtotal</span><span className="font-medium">₹{subtotal.toFixed(2)}</span></div>
                 <div className="flex justify-between">
                     <span>Shipping</span>
-                    <span className={`font-medium ${SHIPPING_COST === 0 ? 'text-green-600' : ''}`}>
-                        {SHIPPING_COST === 0 ? 'Free' : `$${SHIPPING_COST.toFixed(2)}`}
+                    <span className={`font-medium ₹{SHIPPING_COST === 0 ? 'text-green-600' : ''}`}>
+                        {SHIPPING_COST === 0 ? 'Free' : `₹${SHIPPING_COST.toFixed(2)}`}
                     </span>
                 </div>
-                <div className="flex justify-between"><span>Taxes</span><span className="font-medium">${taxes.toFixed(2)}</span></div>
+                {/* <div className="flex justify-between"><span>Taxes</span><span className="font-medium">₹{taxes.toFixed(2)}</span></div> */}
             </div>
             <div className="flex items-center justify-between border-t mt-4 pt-4">
                 <span className="text-xl font-bold text-gray-900">Total</span>
-                <span className="text-xl font-bold text-gray-900">${total.toFixed(2)}</span>
+                <span className="text-xl font-bold text-gray-900">₹{total.toFixed(2)}</span>
             </div>
             <button
                 onClick={() => navigate('/checkout')}
@@ -97,9 +98,10 @@ export default function CartPage() {
         }
     };
 
+    // eslint-disable-next-line no-unused-vars
     const handleRemoveItem = (id, name) => {
         dispatch({ type: 'REMOVE', payload: id });
-        toast.error(`${name} removed from cart.`);
+        toast.error(`₹{name} removed from cart.`);
     };
 
     const handleClearCart = () => {
@@ -109,7 +111,7 @@ export default function CartPage() {
     
     // The subtotal is memoized for performance and recalculates when the cart state changes.
     const subtotal = useMemo(() => {
-        return cart.reduce((total, item) => total + item.price * item.quantity, 0);
+        return cart.reduce((total, item) => total + item.sale * item.quantity, 0);
     }, [cart]);
 
     return (

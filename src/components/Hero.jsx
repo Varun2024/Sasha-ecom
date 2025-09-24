@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React from 'react';
+import React, { useRef } from 'react';
 
 // slider images
 const hero = () => {
@@ -31,16 +31,57 @@ const hero = () => {
 
 import { useEffect, useState } from "react";
 import { motion, useMotionValue } from "framer-motion";
+import { db } from '../firebase/firebaseConfig';
+import { collection, getDocs, orderBy, query } from 'firebase/firestore';
 
-const imgs = [
-  'https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  "https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-  "https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-];
+
+// mock collection data
+// const imgs = [
+//   'https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+//   "https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+//   "https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+//   "https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+//   "https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+//   "https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+//   "https://images.unsplash.com/photo-1460186136353-977e9d6085a1?q=80&w=2670&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+// ];
+
+const useHeroImages = () => {
+  const [imgs, setImgs] = useState([]);
+  const hasFetched = useRef(false);
+  const [slides, setSlides] = useState([]);
+
+  useEffect(() => {
+    const fetchSlides = async () => {
+      if (hasFetched.current) return;
+      hasFetched.current = true;
+
+      try {
+        // fetch in order of createdAt (latest first)
+        const q = query(collection(db, "collections"), orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+
+        const data = snapshot.docs.flatMap(doc => {
+          const d = doc.data();
+          return (d.imageUrls || []).map(url => ({
+            url,
+            description: d.description,
+          }));
+        });
+
+        setSlides(data);
+      } catch (err) {
+        console.error("Error fetching hero slides:", err);
+      }
+    };
+
+    fetchSlides();
+  }, [slides]);
+
+
+  return slides;
+};
+
 
 const ONE_SECOND = 1000;
 const AUTO_DELAY = ONE_SECOND * 10;
@@ -55,6 +96,7 @@ const SPRING_OPTIONS = {
 
 export const Hero = () => {
   const [imgIndex, setImgIndex] = useState(0);
+  const imgs = useHeroImages();
 
   const dragX = useMotionValue(0);
 
@@ -73,7 +115,7 @@ export const Hero = () => {
     }, AUTO_DELAY);
 
     return () => clearInterval(intervalRef);
-  }, [dragX]);
+  }, [dragX, imgs.length]);
 
   const onDragEnd = () => {
     const x = dragX.get();
@@ -107,43 +149,43 @@ export const Hero = () => {
           className="flex cursor-grab items-center active:cursor-grabbing"
         >
 
-          <Images imgIndex={imgIndex} />
+          <Images imgs={imgs} imgIndex={imgIndex} />
         </motion.div>
 
-        <Dots imgIndex={imgIndex} setImgIndex={setImgIndex} />
+        <Dots imgs={imgs} imgIndex={imgIndex} setImgIndex={setImgIndex} />
 
       </div>
     </>
   );
 };
-
-const Images = ({ imgIndex }) => {
+const Images = ({ imgs, imgIndex }) => {
+  console.log("Rendering Images with imgs:", imgs, "and imgIndex:", imgIndex);
   return (
     <>
-      {imgs.map((imgSrc, idx) => {
+      {imgs.map((imgSrc, imgIndex) => {
         return (
           <>
             <motion.div
-              key={idx}
+              key={imgIndex}
               style={{
-                backgroundImage: `url(${imgSrc})`,
-                backgroundSize: "cover",
+                backgroundImage: `url(${imgSrc.url})`,
+                backgroundSize: "contain",
                 backgroundPosition: "center",
               }}
               animate={{
-                scale: imgIndex === idx ? 0.95 : 0.85,
+                scale: imgIndex === imgIndex ? 0.95 : 0.85,
               }}
               transition={SPRING_OPTIONS}
               className="aspect-video w-full md:h-[90vh] shrink-0 rounded-xl bg-neutral-800 object-cover"
             />
-            <div className="absolute z-0 left-20 top-10 text-start w-[50%]">
-              <h1 className="text-5xl text-white md:text-4xl lg:text-6xl font-heading uppercase leading-none">
-                Winter Collection
+            <div className="absolute z-0 left-10 md:left-20 top-10 md:top-40 text-start w-[70%]">
+              <h1 className="text-white text-s md:text-3xl lg:text-6xl font-heading uppercase leading-none">
+                {imgSrc.description}
               </h1>
-              <p className="text-md text-white md:text-xl font-body mt-2">Everyday Essential Apparel</p>
-              <a href="#" className="inline-block mt-6 rounded-xl border-2  border-black bg-white px-8 py-2 font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_white] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none">
+              <p className="text-xs text-gray-500 md:text-xl font-body mt-2">Everyday Essential Apparel</p>
+              <a href="/all" className="inline-block mt-6 rounded-xl border-2 bg-white md:px-8 md:py-2 px-4 py-1 font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_white] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none text-xs md:text-lg">
                 Shop Now
-              </a>  
+              </a>
             </div>
           </>
         );
@@ -151,8 +193,7 @@ const Images = ({ imgIndex }) => {
     </>
   );
 };
-
-const Dots = ({ imgIndex, setImgIndex }) => {
+const Dots = ({ imgs, imgIndex, setImgIndex }) => {
   return (
     <div className="mt-4 flex w-full justify-center gap-2">
       {imgs.map((_, idx) => {
@@ -169,6 +210,7 @@ const Dots = ({ imgIndex, setImgIndex }) => {
   );
 };
 
+
 const GradientEdges = () => {
   return (
     <>
@@ -178,3 +220,160 @@ const GradientEdges = () => {
   );
 };
 export default Hero;
+
+
+/* eslint-disable no-unused-vars */
+// import React, { useEffect, useState } from "react";
+// import { motion, useMotionValue } from "framer-motion";
+// import { collection, getDocs, orderBy, query } from "firebase/firestore";
+// import { db } from "../firebase/firebaseConfig"; // ✅ adjust path if needed
+
+// const ONE_SECOND = 1000;
+// const AUTO_DELAY = ONE_SECOND * 10;
+// const DRAG_BUFFER = 50;
+
+// const SPRING_OPTIONS = {
+//   type: "spring",
+//   mass: 3,
+//   stiffness: 400,
+//   damping: 50,
+// };
+
+// export const Hero = () => {
+//   const [imgIndex, setImgIndex] = useState(0);
+//   const [collections, setCollections] = useState([]);
+//   const dragX = useMotionValue(0);
+
+//   // ✅ Fetch collections from Firestore
+//   useEffect(() => {
+//     const fetchCollections = async () => {
+//       try {
+//         const q = query(collection(db, "collections"));
+//         const querySnapshot = await getDocs(q);
+
+//         const data = querySnapshot.docs.map((doc) => ({
+//           id: doc.id,
+//           ...doc.data(),
+//         }));
+//         console.log("Fetched collections:", data);
+//         setCollections(data);
+//       } catch (err) {
+//         console.error("Error fetching collections:", err);
+//       }
+//     };
+
+//     fetchCollections();
+//   });
+
+//   // ✅ Auto slide
+//   useEffect(() => {
+//     const intervalRef = setInterval(() => {
+//       const x = dragX.get();
+
+//       if (x === 0 && collections.length > 0) {
+//         setImgIndex((pv) => {
+//           if (pv === collections.length - 1) {
+//             return 0;
+//           }
+//           return pv + 1;
+//         });
+//       }
+//     }, AUTO_DELAY);
+
+//     return () => clearInterval(intervalRef);
+//   }, [dragX, collections]);
+
+//   const onDragEnd = () => {
+//     const x = dragX.get();
+
+//     if (x <= -DRAG_BUFFER && imgIndex < collections.length - 1) {
+//       setImgIndex((pv) => pv + 1);
+//     } else if (x >= DRAG_BUFFER && imgIndex > 0) {
+//       setImgIndex((pv) => pv - 1);
+//     }
+//   };
+
+//   if (collections.length === 0) {
+//     return (
+//       <div className="h-[60vh] flex items-center justify-center text-gray-500">
+//         Loading hero collections...
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <div className="relative overflow-hidden mt-20">
+//       <motion.div
+//         drag="x"
+//         dragConstraints={{ left: 0, right: 0 }}
+//         style={{ x: dragX }}
+//         animate={{ translateX: `-${imgIndex * 100}%` }}
+//         transition={SPRING_OPTIONS}
+//         onDragEnd={onDragEnd}
+//         className="flex cursor-grab items-center active:cursor-grabbing"
+//       >
+//         <Images collections={collections} imgIndex={imgIndex} />
+//       </motion.div>
+
+//       <Dots imgIndex={imgIndex} setImgIndex={setImgIndex} count={collections.length} />
+//     </div>
+//   );
+// };
+
+// // ✅ Show images + description
+// const Images = ({ collections, imgIndex }) => {
+//   return (
+//     <>
+//       {collections.map((collection, idx) => {
+//         // Take the first image of each collection for the hero slider
+//         const bgImage = collection.imageUrls?.[0];
+//         return (
+//           <motion.div
+//             key={collection.id}
+//             style={{
+//               backgroundImage: `url(${bgImage})`,
+//               backgroundSize: "cover",
+//               backgroundPosition: "center",
+//             }}
+//             animate={{ scale: imgIndex === idx ? 0.95 : 0.85 }}
+//             transition={SPRING_OPTIONS}
+//             className="relative aspect-video w-full md:h-[90vh] shrink-0 rounded-xl bg-neutral-800 object-cover"
+//           >
+//             <div className="absolute z-10 left-10 top-10 md:left-20 md:top-20 text-start max-w-[50%]">
+//               <h1 className="text-4xl md:text-5xl lg:text-6xl text-white font-heading uppercase leading-none">
+//                 {collection.description || "Untitled Collection"}
+//               </h1>
+//               <p className="text-md text-white md:text-xl font-body mt-2">
+//                 Everyday Essential Apparel
+//               </p>
+//               <a
+//                 href="#"
+//                 className="inline-block mt-6 rounded-xl border-2 border-black bg-white px-8 py-2 font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_white] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none"
+//               >
+//                 Shop Now
+//               </a>
+//             </div>
+//           </motion.div>
+//         );
+//       })}
+//     </>
+//   );
+// };
+
+// const Dots = ({ imgIndex, setImgIndex, count }) => {
+//   return (
+//     <div className="mt-4 flex w-full justify-center gap-2">
+//       {Array.from({ length: count }).map((_, idx) => (
+//         <button
+//           key={idx}
+//           onClick={() => setImgIndex(idx)}
+//           className={`h-3 w-3 rounded-full transition-colors ${
+//             idx === imgIndex ? "bg-neutral-500" : "bg-neutral-300"
+//           }`}
+//         />
+//       ))}
+//     </div>
+//   );
+// };
+
+// export default Hero;

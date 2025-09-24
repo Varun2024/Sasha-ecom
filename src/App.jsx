@@ -9,7 +9,7 @@ import CartPage from './components/Cart';
 import CheckoutPage from './components/Checkout';
 import WishlistPage from './components/WishList';
 import StoreLocation from './pages/StoreLocation/Location';
-import AdminPanel from './admin/AdminPanel';
+import AdminPanel from './Admin/AdminPanel';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import FuzzyText from '../public/404';
@@ -24,7 +24,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path='/login' element={<Login />} />
         <Route path='/register' element={<Register />} />
-        <Route path="/admin" element={<AdminPanel />} />
+        <Route path="/adminsasha" element={<AdminPanel />} />
         <Route path="/product/:productId" element={<ProductDetailsPage />} />
         <Route path="/all" element={<ProductListingPage />} />
         <Route path='/cart' element={<CartPage />} />

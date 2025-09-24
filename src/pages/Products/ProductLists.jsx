@@ -72,8 +72,9 @@ const ProductCard = ({ product, addCartItem, addWishlistItem, wishlist }) => {
             </div>
             <span className="text-gray-500 text-sm ml-2">({product.reviewCount} reviews)</span></div>
         </div>
-        <div className="flex items-center justify-between mt-4">
-          <span className="text-2xl font-bold text-gray-900">₹{product.price}</span>
+        <div className="flex items-center justify-between mt-4">  
+                                    <span className="text-3xl font-bold">₹{product.sale}</span>
+          {product.mrp && <span className="line-through text-gray-500 mr-2">₹{product.mrp}</span>}
           <button
             onClick={() => addCartItem(product)}
             className="flex items-center justify-center bg-gray-900 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-gray-700 transition-colors duration-300">
@@ -111,7 +112,7 @@ export default function ProductListingPage() {
         setProducts(productsData);
 
         // Dynamically set max price for the filter slider
-        const max = Math.ceil(Math.max(...productsData.map(p => p.price)));
+        const max = Math.ceil(Math.max(...productsData.map(p => p.mrp)));
         setMaxPrice(max);
         setPriceRange(max);
 
@@ -130,13 +131,13 @@ export default function ProductListingPage() {
 
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = [...products]
-      .filter(p => p.price <= priceRange) // Filter by price first
+      .filter(p => p.mrp <= priceRange) // Filter by price first
       .filter(p => selectedCategories.length === 0 || selectedCategories.includes(p.category)); // Then by category
 
     // Then sort the results
     switch (sortOption) {
-      case 'price-asc': filtered.sort((a, b) => a.price - b.price); break;
-      case 'price-desc': filtered.sort((a, b) => b.price - a.price); break;
+      case 'price-asc': filtered.sort((a, b) => a.mrp - b.mrp); break;
+      case 'price-desc': filtered.sort((a, b) => b.mrp - a.mrp); break;
       case 'rating': filtered.sort((a, b) => b.rating - a.rating); break;
       case 'newest': filtered.reverse(); break;
       default: break;

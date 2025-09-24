@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import {
     doc,
@@ -8,36 +7,42 @@ import {
     deleteDoc,
     updateDoc,
     query,
-    where,    
+    where,
 } from "firebase/firestore";
 import { PlusCircle, MoreVertical } from "lucide-react";
 import { v4 as uuid } from "uuid";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css"; // Import toastify CSS
-import { db } from "../firebase/firebaseConfig";
+// Make sure this path is correct for your project structure
+import { db } from "../firebase/firebaseConfig"; 
 
 // Reusable Form Component for Adding and Editing Products
 const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
     const isEditMode = Boolean(productToEdit);
 
-    // State to manage form data
+    // State to manage form text data
     const [formData, setFormData] = useState({
         name: "",
-        sku: "",
+        color: "",
+        sale: "",
         category: "",
-        price: "",
+        mrp: "",
         stock: "",
-        imageUrl: "",
+        imageUrl: "", // This will hold the final URL
     });
+
+    // State for the selected image file
+    const [imageFile, setImageFile] = useState(null);
 
     // Pre-fill the form if in edit mode
     useEffect(() => {
         if (isEditMode) {
             setFormData({
                 name: productToEdit.name,
-                sku: productToEdit.sku,
+                color: productToEdit.color,
+                sale: productToEdit.sale,
                 category: productToEdit.category,
-                price: productToEdit.price,
+                mrp: productToEdit.mrp,
                 stock: productToEdit.stock,
                 imageUrl: productToEdit.imageUrl,
             });
@@ -46,14 +51,19 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
 
     // Handle input changes
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        const { name, value, files } = e.target;
+        if (name === "image") {
+            if (files && files[0]) {
+                setImageFile(files[0]);
+            }
+        } else {
+            setFormData((prev) => ({ ...prev, [name]: value }));
+        }
     };
 
-    // Function to add a new product
+    // Function to add a new product to Firestore
     const addProduct = async (productData) => {
         try {
-            // Check if a product with the same name already exists
             const q = query(collection(db, "products"), where("name", "==", productData.name));
             const querySnapshot = await getDocs(q);
 
@@ -64,7 +74,6 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
 
             const newProductId = uuid();
             const productRef = doc(db, "products", newProductId);
-            // Store the ID within the document as well
             await setDoc(productRef, { ...productData, id: newProductId });
 
             toast.success("Product added successfully");
@@ -78,7 +87,7 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
         }
     };
 
-    // Function to update an existing product
+    // Function to update an existing product in Firestore
     const updateProduct = async (productId, productData) => {
         try {
             const productRef = doc(db, "products", productId);
@@ -95,12 +104,54 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
     };
 
     // Handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Start with the existing image URL if in edit mode
+        let uploadedImageUrl = isEditMode ? formData.imageUrl : "";
+
+        // If a new image file is selected, upload it first
+        if (imageFile) {
+            toast.info("Uploading image, please wait...");
+            const uploadFormData = new FormData();
+            uploadFormData.append("image", imageFile);
+            
+            try {
+                // IMPORTANT: Replace with your actual server URL if it's different
+                const response = await fetch("http://localhost:5000/api/upload", {
+                    method: "POST",
+                    body: uploadFormData,
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    uploadedImageUrl = result.data.url; // Get URL from server response
+                    toast.success("Image uploaded successfully!");
+                } else {
+                    toast.error(`Image upload failed: ${result.message}`);
+                    return; // Stop if upload fails
+                }
+            } catch (error) {
+                console.error("Error uploading image:", error);
+                toast.error("An error occurred during image upload.");
+                return;
+            }
+        }
+        
+        // For new products, an image is required
+        if (!uploadedImageUrl) {
+            toast.warn("Please select an image for the product.");
+            return;
+        }
+
+        // Prepare final data for Firestore
+        const finalProductData = { ...formData, imageUrl: uploadedImageUrl };
+
         if (isEditMode) {
-            updateProduct(productToEdit.id, formData);
+            updateProduct(productToEdit.id, finalProductData);
         } else {
-            addProduct(formData);
+            addProduct(finalProductData);
         }
     };
 
@@ -110,11 +161,13 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
             <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 gap-4 mb-10">
                     <input className="border p-2 rounded-md" type="text" name="name" placeholder="Product Name" required value={formData.name} onChange={handleChange} />
-                    <input className="border p-2 rounded-md" type="text" name="sku" placeholder="SKU" required value={formData.sku} onChange={handleChange} />
+                    <input className="border p-2 rounded-md" type="text" name="color" placeholder="Color" required value={formData.color} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="text" name="category" placeholder="Category" required value={formData.category} onChange={handleChange} />
-                    <input className="border p-2 rounded-md" type="number" name="price" placeholder="Price" required value={formData.price} onChange={handleChange} />
+                    <input className="border p-2 rounded-md" type="number" name="mrp" placeholder="MRP" required value={formData.mrp} onChange={handleChange} />
+                    <input className="border p-2 rounded-md" type="text" name="sale" placeholder="Sale price" required value={formData.sale} onChange={handleChange} />   
                     <input className="border p-2 rounded-md" type="number" name="stock" placeholder="Stock Quantity" required value={formData.stock} onChange={handleChange} />
-                    <input className="border p-2 rounded-md" type="file" name="image" placeholder="Image URL" required value={formData.imageUrl} onChange={handleChange} />
+                    {/* File input doesn't use 'value'. It's only required for new products. */}
+                    <input className="border p-2 rounded-md" type="file" name="image" accept="image/*" onChange={handleChange} required={!isEditMode} />
                 </div>
                 <div className="flex items-center justify-between">
                     <button type="submit" className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
@@ -157,15 +210,13 @@ const ProductsView = () => {
     // Handle product deletion
     const handleDelete = async (productId) => {
         setOpenMenuId(null); // Close the menu
-        if (window.confirm("Are you sure you want to delete this product?")) {
-            try {
-                await deleteDoc(doc(db, "products", productId));
-                toast.success("Product deleted successfully");
-                fetchProducts(); // Refresh the list
-            } catch (error) {
-                console.error("Error deleting product:", error);
-                toast.error("Failed to delete product");
-            }
+        try {
+            await deleteDoc(doc(db, "products", productId));
+            toast.success("Product deleted successfully");
+            fetchProducts(); // Refresh the list
+        } catch (error) {
+            console.error("Error deleting product:", error);
+            toast.error("Failed to delete product");
         }
     };
 
@@ -184,7 +235,7 @@ const ProductsView = () => {
 
     return (
         <>
-            <ToastContainer position="bottom-right" autoClose={2000} hideProgressBar />
+            <ToastContainer position="bottom-right" autoClose={3000} hideProgressBar />
             {!showForm && (
                 <div className="bg-white p-6 rounded-xl shadow-sm space-y-6">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -194,15 +245,15 @@ const ProductsView = () => {
                             <span>Add New Product</span>
                         </button>
                     </div>
-
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="border-b bg-gray-50">
                                     <th className="p-4">Product</th>
-                                    <th className="p-4 hidden sm:table-cell">SKU</th>
+                                    <th className="p-4 hidden sm:table-cell">Color</th>
                                     <th className="p-4 hidden md:table-cell">Category</th>
-                                    <th className="p-4">Price</th>
+                                    <th className="p-4">MRP</th>
+                                    <th className="p-4">Sale</th>
                                     <th className="p-4">Stock</th>
                                     <th className="p-4"></th>
                                 </tr>
@@ -216,9 +267,10 @@ const ProductsView = () => {
                                                 <span>{product.name}</span>
                                             </div>
                                         </td>
-                                        <td className="p-4 hidden sm:table-cell">{product.sku}</td>
+                                        <td className="p-4 hidden sm:table-cell">{product.color}</td>
                                         <td className="p-4 hidden md:table-cell">{product.category}</td>
-                                        <td className="p-4">${product.price}</td>
+                                        <td className="p-4">₹{product.mrp}</td>
+                                        <td className="p-4">₹{product.sale}</td>
                                         <td className="p-4">{product.stock}</td>
                                         <td className="p-4">
                                             <div className="relative">

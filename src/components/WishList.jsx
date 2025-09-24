@@ -20,14 +20,14 @@ const WishlistItem = ({ item }) => {
 
     const handleAddToCart = () => {
         if (isInCart) {
-            toast.info(`${item.name} is already in your cart.`);
+            toast.info(`₹{item.name} is already in your cart.`);
             return;
         }
         // Add to cart
         cartDispatch({ type: 'ADD', payload: { ...item, quantity: 1 } });
         // Automatically remove from wishlist
         wishlistDispatch({ type: 'REMOVE_ITEM', payload: item.id });
-        toast.success(`${item.name} moved to cart!`);
+        toast.success(`₹{item.name} moved to cart!`);
     };
 
     return (
@@ -39,7 +39,7 @@ const WishlistItem = ({ item }) => {
                 <Link to={`/product/${item.id}`} className="hover:underline">
                     <h3 className="text-xl font-bold text-gray-800">{item.name}</h3>
                 </Link>
-                <p className="text-lg font-semibold text-purple-600">${item.price}</p>
+                <p className="text-lg font-semibold text-purple-600">₹{item.sale}</p>
             </div>
             <div className="flex flex-col sm:flex-row gap-3">
                 <button
