@@ -25,6 +25,7 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
         name: "",
         color: "",
         sale: "",
+        size: "",
         category: "",
         mrp: "",
         stock: "",
@@ -41,6 +42,7 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
                 name: productToEdit.name,
                 color: productToEdit.color,
                 sale: productToEdit.sale,
+                size: productToEdit.size,
                 category: productToEdit.category,
                 mrp: productToEdit.mrp,
                 stock: productToEdit.stock,
@@ -160,14 +162,16 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
             <h2>{isEditMode ? "Edit Product" : "Add New Product"}</h2>
             <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 gap-4 mb-10">
+                    <input className="border p-2 rounded-md" type="file" name="image" accept="image/*" onChange={handleChange} required={!isEditMode} />
                     <input className="border p-2 rounded-md" type="text" name="name" placeholder="Product Name" required value={formData.name} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="text" name="color" placeholder="Color" required value={formData.color} onChange={handleChange} />
+                    <input className="border p-2 rounded-md" type="text" name="size" placeholder="Available sizes" required value={formData.size} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="text" name="category" placeholder="Category" required value={formData.category} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="number" name="mrp" placeholder="MRP" required value={formData.mrp} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="text" name="sale" placeholder="Sale price" required value={formData.sale} onChange={handleChange} />   
                     <input className="border p-2 rounded-md" type="number" name="stock" placeholder="Stock Quantity" required value={formData.stock} onChange={handleChange} />
                     {/* File input doesn't use 'value'. It's only required for new products. */}
-                    <input className="border p-2 rounded-md" type="file" name="image" accept="image/*" onChange={handleChange} required={!isEditMode} />
+                    
                 </div>
                 <div className="flex items-center justify-between">
                     <button type="submit" className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
@@ -252,6 +256,7 @@ const ProductsView = () => {
                                     <th className="p-4">Product</th>
                                     <th className="p-4 hidden sm:table-cell">Color</th>
                                     <th className="p-4 hidden md:table-cell">Category</th>
+                                    <th className="p-4 hidden lg:table-cell">Sizes</th>
                                     <th className="p-4">MRP</th>
                                     <th className="p-4">Sale</th>
                                     <th className="p-4">Stock</th>
@@ -269,6 +274,7 @@ const ProductsView = () => {
                                         </td>
                                         <td className="p-4 hidden sm:table-cell">{product.color}</td>
                                         <td className="p-4 hidden md:table-cell">{product.category}</td>
+                                        <td className="p-4 hidden lg:table-cell">{product.size}</td>
                                         <td className="p-4">₹{product.mrp}</td>
                                         <td className="p-4">₹{product.sale}</td>
                                         <td className="p-4">{product.stock}</td>

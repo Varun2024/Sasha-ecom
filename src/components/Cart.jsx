@@ -44,6 +44,8 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => (
         </div>
         <div className="w-28 text-center sm:text-right">
             <p className="text-xl font-bold text-gray-900">₹{(item.sale * item.quantity).toFixed(2)}</p>
+            <p className="text-sm text-gray-500 line-through">₹{(item.mrp * item.quantity).toFixed(2)}</p>
+            <p className='text-sm text-gray-500'>Size: <span className='font-bold text-lg'>{item.selectedSize}</span></p>
         </div>
     </div>
 );

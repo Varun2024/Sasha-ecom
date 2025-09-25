@@ -16,7 +16,7 @@ import ProfileContainer from './ProfileContainer';
 
 
 const navLinks = [
-    // { name: 'All Products', path: '/all' },
+    { name: 'Products', path: '/all' },
     { name: 'Store Locator', path: '/store-locator' },
 ];
 
