@@ -1,8 +1,9 @@
-import { UploadCloud } from "lucide-react";
+import { Trash2, UploadCloud } from "lucide-react";
 import { useEffect, useState } from "react";
-import { addDoc, collection, getDocs, orderBy, query } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query } from "firebase/firestore";
 import { db } from "../firebase/firebaseConfig"; // make sure this path is correct
 import { serverTimestamp } from "firebase/firestore";
+import { toast } from "react-toastify";
 
 const CollectionsView = () => {
   const [description, setDescription] = useState("");
@@ -11,7 +12,7 @@ const CollectionsView = () => {
   const [collections, setCollections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
-
+  const [selectedCollection, setSelectedCollection] = useState(null);
   // ✅ Fetch collections from Firestore
   useEffect(() => {
     const fetchCollections = async () => {
@@ -26,6 +27,9 @@ const CollectionsView = () => {
         }));
 
         setCollections(data);
+        if (data.length > 0) {
+          setSelectedCollection(data[0]);
+        }
       } catch (err) {
         console.error("Error fetching collections:", err);
       } finally {
@@ -71,7 +75,7 @@ const CollectionsView = () => {
         const formData = new FormData();
         formData.append("image", file); // must match multer field name
 
-        const res = await fetch("http://localhost:5000/api/upload", {
+        const res = await fetch("https://sasha-backend.onrender.com/api/upload", {
           method: "POST",
           body: formData,
         });
@@ -101,7 +105,7 @@ const CollectionsView = () => {
       };
 
       setCollections((prev) => [newCollection, ...prev]);
-
+      setSelectedCollection(newCollection);
       // ✅ 3. Reset form
       setDescription("");
       setFiles([]);
@@ -114,7 +118,29 @@ const CollectionsView = () => {
       setIsUploading(false);
     }
   };
+  const handleDelete = async (collectionId) => {
+    if (!window.confirm("Are you sure you want to delete this collection? This action cannot be undone.")) {
+      return;
+    }
+    try {
+      await deleteDoc(doc(db, "collections", collectionId));
+      const updatedCollections = collections.filter(c => c.id !== collectionId);
+      setCollections(updatedCollections);
 
+      // Set selected collection to the new first one, or null if empty
+      setSelectedCollection(updatedCollections.length > 0 ? updatedCollections[0] : null);
+      toast.success("Collection deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting collection:", error);
+      toast.error("Failed to delete collection.");
+    }
+  };
+
+  const handleCollectionSelect = (e) => {
+    const collectionId = e.target.value;
+    const collectionToView = collections.find(c => c.id === collectionId);
+    setSelectedCollection(collectionToView);
+  };
   return (
     <div className="space-y-8">
       {/* Add New Collection */}
@@ -221,31 +247,48 @@ const CollectionsView = () => {
           <p className="text-gray-500">No collections yet.</p>
         ) : (
           <div className="space-y-6">
-            {collections.map((collection) => (
-              <div key={collection.id} className="p-4 border rounded-lg">
-                <p className="text-gray-700 mb-4">{collection.description}</p>
+            {/* Collection Selector Dropdown */}
+            <div>
+              <label htmlFor="collection-select" className="block text-sm font-medium text-gray-700 mb-1">
+                Select a collection to view
+              </label>
+              <select
+                id="collection-select"
+                value={selectedCollection?.id || ''}
+                onChange={handleCollectionSelect}
+                className="w-full p-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {collections.map(c => (
+                  <option key={c.id} value={c.id}>
+                    {c.description.substring(0, 80)}... (
+                    {c.createdAt?.toDate().toLocaleDateString()})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Selected Collection Display */}
+            {selectedCollection && (
+              <div className="p-4 border rounded-lg bg-slate-50 relative">
+                <p className="text-gray-700 mb-4">{selectedCollection.description}</p>
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-                  {collection.imageUrls.map((url, index) => (
+                  {selectedCollection.imageUrls.map((url, index) => (
                     <img
                       key={index}
                       src={url}
-                      alt={`Collection ${collection.id} Image ${index + 1}`}
+                      alt={`Collection Image ${index + 1}`}
                       className="h-24 w-24 object-cover rounded-md"
                     />
                   ))}
                 </div>
-                {/* {collection.createdAt && (
-                  <p className="text-xs text-gray-400 mt-2">
-                    Created:{" "}
-                    {new Date(
-                      collection.createdAt?.seconds
-                        ? collection.createdAt.seconds * 1000
-                        : collection.createdAt
-                    ).toLocaleString()}
-                  </p>
-                )} */}  
+                <button
+                  onClick={() => handleDelete(selectedCollection.id)}
+                  className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 bg-red-100 text-red-600 font-semibold rounded-lg hover:bg-red-200 transition-colors text-sm"
+                >
+                  <Trash2 size={16} /> Delete
+                </button>
               </div>
-            ))}
+            )}
           </div>
         )}
       </div>

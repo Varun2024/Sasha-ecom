@@ -8,12 +8,16 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12 mb-12 pb-12 border-b border-gray-600">
           <div>
             <h3 className="font-heading uppercase mb-4">Our Story</h3>
-            <p className="font-body text-sm text-gray-300">This is a space to welcome visitors to the site. Grab their attention with copy that clearly states what the site is about.</p>
+            <p className="font-body text-sm text-gray-300">
+              “Trendy. Comfortable. Yours. — Sasha Store” <br />
+              Find your next favorite outfit from our latest collections.
+            </p>
           </div>
           <div>
             <h3 className="font-heading uppercase mb-4">Info & Location</h3>
             <p className="font-body text-sm text-gray-300">
-              <br />
+              SHOP NO. NAGAR NIGAM COMPLEX,<br />
+              NEAR SBI SHANKAR NAGAR, <br />
               Raipur, Chhattisgarh<br />
               Ph.no : <strong>98268 01231</strong>
             </p>
@@ -40,7 +44,7 @@ const Footer = () => {
           <div>
             <div className="flex space-x-4">
               {/* <a href="#" aria-label="TikTok"><FaTiktok size={20} /></a> */}
-              <a href="#" aria-label="Instagram"><FaInstagram size={20} /></a>
+              <a href="https://www.instagram.com/sasha_store_raipur/" aria-label="Instagram"><FaInstagram size={20} /></a>
               {/* <a href="#" aria-label="YouTube"><FaYoutube size={20} /></a> */}
               <a href="#" aria-label="Facebook"><FaFacebookF size={20} /></a>
             </div>

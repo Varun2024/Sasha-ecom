@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, ShoppingBag, Package, Users, Settings, MoreVertical, Search, Menu, X, PlusCircle, Filter, MapPin } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Package, Users, Settings, MoreVertical, Search, Menu, X, PlusCircle, Filter, MapPin, Star } from 'lucide-react';
 import ProductsView from './ProductView';
 import CustomersView from './CustomerList';
 import OrdersView from './OrdersView';
@@ -65,7 +65,7 @@ export default function AdminPanel() {
             <Sidebar activeView={activeView} setActiveView={setActiveView} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Header setIsSidebarOpen={setIsSidebarOpen} activeView={activeView} />
-                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 md:p-6 lg:p-8">
+                <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-4 md:p-6 lg:p-8 mt-10">
                     {renderView()}
                 </main>
             </div>
@@ -91,15 +91,16 @@ const Sidebar = ({ activeView, setActiveView, isSidebarOpen, setIsSidebarOpen })
             <div 
                 className={`fixed inset-0 bg-black bg-opacity-50  md:hidden ${isSidebarOpen ? 'block' : 'hidden'}`}
                 onClick={() => setIsSidebarOpen(false)}
-            ></div>
-            <aside className={`fixed top-0 left-0 z-0 w-64 h-full bg-white shadow-lg transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:shadow-none`}>
+            >
+            </div>
+            <aside className={`fixed top-0 left-0 z-10 w-40 h-full bg-white shadow-lg transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:shadow-none`}>
                 <div className="flex items-center justify-between p-4 border-b">
                     <h1 className="text-2xl font-bold text-gray-800">CLOTHIFY</h1>
                     <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-gray-600 hover:text-gray-900">
                         <X size={24} />
                     </button>
                 </div>
-                <nav className="mt-6">
+                <nav className="md:mt-6 mt-14 flex flex-col space-y-1">
                     {navItems.map((item) => (
                         <a
                             key={item.name}
@@ -129,7 +130,7 @@ const Sidebar = ({ activeView, setActiveView, isSidebarOpen, setIsSidebarOpen })
 
 const Header = ({ setIsSidebarOpen, activeView }) => {
     return (
-        <header className="flex items-center justify-between p-4 bg-white border-b sticky top-0 z-10">
+        <header className="flex items-center justify-between p-4 bg-white border-b sticky md:top-20 top-10 z-20">
             <div className="flex items-center">
                 <button onClick={() => setIsSidebarOpen(true)} className="md:hidden text-gray-600 hover:text-gray-900 mr-4">
                     <Menu size={24} />
@@ -155,8 +156,8 @@ const Header = ({ setIsSidebarOpen, activeView }) => {
                         className="w-10 h-10 rounded-full object-cover"
                     />
                     <div className="hidden lg:block">
-                        <p className="font-semibold text-sm">Admin User</p>
-                        <p className="text-xs text-gray-500">admin@clothify.com</p>
+                        <p className="font-semibold text-sm">sasha admin</p>
+                        <p className="text-xs text-gray-500">sashastore.com</p>
                     </div>
                 </div>
             </div>

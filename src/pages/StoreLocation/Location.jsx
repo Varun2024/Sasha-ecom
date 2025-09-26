@@ -4,8 +4,8 @@ import { MapPin, Clock, Phone, Navigation } from 'lucide-react';
 const StoreLocation = () => {
     // A valid Google Maps embed URL. I've used a real mall in Raipur as an example.
     // You can generate your own by searching for your location on Google Maps, clicking "Share", then "Embed a map".
-    const mapEmbedUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3718.591143419912!2d81.6705306758882!3d21.24830848045618!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a28dd4e3a4299a9%3A0x35665cb9f4b633e!2sMagneto%20The%20Mall!5e0!3m2!1sen!2sin!4v1723722955555!5m2!1sen!2sin";
-    
+    const mapEmbedUrl = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3718.371105451413!2d81.65904257498164!3d21.256772979908668!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a28dd6f7d73db33%3A0xfe7f24dec5da55ee!2sSASHA%20STORE!5e0!3m2!1sen!2sin!4v1758897323711!5m2!1sen!2sin";
+    // <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3718.371105451413!2d81.65904257498164!3d21.256772979908668!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a28dd6f7d73db33%3A0xfe7f24dec5da55ee!2sSASHA%20STORE!5e0!3m2!1sen!2sin!4v1758897323711!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     // Direct link for the "Get Directions" button.
     const directionsUrl = "https://maps.app.goo.gl/rY1dYk87qK1gYt8n6";
 
@@ -29,8 +29,9 @@ const StoreLocation = () => {
                             <div>
                                 <h2 className="text-2xl font-bold text-gray-800">Sasha Store - Raipur</h2>
                                 <p className="mt-2 text-gray-600">
-                                    Ground Floor, Magneto The Mall, <br />
-                                    NH 53, Labhandih, Raipur, Chhattisgarh 492001
+                                    SHOP NO. 10/31 NAGAR NIGAM COMPLEX,<br />
+                                    NEAR SBI SHANKAR NAGAR,<br /> 
+                                    RAIPUR, Chhattisgarh, 492001
                                 </p>
                             </div>
 
@@ -51,12 +52,12 @@ const StoreLocation = () => {
                                     Contact Us
                                 </h3>
                                 <div className="mt-4 space-y-2 text-gray-600">
-                                    <p><strong>Phone:</strong> <a href="tel:+911234567890" className="hover:underline">+91 12345 67890</a></p>
-                                    <p><strong>Email:</strong> <a href="mailto:contact@yourstore.com" className="hover:underline">contact@yourstore.com</a></p>
+                                    <p><strong>Phone:</strong> <a href="tel:+917225801231" className="hover:underline">+91 72258 01231</a></p>
+                                    <p><strong>Email:</strong> <a href="mailto:sashastoreindia@gmail.com" className="hover:underline">sashastoreindia@gmail.com</a></p>
                                 </div>
                             </div>
-                            
-                            <a 
+
+                            <a
                                 href={directionsUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"

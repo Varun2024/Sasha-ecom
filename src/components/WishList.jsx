@@ -13,6 +13,17 @@ const WishlistItem = ({ item }) => {
     // Check if the item is already in the cart to update the UI
     const isInCart = useMemo(() => cart.some(cartItem => cartItem.id === item.id), [cart, item.id]);
 
+    // CHANGED: Logic to handle both imageUrls array and single imageUrl string for backward compatibility.
+    let displayImage = 'https://placehold.co/200x300/f8f8f8/cccccc?text=Image+Not+Found'; // Default fallback
+    if (item.imageUrls && item.imageUrls.length > 0) {
+        // Use the first image from the new array structure
+        displayImage = item.imageUrls[0];
+    } else if (item.imageUrl) {
+        // Fallback to the old single imageUrl field if the array doesn't exist
+        displayImage = item.imageUrl;
+    }
+
+
     const handleRemove = () => {
         wishlistDispatch({ type: 'REMOVE_ITEM', payload: item.id });
         toast.error(`${item.name} removed from wishlist.`);
@@ -33,7 +44,7 @@ const WishlistItem = ({ item }) => {
     return (
         <div className="flex flex-col sm:flex-row items-center gap-6 p-4 bg-white rounded-xl shadow-sm transition-all hover:shadow-lg hover:scale-[1.02]">
             <Link to={`/product/${item.id}`}>
-                <img src={item.imageUrl} alt={item.name} className="w-28 h-36 object-cover rounded-md" />
+                <img src={displayImage} alt={item.name} className="w-28 h-36 object-cover rounded-md" />
             </Link>
             <div className="flex-grow text-center sm:text-left">
                 <Link to={`/product/${item.id}`} className="hover:underline">

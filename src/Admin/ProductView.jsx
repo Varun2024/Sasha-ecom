@@ -1,3 +1,5 @@
+
+
 import { useEffect, useState } from "react";
 import {
     doc,
@@ -9,18 +11,17 @@ import {
     query,
     where,
 } from "firebase/firestore";
-import { PlusCircle, MoreVertical } from "lucide-react";
+import { PlusCircle, MoreVertical, X } from "lucide-react"; // ADDED: X icon for removal
 import { v4 as uuid } from "uuid";
 import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css"; // Import toastify CSS
-// Make sure this path is correct for your project structure
-import { db } from "../firebase/firebaseConfig"; 
+import "react-toastify/dist/ReactToastify.css";
+import { db } from "../firebase/firebaseConfig";
 
 // Reusable Form Component for Adding and Editing Products
 const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
     const isEditMode = Boolean(productToEdit);
 
-    // State to manage form text data
+    // CHANGED: State now manages an array of image URLs
     const [formData, setFormData] = useState({
         name: "",
         color: "",
@@ -29,38 +30,52 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
         category: "",
         mrp: "",
         stock: "",
-        imageUrl: "", // This will hold the final URL
+        imageUrls: [], // CHANGED: from imageUrl to imageUrls array
     });
 
-    // State for the selected image file
-    const [imageFile, setImageFile] = useState(null);
+    // ADDED: State for newly selected image files (File objects)
+    const [imageFiles, setImageFiles] = useState([]);
 
     // Pre-fill the form if in edit mode
     useEffect(() => {
         if (isEditMode) {
             setFormData({
-                name: productToEdit.name,
-                color: productToEdit.color,
-                sale: productToEdit.sale,
-                size: productToEdit.size,
-                category: productToEdit.category,
-                mrp: productToEdit.mrp,
-                stock: productToEdit.stock,
-                imageUrl: productToEdit.imageUrl,
+                name: productToEdit.name || "",
+                color: productToEdit.color || "",
+                sale: productToEdit.sale || "",
+                size: productToEdit.size || "",
+                category: productToEdit.category || "",
+                mrp: productToEdit.mrp || "",
+                stock: productToEdit.stock || "",
+                imageUrls: productToEdit.imageUrls || [], // CHANGED: Populate imageUrls array
             });
         }
     }, [productToEdit, isEditMode]);
 
-    // Handle input changes
+    // CHANGED: Handle multiple file selection
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         if (name === "image") {
-            if (files && files[0]) {
-                setImageFile(files[0]);
+            if (files) {
+                // Append new files to the existing array
+                setImageFiles((prevFiles) => [...prevFiles, ...Array.from(files)]);
             }
         } else {
             setFormData((prev) => ({ ...prev, [name]: value }));
         }
+    };
+
+    // ADDED: Function to remove a newly selected image before upload
+    const handleRemoveNewImage = (index) => {
+        setImageFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    };
+
+    // ADDED: Function to remove an already uploaded image (in edit mode)
+    const handleRemoveExistingImage = (index) => {
+        setFormData((prev) => ({
+            ...prev,
+            imageUrls: prev.imageUrls.filter((_, i) => i !== index),
+        }));
     };
 
     // Function to add a new product to Firestore
@@ -105,50 +120,55 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
         }
     };
 
-    // Handle form submission
+    // CHANGED: Handle submission with multiple image uploads
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Start with the existing image URL if in edit mode
-        let uploadedImageUrl = isEditMode ? formData.imageUrl : "";
+        let uploadedImageUrls = [];
+        
+        // If new files are selected, upload them
+        if (imageFiles.length > 0) {
+            toast.info("Uploading images, please wait...");
 
-        // If a new image file is selected, upload it first
-        if (imageFile) {
-            toast.info("Uploading image, please wait...");
-            const uploadFormData = new FormData();
-            uploadFormData.append("image", imageFile);
-            
-            try {
-                // IMPORTANT: Replace with your actual server URL if it's different
-                const response = await fetch("http://localhost:5000/api/upload", {
+            // Use Promise.all to upload all files concurrently for better performance
+            const uploadPromises = imageFiles.map(file => {
+                const uploadFormData = new FormData();
+                uploadFormData.append("image", file);
+                return fetch("https://sasha-backend.onrender.com/api/upload", {
                     method: "POST",
                     body: uploadFormData,
-                });
+                }).then(response => response.json());
+            });
 
-                const result = await response.json();
+            try {
+                const results = await Promise.all(uploadPromises);
+                const successfulUploads = results.filter(result => result.success);
                 
-                if (result.success) {
-                    uploadedImageUrl = result.data.url; // Get URL from server response
-                    toast.success("Image uploaded successfully!");
-                } else {
-                    toast.error(`Image upload failed: ${result.message}`);
-                    return; // Stop if upload fails
+                if (successfulUploads.length !== imageFiles.length) {
+                    toast.error("Some images failed to upload. Please try again.");
+                    return; // Stop if any upload fails
                 }
+
+                uploadedImageUrls = successfulUploads.map(result => result.data.url);
+                toast.success("All images uploaded successfully!");
             } catch (error) {
-                console.error("Error uploading image:", error);
+                console.error("Error uploading images:", error);
                 toast.error("An error occurred during image upload.");
                 return;
             }
         }
         
-        // For new products, an image is required
-        if (!uploadedImageUrl) {
-            toast.warn("Please select an image for the product.");
+        // Combine existing URLs (in edit mode) with newly uploaded ones
+        const finalImageUrls = [...formData.imageUrls, ...uploadedImageUrls];
+        
+        // An image is required for all products
+        if (finalImageUrls.length === 0) {
+            toast.warn("Please select at least one image for the product.");
             return;
         }
 
         // Prepare final data for Firestore
-        const finalProductData = { ...formData, imageUrl: uploadedImageUrl };
+        const finalProductData = { ...formData, imageUrls: finalImageUrls };
 
         if (isEditMode) {
             updateProduct(productToEdit.id, finalProductData);
@@ -162,16 +182,46 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
             <h2>{isEditMode ? "Edit Product" : "Add New Product"}</h2>
             <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 gap-4 mb-10">
-                    <input className="border p-2 rounded-md" type="file" name="image" accept="image/*" onChange={handleChange} required={!isEditMode} />
+                    {/* CHANGED: File input now accepts multiple files */}
+                    <input className="border p-2 rounded-md" type="file" name="image" accept="image/*" onChange={handleChange} multiple />
+
+                    {/* --- ADDED: Image Preview Section --- */}
+                    <div className="flex flex-wrap gap-4 border p-4 rounded-md min-h-[100px]">
+                        {/* Preview for existing images (in edit mode) */}
+                        {formData.imageUrls.map((url, index) => (
+                            <div key={index} className="relative w-24 h-24">
+                                <img src={url} alt={`Preview ${index}`} className="w-full h-full object-cover rounded-md" />
+                                <button
+                                    type="button"
+                                    onClick={() => handleRemoveExistingImage(index)}
+                                    className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1 leading-none"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
+                        ))}
+                        {/* Preview for new images */}
+                        {imageFiles.map((file, index) => (
+                            <div key={index} className="relative w-24 h-24">
+                                <img src={URL.createObjectURL(file)} alt={`New Preview ${index}`} className="w-full h-full object-cover rounded-md" />
+                                <button
+                                    type="button"
+                                    onClick={() => handleRemoveNewImage(index)}
+                                    className="absolute top-0 right-0 bg-red-600 text-white rounded-full p-1 leading-none"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+
                     <input className="border p-2 rounded-md" type="text" name="name" placeholder="Product Name" required value={formData.name} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="text" name="color" placeholder="Color" required value={formData.color} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="text" name="size" placeholder="Available sizes" required value={formData.size} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="text" name="category" placeholder="Category" required value={formData.category} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="number" name="mrp" placeholder="MRP" required value={formData.mrp} onChange={handleChange} />
-                    <input className="border p-2 rounded-md" type="text" name="sale" placeholder="Sale price" required value={formData.sale} onChange={handleChange} />   
+                    <input className="border p-2 rounded-md" type="text" name="sale" placeholder="Sale price" required value={formData.sale} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="number" name="stock" placeholder="Stock Quantity" required value={formData.stock} onChange={handleChange} />
-                    {/* File input doesn't use 'value'. It's only required for new products. */}
-                    
                 </div>
                 <div className="flex items-center justify-between">
                     <button type="submit" className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
@@ -191,7 +241,7 @@ const ProductsView = () => {
     const [showForm, setShowForm] = useState(false);
     const [products, setProducts] = useState([]);
     const [productToEdit, setProductToEdit] = useState(null);
-    const [openMenuId, setOpenMenuId] = useState(null); // To control which menu is open
+    const [openMenuId, setOpenMenuId] = useState(null);
 
     const fetchProducts = async () => {
         try {
@@ -211,29 +261,26 @@ const ProductsView = () => {
         fetchProducts();
     }, []);
 
-    // Handle product deletion
     const handleDelete = async (productId) => {
-        setOpenMenuId(null); // Close the menu
+        setOpenMenuId(null);
         try {
             await deleteDoc(doc(db, "products", productId));
             toast.success("Product deleted successfully");
-            fetchProducts(); // Refresh the list
+            fetchProducts();
         } catch (error) {
             console.error("Error deleting product:", error);
             toast.error("Failed to delete product");
         }
     };
 
-    // Set up for editing a product
     const handleEdit = (product) => {
         setProductToEdit(product);
         setShowForm(true);
-        setOpenMenuId(null); // Close the menu
+        setOpenMenuId(null);
     };
 
-    // Set up for adding a new product
     const handleAdd = () => {
-        setProductToEdit(null); // Clear any existing edit data
+        setProductToEdit(null);
         setShowForm(true);
     };
 
@@ -264,39 +311,53 @@ const ProductsView = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {products.map((product) => (
-                                    <tr key={product.id} className="border-b hover:bg-gray-50">
-                                        <td className="p-4 font-medium text-gray-800">
-                                            <div className="flex items-center gap-4">
-                                                <img src={product.imageUrl} alt={product.name} className="w-12 h-12 rounded-md object-cover" />
-                                                <span>{product.name}</span>
-                                            </div>
-                                        </td>
-                                        <td className="p-4 hidden sm:table-cell">{product.color}</td>
-                                        <td className="p-4 hidden md:table-cell">{product.category}</td>
-                                        <td className="p-4 hidden lg:table-cell">{product.size}</td>
-                                        <td className="p-4">₹{product.mrp}</td>
-                                        <td className="p-4">₹{product.sale}</td>
-                                        <td className="p-4">{product.stock}</td>
-                                        <td className="p-4">
-                                            <div className="relative">
-                                                <button className="hover:text-gray-900" onClick={() => setOpenMenuId(openMenuId === product.id ? null : product.id)}>
-                                                    <MoreVertical size={20} />
-                                                </button>
-                                                {openMenuId === product.id && (
-                                                    <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-10 border">
-                                                        <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={(e) => { e.preventDefault(); handleEdit(product); }}>
-                                                            Edit
-                                                        </a>
-                                                        <a href="#" className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100" onClick={(e) => { e.preventDefault(); handleDelete(product.id); }}>
-                                                            Delete
-                                                        </a>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
+                                {products.map((product) => {
+                                    // CHANGED: Logic to handle both imageUrls array and single imageUrl string for backward compatibility.
+                                    let displayImage = 'https://via.placeholder.com/150'; // Default fallback
+                                    if (product.imageUrls && product.imageUrls.length > 0) {
+                                        displayImage = product.imageUrls[0];
+                                    } else if (product.imageUrl) {
+                                        displayImage = product.imageUrl;
+                                    }
+
+                                    return (
+                                        <tr key={product.id} className="border-b hover:bg-gray-50">
+                                            <td className="p-4 font-medium text-gray-800">
+                                                <div className="flex items-center gap-6">
+                                                    <img
+                                                        src={displayImage}
+                                                        alt={product.name}
+                                                        className="w-12 h-12 rounded-md object-cover"
+                                                    />
+                                                    <span>{product.name}</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-4 hidden sm:table-cell">{product.color}</td>
+                                            <td className="p-4 hidden md:table-cell">{product.category}</td>
+                                            <td className="p-4 hidden lg:table-cell">{product.size}</td>
+                                            <td className="p-4">₹{product.mrp}</td>
+                                            <td className="p-4">₹{product.sale}</td>
+                                            <td className="p-4">{product.stock}</td>
+                                            <td className="p-4">
+                                                <div className="relative">
+                                                    <button className="hover:text-gray-900" onClick={() => setOpenMenuId(openMenuId === product.id ? null : product.id)}>
+                                                        <MoreVertical size={20} />
+                                                    </button>
+                                                    {openMenuId === product.id && (
+                                                        <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-10 border">
+                                                            <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={(e) => { e.preventDefault(); handleEdit(product); }}>
+                                                                Edit
+                                                            </a>
+                                                            <a href="#" className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100" onClick={(e) => { e.preventDefault(); handleDelete(product.id); }}>
+                                                                Delete
+                                                            </a>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
                             </tbody>
                         </table>
                     </div>

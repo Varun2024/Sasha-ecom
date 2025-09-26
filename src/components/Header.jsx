@@ -48,7 +48,7 @@ const SearchResults = ({ results, loading, query, onResultClick }) => {
                         <img src={product.imageUrl} alt={product.name} className="w-12 h-16 object-cover rounded-md" />
                         <div className="flex-grow">
                             <p className="font-semibold text-gray-800">{product.name}</p>
-                            <p className="text-sm text-purple-600 font-bold">₹{product.price}</p>
+                            <p className="text-sm text-black font-bold">₹{product.sale}</p>
                         </div>
                     </li>
                 ))}
@@ -134,7 +134,7 @@ const Header = () => {
         <>
             <header className="fixed top-0 z-40 w-full text-black bg-white/80 backdrop-blur-lg shadow-md flex justify-between items-center py-2 px-4 md:px-8">
                 <div onClick={() => navigate('/')} className="cursor-pointer">
-                    <img src="/logo-nbg.png" className="md:w-42 w-28 " alt="" />
+                    <img src="/logo2.png" className="md:w-42 w-28 " alt="" />
                     {/* <div className="w-32 h-16 bg-[url('/public/logo1.png')] bg-cover bg-center" /> */}
                 </div>
 
