@@ -2,15 +2,12 @@
 
 import { useRef, useEffect } from 'react';
 import { User, LogOut, Package, LogIn, UserPlus } from 'lucide-react';
-import { BsBag } from 'react-icons/bs';
-import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext'; // Adjust path to your AuthContext
 import { signOut } from 'firebase/auth';
 import { auth } from '../firebase/firebaseConfig'; // Adjust path to your firebaseConfig
 
 const ProfileContainer = ({ isOpen, onClose }) => {
     const profileRef = useRef(null);
-    const navigate = useNavigate();
     // Get user state from the authentication context
     const { currentUser, userLoggedIn } = useAuth();
 
@@ -35,6 +32,7 @@ const ProfileContainer = ({ isOpen, onClose }) => {
     const handleLogout = async () => {
         try {
             await signOut(auth);
+            window.location.reload(); // Refresh the page to update UI
             onClose(); // Close the dropdown after logging out
         } catch (error) {
             console.error("Failed to log out", error);
@@ -43,7 +41,8 @@ const ProfileContainer = ({ isOpen, onClose }) => {
 
     // Handles navigation and closes the dropdown
     const handleNavigate = (path) => {
-        navigate(path);
+        // navigate(path);
+        window.location.href = path;
         onClose();
     };
 
@@ -79,10 +78,10 @@ const ProfileContainer = ({ isOpen, onClose }) => {
                     <Package className="w-5 h-5" />
                     <span>My Orders</span>
                 </button>
-                <button onClick={() => handleNavigate(userLoggedIn ? '/wishlist' : '/login')} className="w-full text-left flex items-center gap-3 px-3 py-2 text-gray-300 rounded-md hover:bg-gray-700">
+                {/* <button onClick={() => handleNavigate(userLoggedIn ? '/wishlist' : '/login')} className="w-full text-left flex items-center gap-3 px-3 py-2 text-gray-300 rounded-md hover:bg-gray-700">
                     <BsBag className="w-5 h-5" />
                     <span>Wishlist</span>
-                </button>
+                </button> */}
                 
                 {/* --- CONDITIONAL AUTH BUTTONS --- */}
                 {userLoggedIn ? (

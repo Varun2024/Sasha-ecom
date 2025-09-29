@@ -2,7 +2,7 @@ import { useWishlist } from '../context/WishlistContext.jsx';
 import { useCart } from '../context/CartContext.jsx';
 import { Link } from 'react-router-dom';
 import { Trash2, ShoppingCart, Heart } from 'lucide-react';
-import { toast } from 'react-toastify'; // Make sure ToastContainer is in your App.js
+import { toast, ToastContainer } from 'react-toastify'; // Make sure ToastContainer is in your App.js
 import { useMemo } from 'react';
 
 // --- WishlistItem Component ---
@@ -38,7 +38,7 @@ const WishlistItem = ({ item }) => {
         cartDispatch({ type: 'ADD', payload: { ...item, quantity: 1 } });
         // Automatically remove from wishlist
         wishlistDispatch({ type: 'REMOVE_ITEM', payload: item.id });
-        toast.success(`₹{item.name} moved to cart!`);
+        toast.success(`${item.name} moved to cart!`);
     };
 
     return (
@@ -62,7 +62,7 @@ const WishlistItem = ({ item }) => {
                             : 'bg-purple-600 hover:bg-purple-700'
                     }`}
                 >
-                    <ShoppingCart className="w-5 h-5" /> {isInCart ? 'In Cart' : 'Move to Cart'}
+                    <ShoppingCart className="w-5 h-5" /> {isInCart ? 'In Cart' : ' Cart'}
                 </button>
                 <button onClick={handleRemove} className="flex items-center justify-center gap-2 w-full sm:w-auto px-5 py-2.5 font-semibold rounded-lg text-red-600 bg-red-100 hover:bg-red-200 transition-colors">
                     <Trash2 className="w-5 h-5" /> Remove
@@ -79,6 +79,7 @@ export default function WishlistPage() {
 
     return (
         <div className="container min-h-screen pt-20 mx-auto px-4 py-16 bg-slate-50">
+            <ToastContainer theme='dark' hideProgressBar={true} />
             <header className="text-center mb-10">
                 <div className="flex justify-center items-center gap-3">
                     <Heart className="w-10 h-10 text-red-500" />

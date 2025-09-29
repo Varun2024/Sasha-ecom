@@ -4,41 +4,7 @@ import ProductsView from './ProductView';
 import CustomersView from './CustomerList';
 import OrdersView from './OrdersView';
 import CollectionsView from './Collection';
-
-// --- MOCK DATA ---
-// In a real application, this data would come from an API.
-
-const summaryData = [
-    { title: "Total Sales", value: "$12,450", change: "+12.5%", changeType: "increase" },
-    { title: "New Orders", value: "345", change: "+5.2%", changeType: "increase" },
-    { title: "New Customers", value: "82", change: "-1.8%", changeType: "decrease" },
-    { title: "Products in Stock", value: "1,204", change: "", changeType: "" },
-];
-
-const allOrdersData = [
-    { id: "ORD001", customer: "John Doe", date: "2024-08-10", total: "$150.00", status: "Shipped" },
-    { id: "ORD002", customer: "Jane Smith", date: "2024-08-10", total: "$75.50", status: "Processing" },
-    { id: "ORD003", customer: "Mike Johnson", date: "2024-08-09", total: "$220.00", status: "Shipped" },
-    { id: "ORD004", customer: "Emily Brown", date: "2024-08-09", total: "$45.99", status: "Delivered" },
-    { id: "ORD005", customer: "Chris Lee", date: "2024-08-08", total: "$300.10", status: "Pending" },
-    { id: "ORD006", customer: "Sarah Wilson", date: "2024-08-08", total: "$99.00", status: "Shipped" },
-    { id: "ORD007", customer: "David Martinez", date: "2024-08-07", total: "$12.50", status: "Delivered" },
-    { id: "ORD008", customer: "Laura Garcia", date: "2024-08-07", total: "$84.25", status: "Processing" },
-];
-
-
-
-// --- HELPER FUNCTIONS ---
-
-const getStatusColor = (status) => {
-    switch (status) {
-        case "Shipped": return "bg-blue-100 text-blue-800";
-        case "Processing": return "bg-yellow-100 text-yellow-800";
-        case "Delivered": return "bg-green-100 text-green-800";
-        case "Pending": return "bg-orange-100 text-orange-800";
-        default: return "bg-gray-100 text-gray-800";
-    }
-};
+import DashboardView from './DashboardView';
 
 // --- MAIN APP COMPONENT --- 
 
@@ -167,60 +133,60 @@ const Header = ({ setIsSidebarOpen, activeView }) => {
 
 // --- VIEW COMPONENTS ---
 
-const DashboardView = () => {
-    const recentOrders = allOrdersData.slice(0, 5);
-    return (
-        <div className="space-y-8">
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                {summaryData.map((item, index) => (
-                    <div key={index} className="bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300">
-                        <p className="text-sm font-medium text-gray-500">{item.title}</p>
-                        <p className="mt-2 text-3xl font-bold text-gray-900">{item.value}</p>
-                        {item.change && (
-                            <p className={`mt-1 text-sm ${item.changeType === 'increase' ? 'text-green-600' : 'text-red-600'}`}>
-                                {item.change} vs last month
-                            </p>
-                        )}
-                    </div>
-                ))}
-            </div>
+// const DashboardView = () => {
+//     const recentOrders = allOrdersData.slice(0, 5);
+//     return (
+//         <div className="space-y-8">
+//             {/* Summary Cards */}
+//             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+//                 {summaryData.map((item, index) => (
+//                     <div key={index} className="bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300">
+//                         <p className="text-sm font-medium text-gray-500">{item.title}</p>
+//                         <p className="mt-2 text-3xl font-bold text-gray-900">{item.value}</p>
+//                         {item.change && (
+//                             <p className={`mt-1 text-sm ${item.changeType === 'increase' ? 'text-green-600' : 'text-red-600'}`}>
+//                                 {item.change} vs last month
+//                             </p>
+//                         )}
+//                     </div>
+//                 ))}
+//             </div>
 
-            {/* Recent Orders Table */}
-            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Recent Orders</h3>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                        <thead>
-                            <tr className="border-b bg-gray-50">
-                                <th className="p-4 text-sm font-semibold text-gray-600">Order ID</th>
-                                <th className="p-4 text-sm font-semibold text-gray-600">Customer</th>
-                                <th className="p-4 text-sm font-semibold text-gray-600 hidden md:table-cell">Date</th>
-                                <th className="p-4 text-sm font-semibold text-gray-600">Total</th>
-                                <th className="p-4 text-sm font-semibold text-gray-600">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {recentOrders.map((order) => (
-                                <tr key={order.id} className="border-b hover:bg-gray-50">
-                                    <td className="p-4 text-sm text-gray-800 font-medium">{order.id}</td>
-                                    <td className="p-4 text-sm text-gray-600">{order.customer}</td>
-                                    <td className="p-4 text-sm text-gray-600 hidden md:table-cell">{order.date}</td>
-                                    <td className="p-4 text-sm text-gray-800 font-medium">{order.total}</td>
-                                    <td className="p-4 text-sm">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
-                                            {order.status}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    );
-};
+//             {/* Recent Orders Table */}
+//             <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300">
+//                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Recent Orders</h3>
+//                 <div className="overflow-x-auto">
+//                     <table className="w-full text-left">
+//                         <thead>
+//                             <tr className="border-b bg-gray-50">
+//                                 <th className="p-4 text-sm font-semibold text-gray-600">Order ID</th>
+//                                 <th className="p-4 text-sm font-semibold text-gray-600">Customer</th>
+//                                 <th className="p-4 text-sm font-semibold text-gray-600 hidden md:table-cell">Date</th>
+//                                 <th className="p-4 text-sm font-semibold text-gray-600">Total</th>
+//                                 <th className="p-4 text-sm font-semibold text-gray-600">Status</th>
+//                             </tr>
+//                         </thead>
+//                         <tbody>
+//                             {recentOrders.map((order) => (
+//                                 <tr key={order.id} className="border-b hover:bg-gray-50">
+//                                     <td className="p-4 text-sm text-gray-800 font-medium">{order.id}</td>
+//                                     <td className="p-4 text-sm text-gray-600">{order.customer}</td>
+//                                     <td className="p-4 text-sm text-gray-600 hidden md:table-cell">{order.date}</td>
+//                                     <td className="p-4 text-sm text-gray-800 font-medium">{order.total}</td>
+//                                     <td className="p-4 text-sm">
+//                                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
+//                                             {order.status}
+//                                         </span>
+//                                     </td>
+//                                 </tr>
+//                             ))}
+//                         </tbody>
+//                     </table>
+//                 </div>
+//             </div>
+//         </div>
+//     );
+// };
 
 
 const LocationView = () => {

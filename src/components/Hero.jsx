@@ -456,7 +456,7 @@ export const Hero = () => {
     }
 
     return (
-        <div className="relative overflow-hidden mt-20 md:h-[80vh] flex items-center bg-neutral-900 rounded-2xl mx-4">
+        <div className="relative overflow-hidden mt-20 md:h-[90vh] flex items-center bg-neutral-900 rounded-2xl mx-4">
             {/* SLIDING CONTAINER FOR IMAGES */}
             <motion.div
                 drag="x"
@@ -471,11 +471,11 @@ export const Hero = () => {
             </motion.div>
 
             {/* SINGLE TEXT OVERLAY for the entire collection */}
-            <div className="absolute z-10 left-6 md:left-20 text-start w-[60%] md:w-[50%] pointer-events-none bg-white/10 backdrop-blur-sm p-4 rounded-xl">
+            <div className="absolute z-10 left-6 md:left-20 text-start w-[60%] md:w-[50%] pointer-events-none bg-gray-500/10 backdrop-blur-sm p-4 rounded-xl">
                 <h1 className="text-white text-sm md:text-5xl lg:text-6xl font-heading uppercase leading-none">
                     {description}
                 </h1>
-                <p className="text-sm text-gray-300 md:text-xl font-body mt-2">
+                <p className="text-sm text-gray-200 md:text-xl font-body mt-2">
                     Everyday Essential Apparel
                 </p>
                 <a href="/all" className="inline-block mt-3 md:mt-6 rounded-xl border-2 bg-white md:px-8 md:py-2 px-4 py-1 font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_white] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none text-xs md:text-lg pointer-events-auto">
@@ -497,7 +497,7 @@ const Slides = ({ slides }) => {
                     key={idx}
                     style={{
                         backgroundImage: `url(${url})`,
-                        backgroundSize: "cover",
+                        backgroundSize: "contain",
                         backgroundPosition: "center",
                     }}
                     className="aspect-video w-full h-full shrink-0 bg-neutral-800 object-cover"

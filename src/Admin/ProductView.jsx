@@ -30,6 +30,7 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
         category: "",
         mrp: "",
         stock: "",
+        description: "",
         imageUrls: [], // CHANGED: from imageUrl to imageUrls array
     });
 
@@ -47,6 +48,7 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
                 category: productToEdit.category || "",
                 mrp: productToEdit.mrp || "",
                 stock: productToEdit.stock || "",
+                description: productToEdit.description || "",
                 imageUrls: productToEdit.imageUrls || [], // CHANGED: Populate imageUrls array
             });
         }
@@ -222,6 +224,7 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
                     <input className="border p-2 rounded-md" type="number" name="mrp" placeholder="MRP" required value={formData.mrp} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="text" name="sale" placeholder="Sale price" required value={formData.sale} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="number" name="stock" placeholder="Stock Quantity" required value={formData.stock} onChange={handleChange} />
+                    <textarea className="border p-2 rounded-md" name="description" placeholder="Product Description" required value={formData.description} onChange={handleChange}></textarea>
                 </div>
                 <div className="flex items-center justify-between">
                     <button type="submit" className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors">
@@ -307,6 +310,7 @@ const ProductsView = () => {
                                     <th className="p-4">MRP</th>
                                     <th className="p-4">Sale</th>
                                     <th className="p-4">Stock</th>
+                                    <th className="p-4">Description</th>
                                     <th className="p-4"></th>
                                 </tr>
                             </thead>
@@ -332,12 +336,13 @@ const ProductsView = () => {
                                                     <span>{product.name}</span>
                                                 </div>
                                             </td>
-                                            <td className="p-4 hidden sm:table-cell">{product.color}</td>
+                                            <td className="p-4 max-w-[2rem] truncate">{product.color}</td>
                                             <td className="p-4 hidden md:table-cell">{product.category}</td>
                                             <td className="p-4 hidden lg:table-cell">{product.size}</td>
                                             <td className="p-4">₹{product.mrp}</td>
                                             <td className="p-4">₹{product.sale}</td>
                                             <td className="p-4">{product.stock}</td>
+                                            <td className="p-4 max-w-[1rem] truncate">{product.description}</td>
                                             <td className="p-4">
                                                 <div className="relative">
                                                     <button className="hover:text-gray-900" onClick={() => setOpenMenuId(openMenuId === product.id ? null : product.id)}>

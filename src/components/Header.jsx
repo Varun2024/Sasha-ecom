@@ -41,14 +41,13 @@ const SearchResults = ({ results, loading, query, onResultClick }) => {
     if (results.length === 0) return null;
 
     return (
-        <div className="absolute top-full mt-2 w-full max-h-96 overflow-y-auto bg-white rounded-lg shadow-lg border">
+        <div className="absolute top-full mt-2 w-full max-h-96 overflow-y-auto bg-white rounded-lg shadow-lg border z-20">
             <ul>
                 {results.map(product => (
                     <li key={product.id} onClick={() => onResultClick(product.id)} className="flex items-center gap-4 p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0">
-                        <img src={product.imageUrl} alt={product.name} className="w-12 h-16 object-cover rounded-md" />
+                        <img src={product.imageUrls && product.imageUrls[0]} alt={product.name} className="w-12 h-16 object-cover rounded-md" />
                         <div className="flex-grow">
                             <p className="font-semibold text-gray-800">{product.name}</p>
-                            <p className="text-sm text-black font-bold">₹{product.sale}</p>
                         </div>
                     </li>
                 ))}
@@ -86,7 +85,7 @@ const Header = () => {
             setIsSearchLoading(false);
         };
         fetchProductsForSearch();
-    }, []);
+    }, [setAllProducts]);
 
     // Effect to perform search when query changes
     useEffect(() => {
@@ -134,7 +133,7 @@ const Header = () => {
         <>
             <header className="fixed top-0 z-40 w-full text-black bg-white/80 backdrop-blur-lg shadow-md flex justify-between items-center py-2 px-4 md:px-8">
                 <div onClick={() => navigate('/')} className="cursor-pointer">
-                    <img src="/logo2.png" className="md:w-42 w-28 " alt="" />
+                    <img src="/logo5-no.png" className="md:w-36 w-28 " alt="" />
                     {/* <div className="w-32 h-16 bg-[url('/public/logo1.png')] bg-cover bg-center" /> */}
                 </div>
 
@@ -180,12 +179,6 @@ const Header = () => {
 
                 {/* Mobile Menu Button */}
                 <div className="lg:hidden flex items-center gap-4">
-                    
-                    <div className="relative" ref={searchRef}>
-                        <input type="text" className="w-[70%] border border-gray-300 rounded-full pl-10 pr-4 py-2 text-sm" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setIsSearchFocused(true)} />
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                        {isSearchFocused && <SearchResults results={searchResults} loading={isSearchLoading} query={searchQuery} onResultClick={handleResultClick} />}
-                    </div>
                     <button onClick={() => setIsMenuOpen(true)} className="p-2">
                         <Menu size={24} />
                     </button>
@@ -209,6 +202,11 @@ const Header = () => {
                                 <h2 className="text-xl font-bold">Menu</h2>
                                 <button onClick={() => setIsMenuOpen(false)} className="p-2"><X size={24} /></button>
                             </div>
+                            <div className="relative mb-4" ref={searchRef}>
+                                    <input type="text" className="w-[70%] border border-gray-300 rounded-full pl-10 pr-4 py-2 text-sm" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setIsSearchFocused(true)} />
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                                    {isSearchFocused && <SearchResults results={searchResults} loading={isSearchLoading} query={searchQuery} onResultClick={handleResultClick} />}
+                                </div>
                             <nav className="flex-grow">
                                 <ul className="flex flex-col space-y-6 text-lg">
                                     {navLinks.map((link) => (
@@ -218,10 +216,11 @@ const Header = () => {
                                     ))}
                                 </ul>
                             </nav>
+                            
                             <div className="space-y-6 border-t pt-6">
                                 {/* Mobile Search */}
-
                                 <div className="space-y-4 text-md">
+                                
                                     <div className="flex items-center gap-4 cursor-pointer" onClick={() => { toggleProfile(); setIsMenuOpen(false); }}><User size={22} /><span>{currentUser?.displayName || 'Profile'}</span></div>
                                     <div className="flex items-center gap-4 cursor-pointer" onClick={() => { navigate('/wishlist'); setIsMenuOpen(false); }}><Heart size={22} /><span>Wishlist ({wishlistCount})</span></div>
                                     <div className="flex items-center gap-4 cursor-pointer" onClick={() => { navigate('/cart'); setIsMenuOpen(false); }}><ShoppingBag size={22} /><span>Cart ({totalCartItems})</span></div>

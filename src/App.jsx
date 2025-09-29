@@ -13,6 +13,12 @@ import AdminPanel from './Admin/AdminPanel';
 import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import FuzzyText from '../public/404';
+import ShippingPolicy from './pages/ShippingPolicy';
+import TermsOfUse from './pages/T&C';
+import PrivacyPolicy from './pages/Privacy';
+import RefundPolicy from './pages/RefundPolicy';
+import PaymentStatus from './pages/PaymentStatus';
+import MyOrders from './pages/UsersOrders';
 
 
 function App() {
@@ -31,6 +37,12 @@ function App() {
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/wishlist" element={<WishlistPage />} />
         <Route path="/store-locator" element={<StoreLocation />} />
+        <Route path="/shipping-policy" element={<ShippingPolicy />} />
+        <Route path="/t&c" element={<TermsOfUse />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="/payment-status/" element={<PaymentStatus />} />
+        <Route path="/orders" element={<MyOrders />} />
         <Route path="*" element={
           <div 
           className='w-full h-[50vh] flex items-center justify-center'>
