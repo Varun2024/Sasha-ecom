@@ -13,35 +13,38 @@ const ProductCardSkeleton = () => (
 );
 
 // Helper Component: Actual Product Card
-const ProductCard = ({ product, discountPercentage }) => (
-    <div className="flex-shrink-0 w-80 h-80 mx-4 bg-white rounded-xl shadow-md overflow-hidden group">
-        <div className="h-40 overflow-hidden">
-            <img
-            onClick={() => window.location.href = `/product/${product.id}`}
-                src={product.imageUrls && product.imageUrls[0] || 'https://placehold.co/600x400/F1F5F9/334155?text=Product'}
-                alt={product.name}
-                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/600x400/F1F5F9/334155?text=Product'; }}
-            />
-        </div>
-        <div className="p-4" >
-            <h3 className="text-lg font-semibold text-gray-800 truncate">{product.name || 'Product Name'}</h3>
-            <div className="flex items-center justify-between mt-2">
-                <p className="text-lg text-gray-800">₹{product.sale?.toLocaleString('en-IN') || '0.00'}</p>
-                <p className='text-sm line-through text-gray-500'>₹{product.mrp}</p>
-                <p className='text-sm text-green-600'>{discountPercentage}% Off</p>
+const ProductCard = ({ product }) => {
+    const discountPercentage = Math.round(((product.mrp - product.sale) / product.mrp) * 100) || 0;
+    return (
+        <div className="flex-shrink-0 w-80 h-80 mx-4 bg-white rounded-xl shadow-md overflow-hidden group">
+            <div className="h-40 overflow-hidden">
+                <img
+                    onClick={() => window.location.href = `/product/${product.id}`}
+                    src={product.imageUrls && product.imageUrls[0] || 'https://placehold.co/600x400/F1F5F9/334155?text=Product'}
+                    alt={product.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/600x400/F1F5F9/334155?text=Product'; }}
+                />
+            </div>
+            <div className="p-4" >
+                <h3 className="text-lg font-semibold text-gray-800 truncate">{product.name || 'Product Name'}</h3>
+                <div className="flex items-center justify-between mt-2">
+                    <p className="text-lg text-gray-800">₹{product.sale?.toLocaleString('en-IN') || '0.00'}</p>
+                    <p className='text-sm line-through text-gray-500'>₹{product.mrp}</p>
+                    <p className='text-sm text-green-600'>{discountPercentage}% Off</p>
+                </div>
             </div>
         </div>
-    </div>
-);
+    );
+}
 
 // --- Main Component ---
 const ProductMarquee = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] =   useState(null);
+    const [error, setError] = useState(null);
 
-    
+
     useEffect(() => {
         if (!db) {
             setLoading(false);
@@ -62,11 +65,11 @@ const ProductMarquee = () => {
                 setLoading(false);
             }
         };
-        
+
         fetchProducts();
     }, []);
-    
-    const discountPercentage = products.length > 0 ? Math.round(((products[0].mrp - products[0].sale) / products[0].mrp) * 100) : 0;
+
+
     // To create a seamless loop, we duplicate the products array.
     const marqueeProducts = products.length > 0 ? [...products, ...products] : [];
 
@@ -89,9 +92,11 @@ const ProductMarquee = () => {
         return (
             <div className="flex animate-marquee group-hover:[animation-play-state:paused]">
                 {marqueeProducts.map((product, index) => (
-                    <ProductCard key={`${product.id}-${index}`} product={product} discountPercentage={discountPercentage} />
+                    <ProductCard key={`${product.id}-${index}`} product={product} />
                 ))}
+
             </div>
+
         );
     };
 

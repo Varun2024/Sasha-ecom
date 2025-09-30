@@ -247,7 +247,7 @@ export default function ProductListingPage() {
                 {allCategories.map(category => (
                   <div key={category} className="flex items-center">
                     <input id={`category-${category}`} type="checkbox" checked={selectedCategories.includes(category)} onChange={() => handleCategoryChange(category)} className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                    <label htmlFor={`category-${category}`} className="ml-3 text-sm text-gray-600">{category}</label>
+                    <label htmlFor={`category-${category}`} className="ml-3 text-sm text-gray-600">{category.toUpperCase()}</label>
                   </div>
                 ))}
               </div>

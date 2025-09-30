@@ -1,6 +1,6 @@
 
 /* eslint-disable no-unused-vars */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
@@ -14,6 +14,7 @@ import { useWishlist } from '../context/WishlistContext.jsx';
 import { BookText } from 'lucide-react'; // Optional: for a nice icon
 import { v4 as uuid } from 'uuid';
 import { useAuth } from '../context/AuthContext/index.jsx';
+import ProductMarquee from './Discover.jsx';
 
 export default function ProductDetailsPage() {
     const { productId } = useParams();
@@ -36,12 +37,43 @@ export default function ProductDetailsPage() {
     const [newReviewImage, setNewReviewImage] = useState(null);
     const [newReviewRating, setNewReviewRating] = useState(5);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [selectedColor, setSelectedColor] = useState('Select color');
+    const [selectedColor, setSelectedColor] = useState(['Select a color']);
     const [selectedImage, setSelectedImage] = useState(null);
+    const [isCombo, setIsCombo] = useState(false);
+
+
     // --- Contexts ---
     const { cart, dispatch: cartDispatch } = useCart();
     const { wishlist, dispatch: wishlistDispatch } = useWishlist();
-    
+    const availableColors = useMemo(() => {
+        if (!product || !product.color || typeof product.color !== 'string') {
+            setIsCombo(false);
+            return [];
+        }
+
+        const colorString = product.color.trim();
+
+        // ✅ Check if it's the combo format
+        if (colorString.startsWith('(')) {
+            setIsCombo(true);
+            // Parse the combo string: (a,b,c), (d,e,f)
+            return colorString
+                .split(/\s*,\s*\(/) // Split by " , ("
+                .map(part => part.replace(/[()]/g, '')) // Remove parentheses
+                .map(combo => combo.split(',').map(color => color.trim())); // Create inner array
+        } else {
+            // ✅ It's the normal format
+            setIsCombo(false);
+            return colorString.split(',').map(c => c.trim());
+        }
+    }, [product]); // Dependency: re-run only when product changes
+
+    // Set the default selection once colors are parsed
+    useEffect(() => {
+        if (availableColors.length > 0) {
+            setSelectedColor(availableColors[0]);
+        }
+    }, [availableColors]);
     // --- Data Fetching Effect ---
     useEffect(() => {
         const fetchProduct = async () => {
@@ -86,10 +118,10 @@ export default function ProductDetailsPage() {
         fetchProduct();
     }, [productId]);
 
-        const handleBuyNow = () => {
+    const handleBuyNow = () => {
         // First, check if a size is required and not selected
         if (isSizeRequiredAndNotSelected) {
-            toast.error("Please select a size first!",{ position: "bottom-right" });
+            toast.error("Please select a size first!", { position: "bottom-right" });
             return;
         }
 
@@ -100,7 +132,7 @@ export default function ProductDetailsPage() {
             navigate('/checkout');
         } else {
             // If not logged in, redirect to the login page
-            toast.info("Please log in to proceed.",{ position: "bottom-right" });
+            toast.info("Please log in to proceed.", { position: "bottom-right" });
             navigate('/login'); // Or '/signup'
         }
     };
@@ -114,7 +146,7 @@ export default function ProductDetailsPage() {
 
 
     // --- Event Handlers ---
-    const addCartItem = (item, qty, size ,color) => {
+    const addCartItem = (item, qty, size, color) => {
         // Validation check
         if (item.size && !size) {
             toast.error("Please select a size first!");
@@ -138,7 +170,7 @@ export default function ProductDetailsPage() {
             toast.error("Please write a review before submitting.", { position: "bottom-right" });
             return;
         }
-        if (!currentUser) { 
+        if (!currentUser) {
             toast.error("Please log in to submit a review.", { position: "bottom-right" });
             return;
         }
@@ -204,10 +236,11 @@ export default function ProductDetailsPage() {
     // ADDED: Prepare available sizes array and check if a size selection is required
     const availableSizes = (product.size && typeof product.size === 'string') ? product.size.split(',') : [];
 
-    const isSizeRequiredAndNotSelected = availableSizes.length > 0 && !selectedSize  ;
+    const isSizeRequiredAndNotSelected = availableSizes.length > 0 && !selectedSize;
 
     // understand this
-    const availableColors = (product.color && typeof product.color === 'string') ? product.color.split(',').map(c => c.trim()) : [];
+    // const availableColors = (product.color && typeof product.color === 'string') ? product.color.split(',').map(c => c.trim()) : [];
+
     const discountPercentage = product.mrp ? Math.round(((product.mrp - product.sale) / product.mrp) * 100) : 0;
     return (
         <div className="min-h-screen">
@@ -249,7 +282,7 @@ export default function ProductDetailsPage() {
                         <div className="space-y-6 flex flex-col">
                             <div>
                                 <div className="flex justify-between items-start">
-                                    <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-600 to-purple-300 bg-clip-text text-transparent">
+                                    <h1 className="text-4xl font-bold mb-4 text-gray-600">
                                         {product.name}
                                     </h1>
                                     <button
@@ -280,20 +313,48 @@ export default function ProductDetailsPage() {
                                         <h3 className="text-lg font-semibold">
                                             Color: <span className="text-gray-500 capitalize">{selectedColor}</span>
                                         </h3>
-                                        <div className="flex flex-wrap items-center gap-3">
-                                            {availableColors.map((color) => (
-                                                <button
-                                                    key={color}
-                                                    onClick={() => setSelectedColor(color)}
-                                                    title={color}
-                                                    className={`w-10 h-10 rounded-full border-2 transition-all duration-300 ${selectedColor === color
-                                                        ? 'border-black scale-110 shadow-lg'
-                                                        : 'border-gray-300 hover:border-white/60'
-                                                        }`}
-                                                    style={{ backgroundColor: color }}
-                                                />
-                                            ))}
-                                        </div>
+
+                                        {isCombo ? (
+                                            // --- UI for COMBO Products (renders groups of swatches) ---
+                                            <div className="flex flex-wrap items-center gap-3">
+                                                {availableColors.map((combo, index) => (
+                                                    <button
+                                                        key={index}
+                                                        onClick={() => setSelectedColor(combo)}
+                                                        // Compare arrays by turning them into strings to check for active state
+                                                        className={`p-2 rounded-lg border-2 flex items-center gap-1.5 duration-200 transition-all ${Array.isArray(selectedColor) && selectedColor.join(',') === combo.join(',')
+                                                                ? 'bg-gray-400 border-white shadow-lg'
+                                                                : 'bg-gray-200 border-white/30 hover:bg-gray-500/40'
+                                                            }`}
+                                                    >
+                                                        {/* Inner map to render the color circles for each combo */}
+                                                        {combo.map((color, colorIndex) => (
+                                                            <div
+                                                                key={colorIndex}
+                                                                className="w-6 h-6 rounded-full border border-white/50"
+                                                                style={{ backgroundColor: color }}
+                                                            />
+                                                        ))}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            // --- UI for NORMAL Products ---
+                                            <div className="flex flex-wrap items-center gap-3">
+                                                {availableColors.map((color) => (
+                                                    <button
+                                                        key={color}
+                                                        onClick={() => setSelectedColor(color)}
+                                                        title={color}
+                                                        className={`w-10 h-10 rounded-full border-2 transition-all duration-300 ${selectedColor === color
+                                                            ? 'border-black scale-110 shadow-lg'
+                                                            : 'border-gray-300 hover:border-white/60'
+                                                            }`}
+                                                        style={{ backgroundColor: color }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -308,7 +369,7 @@ export default function ProductDetailsPage() {
                                                 onClick={() => setSelectedSize(size)}
                                                 className={`px-4 py-2 rounded-lg border-2 transition-all duration-200 font-medium ${selectedSize === size
                                                     ? 'bg-white text-black border-white shadow-lg'
-                                                    : 'bg-transparent text-black border-white/80 hover:border-white'
+                                                    : 'bg-gray-300 text-black border-white/80 hover:border-white'
                                                     }`}
                                             >
                                                 {size}
@@ -320,7 +381,7 @@ export default function ProductDetailsPage() {
                             )}
 
                             <div className="space-y-4 pt-4 mt-auto">
-                                
+
                                 <div className="flex items-center space-x-4">
                                     <span className="text-lg font-semibold">Quantity:</span>
                                     <div className="flex items-center bg-white/10 rounded-lg">
@@ -332,7 +393,7 @@ export default function ProductDetailsPage() {
                                 <div className="flex space-x-3">
                                     <button
                                         disabled={isSizeRequiredAndNotSelected || selectedColor === 'Select color'}
-                                        onClick={() => { addCartItem(product, quantity, selectedSize ,selectedColor) }}
+                                        onClick={() => { addCartItem(product, quantity, selectedSize, selectedColor) }}
                                         className="text-white flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 py-4 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-[4px_4px_0px_black] shadow-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <ShoppingCart className="w-5 h-5" />
@@ -340,7 +401,7 @@ export default function ProductDetailsPage() {
                                     </button>
                                     <button
                                         disabled={isSizeRequiredAndNotSelected || selectedColor === 'Select color'}
-                                        onClick={() => handleBuyNow() }
+                                        onClick={() => handleBuyNow()}
                                         className="inline-block rounded-lg border-2 border-black bg-white px-8 py-2 font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Buy Now
@@ -382,6 +443,13 @@ export default function ProductDetailsPage() {
                         )}
                     </div>
                     {/* --- END: Product Description Section --- */}
+
+
+                    {/* marquees */}
+                    <ProductMarquee />
+
+
+
                     {/* Customer Reviews Section (Unchanged) ... */}
                     <div className="p-8 border-t border-white/20">
                         <h2 className="text-3xl font-bold mb-6">Customer Reviews</h2>
@@ -401,11 +469,11 @@ export default function ProductDetailsPage() {
                             ></textarea>
 
                             <div className="flex justify-between items-center mt-4">
-                                <label className="flex items-center border-2 gap-2 cursor-pointer p-2 rounded-lg hover:bg-gray-300/20 transition-all hover:translate-y-[-4px] hover:translate-x-[-4px] hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:shadow-none">
+                                {/* <label className="flex items-center border-2 gap-2 cursor-pointer p-2 rounded-lg hover:bg-gray-300/20 transition-all hover:translate-y-[-4px] hover:translate-x-[-4px] hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:shadow-none">
                                     <Camera className="w-5 h-5" />
                                     <span>{newReviewImage ? 'Change Image' : 'Add Image'}</span>
                                     <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
-                                </label>
+                                </label> */}
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
