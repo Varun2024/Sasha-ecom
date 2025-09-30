@@ -197,7 +197,10 @@ const PaymentStatus = () => {
         const response = await fetch(`https://sasha-backend.onrender.com/api/payment-status/?transactionId=${transactionId}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ transactionId })
+          body: JSON.stringify({ 
+            transactionId ,
+            
+          })
         });
 
         if (!response.ok) {

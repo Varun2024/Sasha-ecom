@@ -63,10 +63,10 @@ const DashboardView = () => {
                     const userData = userDoc.data();
                     if (userData.orders && Array.isArray(userData.orders)) {
                         userData.orders.forEach((order, index) => {
-                             const total = order.items.reduce((sum, item) => sum + (parseFloat(item.mrp) || 0), 0);
+                             const total = order.items.reduce((sum, item) => sum + (parseFloat(item.sale) || 0), 0);
                             allOrders.push({
                                 ...order,
-                                id: `${userDoc.id.slice(0, 4)}-${index}`,
+                                id: `${userDoc.id}-ORD${String(index + 1).padStart(3, '0')}`,
                                 customer: userData.firstName || 'N/A',
                                 date: userData.createdAt?.toDate().toLocaleDateString() || 'N/A',
                                 total: total,
@@ -135,7 +135,7 @@ const DashboardView = () => {
                         <tbody>
                             {recentOrders.length > 0 ? recentOrders.map((order) => (
                                 <tr key={order.id} className="border-b hover:bg-gray-50">
-                                    <td className="p-4 text-sm text-gray-800 font-medium">{order.id}</td>
+                                    <td className="p-4 text-sm text-gray-800 font-medium">{order.id.split('-')[1]}</td>
                                     <td className="p-4 text-sm text-gray-600">{order.customer}</td>
                                     <td className="p-4 text-sm text-gray-600 hidden md:table-cell">{order.date}</td>
                                     <td className="p-4 text-sm text-gray-800 font-medium">₹{order.total.toFixed(2)}</td>
