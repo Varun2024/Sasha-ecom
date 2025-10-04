@@ -11,7 +11,7 @@ import {
     query,
     where,
 } from "firebase/firestore";
-import { PlusCircle, MoreVertical, X } from "lucide-react"; // ADDED: X icon for removal
+import { PlusCircle, MoreVertical, X, Trash2 } from "lucide-react"; // ADDED: X icon for removal
 import { v4 as uuid } from "uuid";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -26,7 +26,6 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
         name: "",
         color: "",
         sale: "",
-        size: "",
         category: "",
         mrp: "",
         stock: "",
@@ -36,6 +35,8 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
 
     // ADDED: State for newly selected image files (File objects)
     const [imageFiles, setImageFiles] = useState([]);
+    // ✅ State for size/stock pairs
+    const [sizes, setSizes] = useState([{ id: uuid(), size: '', stock: '' }]);
 
     // Pre-fill the form if in edit mode
     useEffect(() => {
@@ -44,15 +45,34 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
                 name: productToEdit.name || "",
                 color: productToEdit.color || "",
                 sale: productToEdit.sale || "",
-                size: productToEdit.size || "",
                 category: productToEdit.category || "",
                 mrp: productToEdit.mrp || "",
                 stock: productToEdit.stock || "",
                 description: productToEdit.description || "",
                 imageUrls: productToEdit.imageUrls || [], // CHANGED: Populate imageUrls array
             });
+            // Populate sizes from product data if it exists
+            if (productToEdit.sizes && productToEdit.sizes.length > 0) {
+                setSizes(productToEdit.sizes.map(s => ({ ...s, id: uuid() })));
+            }
         }
     }, [productToEdit, isEditMode]);
+    // --- Handlers for new size/stock state ---
+    const handleSizeChange = (id, field, value) => {
+        setSizes(currentSizes => currentSizes.map(s => s.id === id ? { ...s, [field]: value } : s));
+    };
+
+    const addSize = () => {
+        setSizes([...sizes, { id: uuid(), size: '', stock: '' }]);
+    };
+
+    const removeSize = (id) => {
+        if (sizes.length > 1) {
+            setSizes(sizes.filter(s => s.id !== id));
+        } else {
+            toast.warn("Product must have at least one size.");
+        }
+    };
 
     // CHANGED: Handle multiple file selection
     const handleChange = (e) => {
@@ -125,9 +145,9 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
     // CHANGED: Handle submission with multiple image uploads
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         let uploadedImageUrls = [];
-        
+
         // If new files are selected, upload them
         if (imageFiles.length > 0) {
             toast.info("Uploading images, please wait...");
@@ -145,7 +165,7 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
             try {
                 const results = await Promise.all(uploadPromises);
                 const successfulUploads = results.filter(result => result.success);
-                
+
                 if (successfulUploads.length !== imageFiles.length) {
                     toast.error("Some images failed to upload. Please try again.");
                     return; // Stop if any upload fails
@@ -159,18 +179,31 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
                 return;
             }
         }
-        
+
         // Combine existing URLs (in edit mode) with newly uploaded ones
         const finalImageUrls = [...formData.imageUrls, ...uploadedImageUrls];
-        
+
         // An image is required for all products
         if (finalImageUrls.length === 0) {
             toast.warn("Please select at least one image for the product.");
             return;
         }
 
+        // Format the sizes array for Firestore (remove temporary id)
+        const finalSizes = sizes.map(({ size, stock }) => ({
+            size,
+            stock: Number(stock)
+        }));
+
         // Prepare final data for Firestore
-        const finalProductData = { ...formData, imageUrls: finalImageUrls };
+        const finalProductData = {
+            ...formData,
+            imageUrls: finalImageUrls,
+            sizes: finalSizes,
+        };
+        // Remove old top-level size/stock fields if they exist
+        delete finalProductData.size;
+        delete finalProductData.stock;
 
         if (isEditMode) {
             updateProduct(productToEdit.id, finalProductData);
@@ -219,11 +252,38 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
 
                     <input className="border p-2 rounded-md" type="text" name="name" placeholder="Product Name" required value={formData.name} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="text" name="color" placeholder="Color" required value={formData.color} onChange={handleChange} />
-                    <input className="border p-2 rounded-md" type="text" name="size" placeholder="Available sizes" required value={formData.size} onChange={handleChange} />
+
                     <input className="border p-2 rounded-md" type="text" name="category" placeholder="Category" required value={formData.category} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="number" name="mrp" placeholder="MRP" required value={formData.mrp} onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="text" name="sale" placeholder="Sale price" required value={formData.sale} onChange={handleChange} />
-                    <input className="border p-2 rounded-md" type="number" name="stock" placeholder="Stock Quantity" required value={formData.stock} onChange={handleChange} />
+
+                    {/* ✅ DYNAMIC SIZES & STOCK SECTION */}
+                    <div className="p-4 border rounded-lg space-y-3">
+                        <h3 className="font-semibold text-gray-700">Sizes & Stock</h3>
+                        {sizes.map((s, index) => (
+                            <div key={index} className="flex items-center gap-2">
+                                <input
+                                    placeholder="Size (e.g., M)"
+                                    value={s.size}
+                                    onChange={(e) => handleSizeChange(s.id, 'size', e.target.value)}
+                                    className="border p-2 rounded-md w-1/2"
+                                />
+                                <input
+                                    type="number"
+                                    placeholder="Stock"
+                                    value={s.stock}
+                                    onChange={(e) => handleSizeChange(s.id, 'stock', e.target.value)}
+                                    className="border p-2 rounded-md w-1/2"
+                                />
+                                <button type="button" onClick={() => removeSize(s.id)} className="text-red-500 p-2 hover:bg-red-50 rounded-full">
+                                    <Trash2 size={16} />
+                                </button>
+                            </div>
+                        ))}
+                        <button type="button" onClick={addSize} className="text-sm font-medium text-blue-600 mt-2">
+                            + Add Another Size
+                        </button>
+                    </div>
                     <textarea className="border p-2 rounded-md" name="description" placeholder="Product Description" required value={formData.description} onChange={handleChange}></textarea>
                 </div>
                 <div className="flex items-center justify-between">
@@ -309,7 +369,7 @@ const ProductsView = () => {
                                     <th className="p-4 hidden lg:table-cell">Sizes</th>
                                     <th className="p-4">MRP</th>
                                     <th className="p-4">Sale</th>
-                                    <th className="p-4">Stock</th>
+                                    <th className="p-4">Total Stock</th>
                                     <th className="p-4">Description</th>
                                     <th className="p-4"></th>
                                 </tr>
@@ -323,6 +383,10 @@ const ProductsView = () => {
                                     } else if (product.imageUrl) {
                                         displayImage = product.imageUrl;
                                     }
+                                    // ✅ Calculate total stock from the new sizes array
+                                    const totalStock = product.sizes?.reduce((sum, s) => sum + Number(s.stock || 0), 0) ?? product.stock;
+                                    const availableSizes = product.sizes?.map(s => s.size).join(', ') ?? product.size;
+
 
                                     return (
                                         <tr key={product.id} className="border-b hover:bg-gray-50">
@@ -333,15 +397,15 @@ const ProductsView = () => {
                                                         alt={product.name}
                                                         className="w-12 h-12 rounded-md object-cover"
                                                     />
-                                                    <span>{product.name}</span>
+                                                    <span className="max-w-[10rem] truncate">{product.name}</span>
                                                 </div>
                                             </td>
                                             <td className="p-4 max-w-[2rem] truncate">{product.color}</td>
                                             <td className="p-4 hidden md:table-cell">{product.category}</td>
-                                            <td className="p-4 hidden lg:table-cell">{product.size}</td>
-                                            <td className="p-4">₹{product.mrp}</td>
+                                            <td className="p-4 text-gray-600">{availableSizes}</td>
+                                            <td className="p-4 text-gray-600">₹{product.mrp}</td>
                                             <td className="p-4">₹{product.sale}</td>
-                                            <td className="p-4">{product.stock}</td>
+                                            <td className="p-4 text-gray-600 font-medium">{totalStock}</td> 
                                             <td className="p-4 max-w-[1rem] truncate">{product.description}</td>
                                             <td className="p-4">
                                                 <div className="relative">

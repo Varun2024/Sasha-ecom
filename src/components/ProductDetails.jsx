@@ -69,11 +69,11 @@ export default function ProductDetailsPage() {
     }, [product]); // Dependency: re-run only when product changes
 
     // Set the default selection once colors are parsed
-    useEffect(() => {
-        if (availableColors.length > 0) {
-            setSelectedColor(availableColors[0]);
-        }
-    }, [availableColors]);
+    // useEffect(() => {
+    //     if (availableColors.length > 0) {
+    //         setSelectedColor(availableColors[0]);
+    //     }
+    // }, [availableColors]);
     // --- Data Fetching Effect ---
     useEffect(() => {
         const fetchProduct = async () => {
@@ -96,12 +96,12 @@ export default function ProductDetailsPage() {
                         setSelectedImage(productData.imageUrl);
                     }
                     // ADDED: Process the size string and set the default selected size
-                    if (productData.size && typeof productData.size === 'string') {
-                        const availableSizes = productData.size.split(',');
-                        if (availableSizes.length > 0) {
-                            setSelectedSize(availableSizes[0]); // Set default to the first size
-                        }
-                    }
+                    // if (productData.size && typeof productData.size === 'string') {
+                    //     const availableSizes = productData.size.split(',');
+                    //         // if (availableSizes.length > 0) {
+                    //         //     setSelectedSize(availableSizes[0]); // Set default to the first size
+                    //         // }
+                    // }
                 } else {
                     console.log("No such document!");
                     toast.error("Product not found.");
@@ -240,6 +240,9 @@ export default function ProductDetailsPage() {
 
     // understand this
     // const availableColors = (product.color && typeof product.color === 'string') ? product.color.split(',').map(c => c.trim()) : [];
+    const isColorNotSelected = (product.color.length > 0 && !selectedColor)
+
+    const selectedSizeStock = product.sizes?.find(s => s.size === selectedSize)?.stock;
 
     const discountPercentage = product.mrp ? Math.round(((product.mrp - product.sale) / product.mrp) * 100) : 0;
     return (
@@ -323,8 +326,8 @@ export default function ProductDetailsPage() {
                                                         onClick={() => setSelectedColor(combo)}
                                                         // Compare arrays by turning them into strings to check for active state
                                                         className={`p-2 rounded-lg border-2 flex items-center gap-1.5 duration-200 transition-all ${Array.isArray(selectedColor) && selectedColor.join(',') === combo.join(',')
-                                                                ? 'bg-gray-400 border-white shadow-lg'
-                                                                : 'bg-gray-200 border-white/30 hover:bg-gray-500/40'
+                                                            ? 'bg-gray-400 border-white shadow-lg'
+                                                            : 'bg-gray-200 border-white/30 hover:bg-gray-500/40'
                                                             }`}
                                                     >
                                                         {/* Inner map to render the color circles for each combo */}
@@ -358,27 +361,28 @@ export default function ProductDetailsPage() {
                                     </div>
                                 )}
                             </div>
-                            {/* --- ADDED: Size Selector UI --- */}
-                            {availableSizes.length > 0 && (
-                                <div className="space-y-3">
-                                    <div className="flex flex-wrap items-center gap-2">
-                                        Select Size:
-                                        {availableSizes.map((size) => (
+                            <div className="space-y-3">
+                                <h3 className="font-semibold">Size:</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {product.sizes?.map(({ size, stock }) => {
+                                        const isOutOfStock = stock === 0;
+                                        return (
                                             <button
                                                 key={size}
-                                                onClick={() => setSelectedSize(size)}
-                                                className={`px-4 py-2 rounded-lg border-2 transition-all duration-200 font-medium ${selectedSize === size
-                                                    ? 'bg-white text-black border-white shadow-lg'
-                                                    : 'bg-gray-300 text-black border-white/80 hover:border-white'
-                                                    }`}
+                                                onClick={() => !isOutOfStock && setSelectedSize(size)}
+                                                disabled={isOutOfStock}
+                                                className={`px-4 py-2 rounded-lg border-2 transition-all 
+                        ${selectedSize === size ? 'bg-white text-black' : 'text-white bg-gray-300'}
+                        ${isOutOfStock ? 'border-gray-500 text-gray-500 cursor-not-allowed relative' : ''}
+                    `}
                                             >
                                                 {size}
+                                                {isOutOfStock && <div className="absolute inset-0 flex items-center justify-center text-red-500 font-bold text-xs" style={{ transform: 'rotate(-10deg)' }}>SOLD OUT</div>}
                                             </button>
-
-                                        ))}
-                                    </div>
+                                        );
+                                    })}
                                 </div>
-                            )}
+                            </div>
 
                             <div className="space-y-4 pt-4 mt-auto">
 
@@ -392,15 +396,15 @@ export default function ProductDetailsPage() {
                                 </div>
                                 <div className="flex space-x-3">
                                     <button
-                                        disabled={isSizeRequiredAndNotSelected || selectedColor === 'Select color'}
+                                        disabled={isSizeRequiredAndNotSelected || isColorNotSelected}
                                         onClick={() => { addCartItem(product, quantity, selectedSize, selectedColor) }}
                                         className="text-white flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 py-4 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-[4px_4px_0px_black] shadow-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <ShoppingCart className="w-5 h-5" />
-                                        <span>{isSizeRequiredAndNotSelected ? 'Select a Size' : 'Add to Cart'}</span>
+                                        <span>{isSizeRequiredAndNotSelected && selectedSize === 0 ? 'Select a Size and color' : 'Add to Cart'}</span>
                                     </button>
                                     <button
-                                        disabled={isSizeRequiredAndNotSelected || selectedColor === 'Select color'}
+                                        disabled={isSizeRequiredAndNotSelected || isColorNotSelected}
                                         onClick={() => handleBuyNow()}
                                         className="inline-block rounded-lg border-2 border-black bg-white px-8 py-2 font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
