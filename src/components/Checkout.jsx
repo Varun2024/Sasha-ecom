@@ -14,7 +14,7 @@ import { arrayUnion, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
 
 
-const SHIPPING_COST = 0.00; // Fixed shipping cost for simplicity
+const SHIPPING_COST = 50.00; // Fixed shipping cost for simplicity
 
 // A component to display the current step in the checkout process
 const CheckoutStep = ({ number, title, active }) => (
