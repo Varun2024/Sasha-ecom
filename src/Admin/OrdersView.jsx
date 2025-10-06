@@ -384,7 +384,7 @@ const AllOrders = () => {
         };
 
         fetchAllOrders();
-    }, [db]);
+    }, []);
 
     // const statuses = ['All', 'Shipped', 'Processing', 'Pending', 'Delivered', 'Completed'];
     const filteredOrders = filter === 'All' ? allOrders : allOrders.filter(o => o.status === filter);

@@ -1,7 +1,6 @@
 import React, {  useState } from 'react';
 import DataContext from './Context';
 
-
 export const DataProvider = ({ children }) => {
     const [productData, setProductData] = useState({
         id: '',
@@ -12,12 +11,15 @@ export const DataProvider = ({ children }) => {
         reviewCount: 0,
         imageUrl: '',
     });
+    const [mode, setMode] = useState('COD');
     return (
 
         <DataContext.Provider
             value={{
                 productData,
                 setProductData,
+                mode,
+                setMode
             }}
         >
             {children}

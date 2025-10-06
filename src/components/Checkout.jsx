@@ -3,7 +3,7 @@
 
 
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, use, useContext } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Loader2, PlusCircle } from 'lucide-react'; // Added Loader2 for loading state
@@ -12,7 +12,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useAuth } from '../context/AuthContext';
 import { arrayUnion, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
-
+import DataContext from '../context/Context';
 
 const SHIPPING_COST = 50.00; // Fixed shipping cost for simplicity
 
@@ -117,9 +117,9 @@ export default function CheckoutPage() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [isLoadingAddresses, setIsLoadingAddresses] = useState(true);
     const [showAddressForm, setShowAddressForm] = useState(false);
-
     const [addresses, setAddresses] = useState([]);
     const [selectedAddress, setSelectedAddress] = useState(null);
+    const { mode, setMode } = useContext(DataContext);
     // Added 'phone' to the initial state
     const [formData, setFormData] = useState({
         fullName: '', email: '', phone: '', address: '', city: '', state: '', zip: '',
@@ -128,14 +128,13 @@ export default function CheckoutPage() {
     // Memoized calculation for total
     const subtotal = useMemo(() => cart.reduce((total, item) => total + item.sale * item.quantity, 0), [cart]);
     const total = subtotal + SHIPPING_COST;
-
+    const handleCOD = () => {
+        setMode("COD");
+        navigate('/payment-status'); 
+    }
+    
     useEffect(() => {
         const fetchAddresses = async () => {
-            if (!currentUser && !userLoggedIn) {
-                toast.error("Please log in to continue.");
-                // navigate('/login');
-                return;
-            };
             setIsLoadingAddresses(true);
             try {
                 const userDocRef = doc(db, 'users', currentUser.user.uid);
@@ -150,7 +149,7 @@ export default function CheckoutPage() {
                 }
             } catch (error) {
                 console.error("Error fetching addresses:", error);
-                toast.error("Could not load your addresses.");
+                // toast.error("Could not load your addresses.");
             } finally {
                 setIsLoadingAddresses(false);
             }
@@ -232,10 +231,13 @@ export default function CheckoutPage() {
             setIsProcessingPayment(false);
         }
     };
+
+    
     const renderShippingStep = () => {
         if (isLoadingAddresses) {
             return <div className="flex justify-center items-center h-40"><Loader2 className="h-8 w-8 animate-spin text-purple-400" /></div>;
         }
+
 
         if (showAddressForm) {
             return (
@@ -276,7 +278,12 @@ export default function CheckoutPage() {
                     disabled={isProcessing || !selectedAddress}
                     className="w-full bg-purple-600 text-white font-bold py-3 rounded-lg hover:bg-purple-700 transition-colors duration-300 mt-6 flex items-center justify-center disabled:bg-purple-400 disabled:cursor-not-allowed"
                 >
-                    {isProcessingPayment ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : `Continue to Pay ₹${total.toFixed(2)}`}
+                    {isProcessingPayment ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : `Pay ₹${total.toFixed(2)} Now (save upto ₹50 on delivery)`}
+                </button>
+                <button
+                    onClick={handleCOD}
+                    className='w-full bg-gray-600 text-white font-bold py-3 rounded-lg hover:bg-gray-700 transition-colors duration-300 mt-6 flex items-center justify-center disabled:bg-purple-400 disabled:cursor-not-allowed'>
+                    {`Pay ₹${(total + 50.00).toFixed(2)} on Delivery (COD)`}
                 </button>
             </div>
         );
@@ -285,7 +292,7 @@ export default function CheckoutPage() {
     // If cart is empty, redirect user (unless they are on the confirmation page)
     if (cart.length === 0 && step < 2) {
         return (
-            <div className="container mx-auto px-4 py-16 text-center">
+            <div className="container mx-auto px-4 py-16 text-center mt-20">
                 <h1 className="text-3xl font-bold">Your cart is empty.</h1>
                 <p className="text-gray-400 mt-2">Add items to your cart to proceed to checkout.</p>
                 <button onClick={() => navigate('/cart')} className="mt-6 px-6 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700">
@@ -294,6 +301,8 @@ export default function CheckoutPage() {
             </div>
         )
     }
+
+    
 
     return (
         <div className="container mx-auto px-4 py-16 mt-20">
@@ -309,16 +318,16 @@ export default function CheckoutPage() {
                     </div>
                 )}
 
-            <section className='container mx-auto mb-12 p-6 bg-white/5 rounded-lg shadow-lg max-w-3xl'>
-                <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
-                {cart.map((item) => (
-                    <div key={item.id} className="flex justify-between items-center py-2 border-b border-gray-700">
-                        <span>{item.name} x {item.quantity}</span>
-                        <span className="text-sm text-gray-400">{item.selectedSize} / {item.selectedColor}</span>
-                        <span className="font-medium">₹{(item.sale * item.quantity).toFixed(2)}</span>
-                    </div>
-                ))}
-            </section>
+                <section className='container mx-auto mb-12 p-6 bg-white/5 rounded-lg shadow-lg max-w-3xl'>
+                    <h2 className="text-2xl font-bold mb-4">Order Summary</h2>
+                    {cart.map((item) => (
+                        <div key={item.id} className="flex justify-between items-center py-2 border-b border-gray-700">
+                            <span>{item.name} x {item.quantity}</span>
+                            <span className="text-sm text-gray-400">{item.selectedSize} / {item.selectedColor}</span>
+                            <span className="font-medium">₹{(item.sale * item.quantity).toFixed(2)}</span>
+                        </div>
+                    ))}
+                </section>
                 <div className="bg-white/5 p-8 rounded-lg shadow-2xl">
 
                     {step === 1 && (

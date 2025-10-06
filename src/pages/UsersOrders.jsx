@@ -27,7 +27,7 @@ const EmptyState = () => (
 const OrderItem = ({ item }) => (
     <li className="px-4 py-4 sm:px-6 flex items-center space-x-4">
         <div className="flex-shrink-0 bg-gray-200 rounded-md w-16 h-16 flex items-center justify-center">
-            {/* Placeholder for an item image */}
+            <img src={item.imageUrls || item.imageUrls[0]} alt={item.name} className="w-full h-full object-cover rounded-md" />
             <svg className="w-8 h-8 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.4 2.245 4.5 4.5 0 008.4-2.245c0-.399-.078-.78-.22-1.128zm0 0a15.998 15.998 0 003.388-1.62m-5.043-.025a15.998 15.998 0 011.622-3.385m5.043.025a15.998 15.998 0 001.622-3.385m3.388 1.62a15.998 15.998 0 00-1.622 3.385m-5.043-.025a15.998 15.998 0 01-3.388 1.621m7.424 0a4.5 4.5 0 00-8.4-2.245 2.25 2.25 0 01-2.4-2.245 3 3 0 005.78-1.128 15.998 15.998 0 005.043 3.405z" />
             </svg>
@@ -42,7 +42,16 @@ const OrderItem = ({ item }) => (
         </div>
     </li>
 );
-
+const getStatusColor = (status) => {
+    switch (status) {
+        case "Shipped": return "bg-blue-100 text-blue-800";
+        case "Processing": return "bg-yellow-100 text-yellow-800";
+        case "Delivered": return "bg-green-100 text-green-800";
+        case "Pending": return "bg-orange-100 text-orange-800";
+        case "Completed": return "bg-green-100 text-green-800"; // Added for default
+        default: return "bg-gray-100 text-gray-800";
+    }
+};
 const OrderCard = ({ order, orderNumber }) => (
     <div className="bg-white shadow-sm ring-1 ring-gray-900/5 rounded-xl mb-6">
         <div className="px-4 py-5 sm:px-6 border-b border-gray-200">
@@ -52,7 +61,9 @@ const OrderCard = ({ order, orderNumber }) => (
                     <p className="mt-1 max-w-2xl text-sm text-gray-500">Order details and items.</p>
                 </div>
                 <div>
-                    <span className="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Completed</span>
+                    <span className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset  ${getStatusColor(order.status)}`}>
+                        <div className={`w-2 h-2 rounded-full relative z-10 mr-1 bg-black animate-pulse transition-all duration-200`} /> {order.status}
+                    </span>
                 </div>
             </div>
         </div>
@@ -87,7 +98,7 @@ const MyOrders = () => {
                 if (docSnap.exists()) {
                     const userData = docSnap.data();
                     const userOrders = userData.orders || [];
-                     if (Array.isArray(userOrders) && userOrders.length > 0) {
+                    if (Array.isArray(userOrders) && userOrders.length > 0) {
                         setOrders(userOrders);
                     } else {
                         setOrders([]);

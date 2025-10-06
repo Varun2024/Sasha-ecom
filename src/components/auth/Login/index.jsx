@@ -41,6 +41,7 @@ export default function Login() {
                 position: "bottom-right",
                 autoClose: 2000,
                 hideProgressBar: true,
+                theme: "dark"
             });
             
             setTimeout(() => {
@@ -78,6 +79,7 @@ export default function Login() {
                 position: "bottom-right",
                 autoClose: 2000,
                 hideProgressBar: true,
+                theme: "dark"
             });
             setTimeout(() => {
                 navigate('/cart'); // Redirect to cart after successful registration
