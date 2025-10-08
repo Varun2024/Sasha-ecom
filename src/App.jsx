@@ -19,6 +19,7 @@ import PrivacyPolicy from './pages/Privacy';
 import RefundPolicy from './pages/RefundPolicy';
 import PaymentStatus from './pages/PaymentStatus';
 import MyOrders from './pages/UsersOrders';
+import CodCheckoutPage from './components/CodCheckout';
 
 
 function App() {
@@ -43,6 +44,7 @@ function App() {
         <Route path="/refund-policy" element={<RefundPolicy />} />
         <Route path="/payment-status/" element={<PaymentStatus />} />
         <Route path="/orders" element={<MyOrders />} />
+        <Route path="/cod-checkout" element={<CodCheckoutPage />} />
         <Route path="*" element={
           <div 
           className='w-full h-[50vh] flex items-center justify-center'>

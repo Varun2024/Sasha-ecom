@@ -157,20 +157,10 @@ const PaymentStatus = () => {
     };
 
     verifyPayment();
-  }, [searchParams, currentUser, dispatch, navigate,mode]);
+  }, [searchParams, currentUser, dispatch, navigate]);
 
-  useEffect(()=>{
-    const setModeofPayment = async () => {
-      if (mode === "COD") {
-        await setStatus('cod');
-        // createOrder();
-        return;   
-      }
-    };
 
-    setModeofPayment();
-  },[mode]);
-  console.log(status)
+
 
   const StatusDisplay = () => {
     switch (status) {
@@ -211,24 +201,6 @@ const PaymentStatus = () => {
               className="mt-4 px-6 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors"
             >
               Try Again
-            </Link>
-          </div>
-        );
-      case 'cod':
-        return (
-          <div className="flex flex-col items-center gap-4 text-center">
-            <CheckCircle className="w-16 h-16 text-green-500" />
-            <h1 className="text-3xl font-bold ">Payment Successful!</h1>
-            <p className="text-gray-400 max-w-md">
-              Thank you for your purchase. Your order has been confirmed.
-            </p>
-            {/* Display the critical error if order creation failed */}
-            {error && <p className="text-red-400 mt-4 font-semibold">{error}</p>}
-            <Link
-              to="/orders" // Navigate to a new 'My Orders' page
-              className="mt-4 px-6 py-2 bg-purple-600 font-semibold rounded-lg hover:bg-purple-700 transition-colors"
-            >
-              View My Orders
             </Link>
           </div>
         );

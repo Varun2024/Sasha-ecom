@@ -129,9 +129,19 @@ export default function CheckoutPage() {
     const subtotal = useMemo(() => cart.reduce((total, item) => total + item.sale * item.quantity, 0), [cart]);
     const total = subtotal + SHIPPING_COST;
     const handleCOD = () => {
-        setMode("COD");
-        navigate('/payment-status'); 
+    if (!selectedAddress) {
+        toast.error("Please select a shipping address first.");
+        return;
     }
+    setMode("COD");
+    // Pass selected address and final total (including COD charges) to the new page
+    navigate('/cod-checkout', { 
+        state: { 
+            selectedAddress: selectedAddress,
+            totalAmount: total + 50,
+        } 
+    }); 
+}
     
     useEffect(() => {
         const fetchAddresses = async () => {
@@ -280,11 +290,11 @@ export default function CheckoutPage() {
                 >
                     {isProcessingPayment ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : `Pay ₹${total.toFixed(2)} Now (save upto ₹50 on delivery)`}
                 </button>
-                <button
+                {/* <button
                     onClick={handleCOD}
                     className='w-full bg-gray-600 text-white font-bold py-3 rounded-lg hover:bg-gray-700 transition-colors duration-300 mt-6 flex items-center justify-center disabled:bg-purple-400 disabled:cursor-not-allowed'>
                     {`Pay ₹${(total + 50.00).toFixed(2)} on Delivery (COD)`}
-                </button>
+                </button> */}
             </div>
         );
     }
