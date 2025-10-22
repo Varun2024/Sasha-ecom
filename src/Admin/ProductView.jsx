@@ -1,5 +1,3 @@
-
-
 import { useEffect, useState } from "react";
 import {
     doc,
@@ -250,7 +248,13 @@ const ProductForm = ({ toggleForm, fetchProducts, productToEdit }) => {
                         ))}
                     </div>
 
-                    <input className="border p-2 rounded-md" type="text" name="name" placeholder="Product Name" required value={formData.name} onChange={handleChange} />
+                    <input className="border p-2 rounded-md"
+                        type="text"
+                        name="name"
+                        placeholder="Product Name"
+                        required
+                        value={formData.name}
+                        onChange={handleChange} />
                     <input className="border p-2 rounded-md" type="text" name="color" placeholder="Color" required value={formData.color} onChange={handleChange} />
 
                     <input className="border p-2 rounded-md" type="text" name="category" placeholder="Category" required value={formData.category} onChange={handleChange} />
@@ -334,7 +338,7 @@ const ProductsView = () => {
             console.error("Error deleting product:", error);
             toast.error("Failed to delete product");
         }
-    };
+    };  
 
     const handleEdit = (product) => {
         setProductToEdit(product);
@@ -405,7 +409,7 @@ const ProductsView = () => {
                                             <td className="p-4 text-gray-600">{availableSizes}</td>
                                             <td className="p-4 text-gray-600">₹{product.mrp}</td>
                                             <td className="p-4">₹{product.sale}</td>
-                                            <td className="p-4 text-gray-600 font-medium">{totalStock}</td> 
+                                            <td className="p-4 text-gray-600 font-medium">{totalStock}</td>
                                             <td className="p-4 max-w-[1rem] truncate">{product.description}</td>
                                             <td className="p-4">
                                                 <div className="relative">
@@ -414,10 +418,10 @@ const ProductsView = () => {
                                                     </button>
                                                     {openMenuId === product.id && (
                                                         <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg z-10 border">
-                                                            <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={(e) => { e.preventDefault(); handleEdit(product); }}>
+                                                            <a className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" onClick={(e) => { e.preventDefault(); handleEdit(product); }}>
                                                                 Edit
                                                             </a>
-                                                            <a href="#" className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100" onClick={(e) => { e.preventDefault(); handleDelete(product.id); }}>
+                                                            <a className="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100" onClick={(e) => { e.preventDefault(); handleDelete(product.id); }}>
                                                                 Delete
                                                             </a>
                                                         </div>

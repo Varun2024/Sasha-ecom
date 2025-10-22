@@ -22,7 +22,7 @@ const cartReducer = (state, action) => {
     let newState;
 
     switch (action.type) {
-        // "ADD" now handles both adding new items and incrementing existing ones
+
         case "ADD": {
             const itemInCart = state.find(item => item.id === action.payload.id);
             if (itemInCart) {
@@ -42,7 +42,6 @@ const cartReducer = (state, action) => {
             break;
         }
 
-        // New action to handle specific quantity changes from the cart page
         case "UPDATE_QUANTITY": {
             newState = state.map(item =>
                 item.id === action.payload.id

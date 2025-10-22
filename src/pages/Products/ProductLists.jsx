@@ -1,7 +1,6 @@
 
 
 import React, { useState, useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useSearchParams } from 'react-router-dom'; // 1. IMPORT useSearchParams
 // --- Firebase and Data ---
 import { db } from '../../firebase/firebaseConfig';
@@ -35,7 +34,7 @@ const ProductCardSkeleton = () => (
 
 // --- Product Card Component (Upgraded) ---
 const ProductCard = ({ product, addCartItem, addWishlistItem, wishlist }) => {
-  const navigate = useNavigate();
+
 
   const isWishlisted = useMemo(() =>
     wishlist.some(item => item.id === product.id),
@@ -43,7 +42,7 @@ const ProductCard = ({ product, addCartItem, addWishlistItem, wishlist }) => {
   );
 
   const handleProductClick = () => {
-    navigate(`/product/${product.id}`);
+    window.location.href = `/product/${product.id}`; // Force full page reload
   };
 
   // CHANGED: Logic to handle both imageUrls array and single imageUrl string for backward compatibility.
@@ -273,9 +272,7 @@ export default function ProductListingPage() {
               </div>
             ) : (
               <>
-                <div className="mb-4 text-sm text-gray-600">
-                  Showing <span className="font-bold text-gray-900">{filteredAndSortedProducts.length}</span> of <span className="font-bold text-gray-900">{products.length}</span> products
-                </div>
+                
                 {filteredAndSortedProducts.length > 0 ? (
                   <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
                     {filteredAndSortedProducts.map((product) => (

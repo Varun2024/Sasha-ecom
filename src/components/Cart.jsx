@@ -96,8 +96,6 @@ const OrderSummary = ({ subtotal }) => {
                     } else {
                         toast.error("Please log in to proceed to checkout.", { hideProgressBar: true });
                         setTimeout(() => { window.location.href = '/login'; }, 2000);
-                        // Immediate redirection
-                        //
                     }
                 }}
                 className="mt-6 w-full rounded-lg border-2 border-black bg-black px-8 py-3 font-semibold uppercase text-white transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_#6b7280] active:translate-x-[0px] active:translate-y-[0px] active:rounded-lg active:shadow-none"

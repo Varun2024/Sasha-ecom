@@ -1,8 +1,4 @@
 /* eslint-disable no-unused-vars */
-
-
-
-
 import { useState, useMemo, useEffect, use, useContext } from 'react';
 import { useCart } from '../context/CartContext';
 import { useNavigate } from 'react-router-dom';

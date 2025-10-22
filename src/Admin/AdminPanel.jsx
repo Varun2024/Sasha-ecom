@@ -7,7 +7,6 @@ import CollectionsView from './Collection';
 import DashboardView from './DashboardView';
 
 // --- MAIN APP COMPONENT --- 
-
 export default function AdminPanel() {
     const [activeView, setActiveView] = useState('Dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -27,7 +26,7 @@ export default function AdminPanel() {
     };
 
     return (
-        <div className="flex h-full bg-gray-50 font-sans">
+        <div className="flex h-full bg-gray-50 font-sans ">
             <Sidebar activeView={activeView} setActiveView={setActiveView} isSidebarOpen={isSidebarOpen} setIsSidebarOpen={setIsSidebarOpen} />
             <div className="flex-1 flex flex-col overflow-hidden">
                 <Header setIsSidebarOpen={setIsSidebarOpen} activeView={activeView} />
@@ -59,9 +58,9 @@ const Sidebar = ({ activeView, setActiveView, isSidebarOpen, setIsSidebarOpen })
                 onClick={() => setIsSidebarOpen(false)}
             >
             </div>
-            <aside className={`fixed top-0 left-0 z-10 w-40 h-full bg-white shadow-lg transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:shadow-none`}>
+            <aside className={`fixed top-22 left-0 z-10 w-40 h-full bg-white shadow-lg transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:shadow-none`}>
                 <div className="flex items-center justify-between p-4 border-b">
-                    <h1 className="text-2xl font-bold text-gray-800">CLOTHIFY</h1>
+                    <h1 className="text-2xl font-bold text-gray-800">Sasha</h1>
                     <button onClick={() => setIsSidebarOpen(false)} className="md:hidden text-gray-600 hover:text-gray-900">
                         <X size={24} />
                     </button>
@@ -130,64 +129,6 @@ const Header = ({ setIsSidebarOpen, activeView }) => {
         </header>
     );
 };
-
-// --- VIEW COMPONENTS ---
-
-// const DashboardView = () => {
-//     const recentOrders = allOrdersData.slice(0, 5);
-//     return (
-//         <div className="space-y-8">
-//             {/* Summary Cards */}
-//             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-//                 {summaryData.map((item, index) => (
-//                     <div key={index} className="bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300">
-//                         <p className="text-sm font-medium text-gray-500">{item.title}</p>
-//                         <p className="mt-2 text-3xl font-bold text-gray-900">{item.value}</p>
-//                         {item.change && (
-//                             <p className={`mt-1 text-sm ${item.changeType === 'increase' ? 'text-green-600' : 'text-red-600'}`}>
-//                                 {item.change} vs last month
-//                             </p>
-//                         )}
-//                     </div>
-//                 ))}
-//             </div>
-
-//             {/* Recent Orders Table */}
-//             <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300">
-//                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Recent Orders</h3>
-//                 <div className="overflow-x-auto">
-//                     <table className="w-full text-left">
-//                         <thead>
-//                             <tr className="border-b bg-gray-50">
-//                                 <th className="p-4 text-sm font-semibold text-gray-600">Order ID</th>
-//                                 <th className="p-4 text-sm font-semibold text-gray-600">Customer</th>
-//                                 <th className="p-4 text-sm font-semibold text-gray-600 hidden md:table-cell">Date</th>
-//                                 <th className="p-4 text-sm font-semibold text-gray-600">Total</th>
-//                                 <th className="p-4 text-sm font-semibold text-gray-600">Status</th>
-//                             </tr>
-//                         </thead>
-//                         <tbody>
-//                             {recentOrders.map((order) => (
-//                                 <tr key={order.id} className="border-b hover:bg-gray-50">
-//                                     <td className="p-4 text-sm text-gray-800 font-medium">{order.id}</td>
-//                                     <td className="p-4 text-sm text-gray-600">{order.customer}</td>
-//                                     <td className="p-4 text-sm text-gray-600 hidden md:table-cell">{order.date}</td>
-//                                     <td className="p-4 text-sm text-gray-800 font-medium">{order.total}</td>
-//                                     <td className="p-4 text-sm">
-//                                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
-//                                             {order.status}
-//                                         </span>
-//                                     </td>
-//                                 </tr>
-//                             ))}
-//                         </tbody>
-//                     </table>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// };
-
 
 const LocationView = () => {
     return (

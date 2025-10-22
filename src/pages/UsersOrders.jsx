@@ -37,9 +37,11 @@ const OrderItem = ({ item }) => (
             {item.size && <p className="text-sm text-gray-500 truncate">Size: {item.size}</p>}
         </div>
         <div className="text-right">
-            <p className="text-sm font-medium text-gray-900">₹{item.mrp || '0.00'}</p>
+            <p className="text-sm font-medium text-gray-900">₹{item.sale || '0.00'}</p>
+            <p className="text-sm text-gray-500">MRP: ₹{item.mrp || '0.00'}</p>
             {item.quantity && <p className="text-sm text-gray-500">Qty: {item.quantity}</p>}
         </div>
+
     </li>
 );
 const getStatusColor = (status) => {

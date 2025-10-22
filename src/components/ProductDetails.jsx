@@ -42,6 +42,9 @@ export default function ProductDetailsPage() {
     const [isCombo, setIsCombo] = useState(false);
 
 
+    // Inside your component, presumably right below your existing `selectedImage` state
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentModalIndex, setCurrentModalIndex] = useState(0);
     // --- Contexts ---
     const { cart, dispatch: cartDispatch } = useCart();
     const { wishlist, dispatch: wishlistDispatch } = useWishlist();
@@ -68,12 +71,7 @@ export default function ProductDetailsPage() {
         }
     }, [product]); // Dependency: re-run only when product changes
 
-    // Set the default selection once colors are parsed
-    // useEffect(() => {
-    //     if (availableColors.length > 0) {
-    //         setSelectedColor(availableColors[0]);
-    //     }
-    // }, [availableColors]);
+
     // --- Data Fetching Effect ---
     useEffect(() => {
         const fetchProduct = async () => {
@@ -117,6 +115,8 @@ export default function ProductDetailsPage() {
 
         fetchProduct();
     }, [productId]);
+
+
 
     const handleBuyNow = () => {
         // First, check if a size is required and not selected
@@ -240,11 +240,32 @@ export default function ProductDetailsPage() {
 
     // understand this
     // const availableColors = (product.color && typeof product.color === 'string') ? product.color.split(',').map(c => c.trim()) : [];
-    const isColorNotSelected = (product.color.length > 0 && !selectedColor)
-
-    const selectedSizeStock = product.sizes?.find(s => s.size === selectedSize)?.stock;
-
+    const isColorNotSelected = (product.color.length === 0 || selectedColor.includes('Select a color'));
+    const comboColors = selectedColor.length > 0 && Array.isArray(selectedColor) ? selectedColor.join(', ') : selectedColor;
+    const isDisabled = isSizeRequiredAndNotSelected || isColorNotSelected;
     const discountPercentage = product.mrp ? Math.round(((product.mrp - product.sale) / product.mrp) * 100) : 0;
+
+    const selectedImageIndex = product.imageUrls.indexOf(selectedImage);
+    // Function to open the modal, starting at the clicked image
+    const openModal = () => {
+        // Set the modal index to match the currently displayed image
+        setCurrentModalIndex(selectedImageIndex >= 0 ? selectedImageIndex : 0);
+        setIsModalOpen(true);
+    };
+
+    // Function to close the modal
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
+
+    // Functions to navigate within the modal
+    const goToNextImage = () => {
+        setCurrentModalIndex(prevIndex => (prevIndex + 1) % product.imageUrls.length);
+    };
+
+    const goToPrevImage = () => {
+        setCurrentModalIndex(prevIndex => (prevIndex - 1 + product.imageUrls.length) % product.imageUrls.length);
+    };
     return (
         <div className="min-h-screen">
             <div className="container mx-auto px-4 py-8">
@@ -259,7 +280,16 @@ export default function ProductDetailsPage() {
                                     src={selectedImage}
                                     alt={product.name}
                                     className="w-full h-full object-scale-down rounded-2xl shadow-xl transition-transform duration-300 ease-in-out"
+                                    onClick={openModal}
                                 />
+                                <div
+                                    onClick={openModal} // <-- Also trigger on icon click
+                                    className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl cursor-pointer"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-16 h-16 text-white">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607zM10.5 7.5v6m3-3h-6" />
+                                    </svg>
+                                </div>
                             </div>
                             {/* Thumbnails */}
                             {product.imageUrls && product.imageUrls.length > 1 && (
@@ -279,6 +309,64 @@ export default function ProductDetailsPage() {
                                 </div>
                             )}
                         </div>
+                        {/* --- ADDED: Image Lightbox Modal --- */}
+                        {isModalOpen && (
+                            <div
+                                className="fixed inset-0 h-screen z-50 flex items-center justify-center bg-black/80 backdrop-blur-lg"
+                                onClick={closeModal} // Close modal when clicking the backdrop
+                            >
+                                {/* Close Button (Top Right) */}
+                                <button
+                                    onClick={closeModal}
+                                    className="absolute top-6 right-6 z-[60] text-white bg-white/10 p-2 rounded-full hover:bg-white/20 transition-all"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+
+                                {/* Modal Content (Image and Nav) */}
+                                <div
+                                    className="relative w-full h-screen flex items-center justify-center p-4"
+                                    onClick={(e) => e.stopPropagation()} // Prevent modal from closing when clicking the content itself
+                                >
+                                    {/* Prev Button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // Prevent backdrop click
+                                            goToPrevImage();
+                                        }}
+                                        className="absolute left-4 md:left-10 z-[60] text-white bg-white/10 p-3 rounded-full hover:bg-white/20 transition-all"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                                        </svg>
+                                    </button>
+
+                                    {/* Main Image */}
+                                    <div className="relative max-w-[90vw] max-h-[90vh] rounded-lg overflow-hidden shadow-2xl">
+                                        <img
+                                            src={product.imageUrls[currentModalIndex]}
+                                            alt="Enlarged product"
+                                            className="w-full h-full object-contain max-w-full max-h-[90vh]"
+                                        />
+                                    </div>
+
+                                    {/* Next Button */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // Prevent backdrop click
+                                            goToNextImage();
+                                        }}
+                                        className="absolute right-4 md:right-10 z-[60] text-white bg-white/10 p-3 rounded-full hover:bg-white/20 transition-all"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                         {/* --- END: Image Gallery --- */}
 
                         {/* Product Info */}
@@ -311,10 +399,32 @@ export default function ProductDetailsPage() {
 
 
                                 </div>
+                                <div className="space-y-3">
+                                    <h3 className="font-semibold">Size:</h3>
+                                    <div className="flex flex-wrap gap-2">
+                                        {product.sizes?.map(({ size, stock }) => {
+                                            const isOutOfStock = stock === 0;
+                                            return (
+                                                <button
+                                                    key={size}
+                                                    onClick={() => !isOutOfStock && setSelectedSize(size)}
+                                                    disabled={isOutOfStock}
+                                                    className={`px-4 py-2 rounded-lg border-2 transition-all 
+                        ${selectedSize === size ? 'bg-white text-black' : 'text-white bg-gray-300'}
+                        ${isOutOfStock ? 'border-gray-500 text-gray-500 cursor-not-allowed relative' : ''}
+                    `}
+                                                >
+                                                    {size}
+                                                    {isOutOfStock && <div className="absolute inset-0 flex items-center justify-center text-red-500 font-bold text-xs" style={{ transform: 'rotate(-10deg)' }}>SOLD OUT</div>}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
                                 {availableColors.length > 0 && (
                                     <div className="space-y-3">
                                         <h3 className="text-lg font-semibold">
-                                            Color: <span className="text-gray-500 capitalize">{selectedColor}</span>
+                                            Color: <span className="text-gray-500 capitalize">{comboColors}</span>
                                         </h3>
 
                                         {isCombo ? (
@@ -361,28 +471,7 @@ export default function ProductDetailsPage() {
                                     </div>
                                 )}
                             </div>
-                            <div className="space-y-3">
-                                <h3 className="font-semibold">Size:</h3>
-                                <div className="flex flex-wrap gap-2">
-                                    {product.sizes?.map(({ size, stock }) => {
-                                        const isOutOfStock = stock === 0;
-                                        return (
-                                            <button
-                                                key={size}
-                                                onClick={() => !isOutOfStock && setSelectedSize(size)}
-                                                disabled={isOutOfStock}
-                                                className={`px-4 py-2 rounded-lg border-2 transition-all 
-                        ${selectedSize === size ? 'bg-white text-black' : 'text-white bg-gray-300'}
-                        ${isOutOfStock ? 'border-gray-500 text-gray-500 cursor-not-allowed relative' : ''}
-                    `}
-                                            >
-                                                {size}
-                                                {isOutOfStock && <div className="absolute inset-0 flex items-center justify-center text-red-500 font-bold text-xs" style={{ transform: 'rotate(-10deg)' }}>SOLD OUT</div>}
-                                            </button>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+
 
                             <div className="space-y-4 pt-4 mt-auto">
 
@@ -396,22 +485,22 @@ export default function ProductDetailsPage() {
                                 </div>
                                 <div className="flex space-x-3">
                                     <button
-                                        disabled={isSizeRequiredAndNotSelected || isColorNotSelected}
+                                        disabled={isDisabled}
                                         onClick={() => { addCartItem(product, quantity, selectedSize, selectedColor) }}
                                         className="text-white flex-1 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 py-4 px-6 rounded-xl font-semibold transition-all duration-300 transform hover:translate-x-[-4px] hover:translate-y-[-4px] hover:shadow-[4px_4px_0px_black] shadow-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         <ShoppingCart className="w-5 h-5" />
-                                        <span>{isSizeRequiredAndNotSelected && selectedSize === 0 ? 'Select a Size and color' : 'Add to Cart'}</span>
+                                        <span>{isDisabled ? 'Select a Size and color' : 'Add to Cart'}</span>
                                     </button>
                                     <button
-                                        disabled={isSizeRequiredAndNotSelected || isColorNotSelected}
+                                        disabled={isDisabled}
                                         onClick={() => handleBuyNow()}
                                         className="inline-block rounded-lg border-2 border-black bg-white px-8 py-2 font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Buy Now
                                     </button>
                                 </div>
-                                <div className="text-sm bg-red-500/70 shadow-lg p-3 rounded-lg border border-white/20 transition-all duration-300" style={{ display: isSizeRequiredAndNotSelected || selectedColor === 'Select color' ? 'block' : 'none' }}>
+                                <div className="text-sm bg-red-500/70 shadow-lg p-3 rounded-lg border border-white/20 transition-all duration-300" style={{ display: isDisabled ? 'block' : 'none' }}>
                                     <span className='text-white'>Please select a size and a color before adding to cart or buying !!</span>
                                 </div>
                             </div>
