@@ -1,7 +1,5 @@
-
-
 import React, { useState, useMemo, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom'; // 1. IMPORT useSearchParams
+import { useSearchParams, useNavigate } from 'react-router-dom'; // 1. IMPORT useNavigate
 // --- Firebase and Data ---
 import { db } from '../../firebase/firebaseConfig';
 import { collection, getDocs } from 'firebase/firestore';
@@ -32,8 +30,9 @@ const ProductCardSkeleton = () => (
   </div>
 );
 
-// --- Product Card Component (Upgraded) ---
+// --- ✅ Product Card Component (Upgraded) ---
 const ProductCard = ({ product, addCartItem, addWishlistItem, wishlist }) => {
+
 
 
   const isWishlisted = useMemo(() =>
@@ -42,18 +41,24 @@ const ProductCard = ({ product, addCartItem, addWishlistItem, wishlist }) => {
   );
 
   const handleProductClick = () => {
-    window.location.href = `/product/${product.id}`; // Force full page reload
+    // 3. Use navigate for consistency (or keep window.location.href if reload is essential)
+    window.location.href = `/product/${product.id}`;
   };
 
-  // CHANGED: Logic to handle both imageUrls array and single imageUrl string for backward compatibility.
-  let displayImage = 'https://placehold.co/600x800/f8f8f8/cccccc?text=Image+Not+Found'; // Default fallback
-  if (product.imageUrls && product.imageUrls.length > 0) {
-    // Use the first image from the new array structure
+  // ✅ CHANGED: Logic now reads from the 'variants' array first.
+  let displayImage = 'https://placehold.co/600x800/f8f8f8/cccccc?text=Image+Not+Found';
+  
+  if (product.variants && product.variants.length > 0 && product.variants[0].imageUrls && product.variants[0].imageUrls.length > 0) {
+    // 1. Use the first image from the first variant
+    displayImage = product.variants[0].imageUrls[0];
+  } 
+  // --- Fallback for OLD data structure ---
+  else if (product.imageUrls && product.imageUrls.length > 0) {
     displayImage = product.imageUrls[0];
   } else if (product.imageUrl) {
-    // Fallback to the old single imageUrl field if the array doesn't exist
     displayImage = product.imageUrl;
   }
+  // --- End of new logic ---
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 hover:shadow-xl group flex flex-col">
@@ -76,7 +81,7 @@ const ProductCard = ({ product, addCartItem, addWishlistItem, wishlist }) => {
       </div>
       <div className="p-4 flex flex-col flex-grow justify-between">
         <div>
-          <h3 className="md:text-lg  font-semibold text-gray-800 truncate" title={product.name}>{product.name}</h3>
+          <h3 className="md:text-lg  font-semibold text-gray-800 truncate" title={product.name}>{product.name}</h3>
           <div className="flex items-center mt-1">
             <div className="flex items-center text-yellow-500">{[...Array(5)].map((_, i) => (<Star key={i} className={`w-4 h-4 ${i < Math.round(product.rating) ? 'fill-current' : ''}`} />))}
             </div>
@@ -88,11 +93,13 @@ const ProductCard = ({ product, addCartItem, addWishlistItem, wishlist }) => {
             <span className="md:text-2xl text-2xs font-bold text-gray-900">₹{product.sale}</span>
             {product.mrp && <span className="line-through text-gray-500 text-xs md:text-sm">₹{product.mrp}</span>}
           </div>
+          
+          {/* ✅ CHANGED: Button text and function. It now calls the (modified) addCartItem which navigates. */}
           <button
-            onClick={() => addCartItem(product)}
+            onClick={() => addCartItem(product)} 
             className="flex items-center justify-center bg-gray-900 text-white px-2 md:px-4 py-2 rounded-lg font-semibold text-xs md:text-sm hover:bg-gray-700 transition-colors duration-300"
           >
-            <ShoppingCart className="w-4 h-4 md:mr-2" /> <span className='text-xs md:text-sm'> Cart</span>
+            <span className='text-xs md:text-sm'>See more</span>
           </button>
         </div>
       </div>
@@ -101,19 +108,18 @@ const ProductCard = ({ product, addCartItem, addWishlistItem, wishlist }) => {
 };
 
 
-// --- Main Product Listing Page Component (Unchanged from your version) ---
+// --- Main Product Listing Page Component ---
 export default function ProductListingPage() {
-  // ... all the state and logic from your provided code remains the same ...
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [sortOption, setSortOption] = useState('featured');
-  // const [selectedCategories, setSelectedCategories] = useState([]);
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState(5000);
   const [maxPrice, setMaxPrice] = useState(5000);
   const { dispatch: cartDispatch } = useCart();
   const { wishlist, dispatch: wishlistDispatch } = useWishlist();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate(); // 4. Initialize navigate here as well
   const initialCategory = searchParams.get('category');
 
   const [selectedCategories, setSelectedCategories] = useState(
@@ -149,7 +155,6 @@ export default function ProductListingPage() {
       .filter(p => (Number(p.sale) || 0) <= priceRange)
       .filter(p => selectedCategories.length === 0 || selectedCategories.includes(p.category));
 
-    // This logic will now automatically apply the filter from the URL on the first render
     if (selectedCategories.length > 0) {
       filtered = filtered.filter(p => selectedCategories.includes(p.category));
     }
@@ -173,16 +178,17 @@ export default function ProductListingPage() {
     setSortOption('featured');
   };
 
+  // ✅ CHANGED: This function now navigates to the product page instead of adding to cart.
   const addCartItem = (product) => {
-    if (!product.selectedSize || !product.selectedColor) {
-      toast.error("Please select a size and color before adding to cart.");
-      return;
-    }
-
-    cartDispatch({ type: 'ADD', payload: { ...product, quantity: 1 } });
-    toast.success(`${product.name} added to cart!`);
+    // This button can't add to cart directly.
+    // It must navigate to the product page to force variant selection.
+    toast.info("Please select your options on the product page.", { autoClose: 2500 });
+    
+    // 5. Use navigate to go to the product details page
+    navigate(`/product/${product.id}`);
   };
 
+  // This function is correct, as wishlist applies to the whole product
   const addWishlistItem = (product) => {
     const isWishlisted = wishlist.some(item => item.id === product.id);
     if (isWishlisted) {
@@ -194,6 +200,7 @@ export default function ProductListingPage() {
     }
   };
 
+  // --- JSX (Unchanged) ---
   return (
     <div className="bg-slate-50 min-h-screen">
       <ToastContainer position="bottom-right" autoClose={2000} hideProgressBar={true} theme='dark' />
