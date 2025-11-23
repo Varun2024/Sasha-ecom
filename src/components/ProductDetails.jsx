@@ -267,12 +267,12 @@ export default function ProductDetailsPage() {
                     <div className="grid lg:grid-cols-2 gap-8 p-8">
 
                         {/* --- Image Gallery --- */}
-                        <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-4 ">
                             <div className="relative group w-full h-96 lg:h-[500px]">
                                 <img
                                     src={selectedImage || 'https://via.placeholder.com/500'}
                                     alt={product.name}
-                                    className="w-full h-full object-scale-down rounded-2xl shadow-xl transition-transform duration-300 ease-in-out"
+                                    className="w-full h-full object-scale-down rounded-2xl shadow-xl ease-in-out border-2 transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none"
                                     onClick={openModal}
                                 />
                                 <div

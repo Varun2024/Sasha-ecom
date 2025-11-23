@@ -10,7 +10,7 @@ import { db } from "../firebase/firebaseConfig"; // ADDED: Adjust this path to y
 
 const ShopByCategory = () => {
     return (
-        <div className="rounded-4xl mb-8 md:max-w-full mx-4 md:mx-6 bg-[#e0ddd9]">
+        <div className="rounded-4xl mb-8 md:max-w-full mx-4 md:mx-6 bg-[#e0ddd9] border-2">
             <div className=" mt-10 flex flex-col justify-center items-center ">
                 <div className="font-semibold uppercase text-neutral-500 mt-10 md:text-7xl text-3xl">
                     Shop By Category

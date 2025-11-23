@@ -16,7 +16,7 @@ const ProductCardSkeleton = () => (
 const ProductCard = ({ product }) => {
     const discountPercentage = Math.round(((product.mrp - product.sale) / product.mrp) * 100) || 0;
     return (
-        <div className="flex-shrink-0 w-80 h-80 mx-4 bg-white rounded-xl shadow-md overflow-hidden group">
+        <div className="flex-shrink-0 border-2 w-64 h-80 mx-4 bg-white rounded-xl shadow-md overflow-hidden group transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:rounded-xl active:shadow-none">
             <div className="h-40 overflow-hidden">
                 <img
                     onClick={() => window.location.href = `/product/${product.id}`}
@@ -28,7 +28,7 @@ const ProductCard = ({ product }) => {
             </div>
             <div className="p-4" >
                 <h3 className="text-lg font-semibold text-gray-800 truncate">{product.name || 'Product Name'}</h3>
-                <div className="flex items-center justify-between mt-2">
+                <div className="flex flex-col items-center justify-between mt-2">
                     <p className="text-lg text-gray-800">₹{product.sale?.toLocaleString('en-IN') || '0.00'}</p>
                     <p className='text-sm line-through text-gray-500'>₹{product.mrp}</p>
                     <p className='text-sm text-green-600'>{discountPercentage}% Off</p>
@@ -90,7 +90,7 @@ const ProductMarquee = () => {
         }
         // The `animate-marquee` class will apply the scrolling animation
         return (
-            <div className="flex animate-marquee group-hover:[animation-play-state:paused]">
+            <div className="flex animate-marquee group-hover:[animation-play-state:paused] mt-5">
                 {marqueeProducts.map((product, index) => (
                     <ProductCard key={`${product.id}-${index}`} product={product} />
                 ))}
@@ -101,7 +101,7 @@ const ProductMarquee = () => {
     };
 
     return (
-        <section className="mx-4 rounded-3xl my-10 bg-gray-200 py-12 sm:py-16 h-screen justify-center flex flex-col">
+        <section className="mx-4 rounded-3xl my-10 bg-gray-200 py-12 sm:py-16 h-screen justify-center flex flex-col border-2">
             <div className="max-w-7xl mx-auto px-4">
                 <h2 className="text-3xl md:text-8xl font-bold text-center text-gray-800 mb-8">
                     Discover Our Products

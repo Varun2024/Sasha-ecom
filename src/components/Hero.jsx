@@ -77,7 +77,7 @@ export const Hero = () => {
     }
 
     return (
-        <div className="relative overflow-hidden mt-20 md:h-[90vh] flex items-center bg-neutral-900 rounded-2xl mx-4">
+        <div className="relative overflow-hidden mt-20 md:h-[90vh] flex items-center bg-neutral-900 rounded-2xl mx-4 border-2 transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none">
             {/* SLIDING CONTAINER FOR IMAGES */}
             <motion.div
                 drag="x"
@@ -99,7 +99,7 @@ export const Hero = () => {
                 <p className="text-sm text-gray-200 md:text-xl font-body mt-2">
                     Everyday Essential Apparel
                 </p>
-                <a href="/all" className="inline-block mt-3 md:mt-6 rounded-xl border-2 bg-white md:px-8 md:py-2 px-4 py-1 font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_white] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none text-xs md:text-lg pointer-events-auto">
+                <a href="/all" className="inline-block mt-3 md:mt-6 rounded-xl border-2 bg-white md:px-8 md:py-2 px-4 py-1 font-semibold uppercase text-black transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none text-xs md:text-lg pointer-events-auto">
                     Shop Now
                 </a>
             </div>

@@ -46,15 +46,15 @@ function App() {
         <Route path="/orders" element={<MyOrders />} />
         <Route path="/cod-checkout" element={<CodCheckoutPage />} />
         <Route path="*" element={
-          <div 
-          className='w-full h-[50vh] flex items-center justify-center'>
+          <div
+            className='w-full h-[50vh] flex items-center justify-center'>
             <FuzzyText
-            baseIntensity={0.3}
-            hoverIntensity={0.5}
-            enableHover={true}
-          >
-            404 - Not Found
-          </FuzzyText>
+              baseIntensity={0.3}
+              hoverIntensity={0.5}
+              enableHover={true}
+            >
+              404 - Not Found
+            </FuzzyText>
           </div>
         } />
       </Routes>

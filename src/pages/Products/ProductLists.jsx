@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom'; // 1. IMPORT useNavigate
 // --- Firebase and Data ---
@@ -61,7 +62,7 @@ const ProductCard = ({ product, addCartItem, addWishlistItem, wishlist }) => {
   // --- End of new logic ---
 
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:scale-105 hover:shadow-xl group flex flex-col">
+    <div className=" rounded-lg shadow-md border-2 border-black overflow-hidden transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none group flex flex-col">
       <div className="relative">
         <div className="cursor-pointer" onClick={handleProductClick}>
           <img
@@ -218,9 +219,9 @@ export default function ProductListingPage() {
             <Filter className="w-5 h-5" />{showFilters ? 'Hide' : 'Show'} Filters
           </button>
         </div>
-        <div className="flex flex-col md:flex-row items-start gap-8 w-full">
-          <aside className={`w-full md:w-1/4 lg:w-1/5 p-6 bg-white rounded-lg shadow-md md:sticky md:top-24 ${showFilters ? 'block' : 'hidden'} md:block`}>
-            <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col md:flex-row items-start gap-8 w-full ">
+          <aside className={`w-full md:w-1/4 lg:w-1/5 p-6 bg-white rounded-lg shadow-md md:sticky md:top-24 border-2 border-gray-400 ${showFilters ? 'block' : 'hidden'} md:block`}>
+            <div className="flex justify-between items-center mb-6 ">
               <h2 className="text-xl font-bold text-gray-800">Filters</h2>
               <button onClick={() => setShowFilters(false)} className="md:hidden cursor-pointer"><X className="w-6 h-6 text-gray-600" /></button>
             </div>
@@ -240,7 +241,7 @@ export default function ProductListingPage() {
             <div className="mb-6">
               <h3 className="text-sm font-medium text-gray-700 mb-2">Price Range</h3>
               <div className="space-y-2">
-                <input type="range" min="0" max={maxPrice} value={priceRange} onChange={(e) => setPriceRange(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                <input type="range" min="0" max={maxPrice} value={priceRange} onChange={(e) => setPriceRange(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer " />
                 <div className="flex justify-between text-xs text-gray-500">
                   <span>₹0</span>
                   <span>Up to ₹{priceRange}</span>
