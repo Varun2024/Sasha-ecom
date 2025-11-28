@@ -289,7 +289,7 @@ export default function CheckoutPage() {
                 <button
                     onClick={handleCOD}
                     className='w-full bg-gray-600 text-white font-bold py-3 rounded-lg hover:bg-gray-700 transition-colors duration-300 mt-6 flex items-center justify-center disabled:bg-purple-400 disabled:cursor-not-allowed'>
-                    {`Pay ₹${(total + 50.00).toFixed(2)} on Delivery (COD)`}
+                    {`Pay ₹${(total)} + 100 on Delivery (COD)`}
                 </button>
             </div>
         );

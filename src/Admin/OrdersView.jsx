@@ -354,7 +354,7 @@ const getStatusColor = (status) => {
 const statuses = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Completed', 'Cancelled'];
 
 
-const OrderRow = ({ order, onStatusUpdate }) => {
+const OrderRow = ({ order, onStatusUpdate ,paymentMethod }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [newStatus, setNewStatus] = useState(order.status);
     const [isSaving, setIsSaving] = useState(false);
@@ -368,7 +368,7 @@ const OrderRow = ({ order, onStatusUpdate }) => {
     return (
         <Fragment>
             <tr className="border-b hover:bg-gray-50 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
-                <td><img src={order.items[0]?.featuredImageUrl || order.items[0]?.imageUrls?.[0]} alt={order.id} className="w-16 h-16 object-cover rounded-md" /></td>
+                <td><img src={order.items[0]?.featuredImageUrl || order.items[0]?.imageUrls?.[0] || order.items[0]?.imageUrl || order.items[0]?.image || order.items[0]?.img || 'https://via.placeholder.com/150?text=No+Image'} alt={order.id} className="w-16 h-16 object-cover rounded-md" /></td>
                 {/* ✅ CHANGED: Display the actual order ID, truncated for neatness */}
                 <td className="p-4 text-sm text-gray-800 font-medium" title={order.id}>
                     {order.id.substring(0, 8)}...
@@ -412,9 +412,10 @@ const OrderRow = ({ order, onStatusUpdate }) => {
                                                 <span className="text-gray-800">{item.name || 'Unnamed Item'}</span>
                                                 <span className=" text-gray-800">Color : {item.selectedColor}</span>
                                                 <span className=" text-gray-800">Size: {item.selectedSize}</span>
-                                                <span className="font-medium text-gray-800">₹{item.sale || '0.00'}</span>
+                                                <span className="font-medium text-gray-800">₹{item.sale || '0.00'} + 100</span>
+                                                <span className="font-medium text-gray-800">Payment method: {paymentMethod || 'Prepaid'} </span>
                                             </div>
-                                            <span><img src={item.imageUrls && item.imageUrls[0]} alt={item.id} className="w-40 h-32 object-cover rounded-md" /></span>
+                                            <span><img src={item.featuredImageUrl || item.imageUrls?.[0] || item.imageUrl || item.image || item.img || 'https://via.placeholder.com/150?text=No+Image'} alt={item.id} className="w-40 h-32 object-cover rounded-md" /></span>
                                         </li>
                                     ))}
                                 </ul>
@@ -531,44 +532,7 @@ const AllOrders = () => {
 
     const filteredOrders = filter === 'All' ? allOrders : allOrders.filter(o => o.status === filter);
 
-    // ✅ REVISED: Status update logic is now more robust
-    // const handleStatusUpdate = async (orderToUpdate, newStatus) => {
-    //     try {
-    //         // Directly reference the user document using the saved userId
-    //         const userRef = doc(db, "users", orderToUpdate.userId);
-    //         const userSnap = await getDoc(userRef);
 
-    //         if (userSnap.exists()) {
-    //             const userData = userSnap.data();
-    //             const ordersArray = userData.orders || [];
-
-    //             // Find the specific order in the array by its original ID
-    //             const orderIndex = ordersArray.findIndex(o => o.id === orderToUpdate.id);
-
-    //             if (orderIndex > -1) {
-    //                 ordersArray[orderIndex].status = newStatus;
-
-    //                 // Update the entire orders array in the user document
-    //                 await updateDoc(userRef, { orders: ordersArray });
-
-    //                 // Update local state to reflect the change immediately
-    //                 setAllOrders(prevOrders =>
-    //                     prevOrders.map(o =>
-    //                         o.compositeId === orderToUpdate.compositeId ? { ...o, status: newStatus } : o
-    //                     )
-    //                 );
-    //                 toast.success(`Order status updated to "${newStatus}"`);
-    //             } else {
-    //                 throw new Error("Order not found in user's order list.");
-    //             }
-    //         } else {
-    //             throw new Error("User not found for this order.");
-    //         }
-    //     } catch (error) {
-    //         console.error("Error updating status:", error);
-    //         toast.error("Failed to update status.");
-    //     }
-    // };
 
         const handleStatusUpdate = async (orderToUpdate, newStatus) => {
         try {
@@ -656,6 +620,7 @@ const AllOrders = () => {
                                         key={order.compositeId}
                                         order={order}
                                         onStatusUpdate={handleStatusUpdate}
+                                        paymentMethod={order.paymentMethod}
                                     />)
                             ) : (
                                 <tr><td colSpan="7" className="text-center py-10">No orders for "{filter}".</td></tr>
