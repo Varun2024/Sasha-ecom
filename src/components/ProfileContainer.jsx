@@ -1,17 +1,15 @@
 
 
 import { useRef, useEffect } from 'react';
-import { User, LogOut, Package, LogIn, UserPlus } from 'lucide-react';
-import { useAuth } from '../context/AuthContext'; // Adjust path to your AuthContext
+import { User, LogOut, Package, LogIn, UserPlus, Heart } from 'lucide-react';
+import { useAuth } from '../context/AuthContext'; 
 import { signOut } from 'firebase/auth';
-import { auth } from '../firebase/firebaseConfig'; // Adjust path to your firebaseConfig
+import { auth } from '../firebase/firebaseConfig';
 
 const ProfileContainer = ({ isOpen, onClose }) => {
     const profileRef = useRef(null);
-    // Get user state from the authentication context
     const { currentUser, userLoggedIn } = useAuth();
 
-    // Effect to handle clicks outside the profile container to close it
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (profileRef.current && !profileRef.current.contains(event.target)) {
@@ -28,79 +26,90 @@ const ProfileContainer = ({ isOpen, onClose }) => {
         };
     }, [isOpen, onClose]);
 
-    // Handles user logout
     const handleLogout = async () => {
         try {
             await signOut(auth);
-            window.location.reload(); // Refresh the page to update UI
-            onClose(); // Close the dropdown after logging out
+            window.location.reload(); 
+            onClose();
         } catch (error) {
             console.error("Failed to log out", error);
         }
     };
 
-    // Handles navigation and closes the dropdown
     const handleNavigate = (path) => {
-        // navigate(path);
         window.location.href = path;
         onClose();
     };
 
-    if (!isOpen) {
-        return null;
-    }
+    if (!isOpen) return null;
 
     return (
         <div
             ref={profileRef}
-            className="fixed top-10 right-20 mt-2 w-72 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-50 overflow-hidden"
+            className="fixed top-16 right-6 md:right-12 w-64 bg-white border border-gray-100 shadow-[0_10px_30px_rgba(0,0,0,0.08)] z-[100] rounded-sm animate-in fade-in slide-in-from-top-2 duration-200"
         >
-            {/* --- RENDER USER INFO ONLY WHEN LOGGED IN --- */}
-            {userLoggedIn && currentUser && (
-                <div className="p-4 border-b border-gray-700">
-                    <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center">
-                            <User className="w-8 h-8 text-white" />
-                        </div>
-                        <div>
-                            {/* Display user's name or a default */}
-                            <p className="font-semibold text-white truncate">{currentUser.user.displayName || 'User'}</p>
-                            {/* Display user's email */}
-                            <p className="text-sm text-gray-400 truncate">{currentUser.user.email}</p>
-                        </div>
+            {/* --- USER ACCOUNT HEADER --- */}
+            <div className="p-5 border-b border-gray-50 bg-[#fafafa]">
+                {userLoggedIn && currentUser ? (
+                    <div className="space-y-1">
+                        <p className="text-[10px] tracking-[0.2em] text-gray-400 uppercase font-semibold">Account</p>
+                        <p className="text-sm font-medium text-gray-900 truncate uppercase tracking-tight">
+                            {currentUser.user.displayName || 'Guest User'}
+                        </p>
+                        <p className="text-[11px] text-gray-500 font-light truncate">{currentUser.user.email}</p>
                     </div>
-                </div>
-            )}
+                ) : (
+                    <div className="space-y-1">
+                        <p className="text-[10px] tracking-[0.2em] text-gray-400 uppercase font-semibold">Welcome</p>
+                        <p className="text-sm font-medium text-gray-900 uppercase">Sasha Store</p>
+                    </div>
+                )}
+            </div>
             
             {/* --- NAVIGATION SECTION --- */}
-            <nav className="p-2">
-                <button onClick={() => handleNavigate(userLoggedIn ? '/orders' : '/login')} className="w-full text-left flex items-center gap-3 px-3 py-2 text-gray-300 rounded-md hover:bg-gray-700">
-                    <Package className="w-5 h-5" />
-                    <span>My Orders</span>
+            <nav className="py-2">
+                <button 
+                    onClick={() => handleNavigate(userLoggedIn ? '/orders' : '/login')} 
+                    className="w-full text-left flex items-center gap-4 px-5 py-3 text-gray-600 hover:text-black hover:bg-gray-50 transition-colors group"
+                >
+                    <Package className="w-4 h-4 text-gray-400 group-hover:text-black transition-colors" strokeWidth={1.5} />
+                    <span className="text-[11px] uppercase tracking-[0.15em] font-medium">My Orders</span>
                 </button>
-                {/* <button onClick={() => handleNavigate(userLoggedIn ? '/wishlist' : '/login')} className="w-full text-left flex items-center gap-3 px-3 py-2 text-gray-300 rounded-md hover:bg-gray-700">
-                    <BsBag className="w-5 h-5" />
-                    <span>Wishlist</span>
-                </button> */}
+
+                <button 
+                    onClick={() => handleNavigate('/wishlist')} 
+                    className="w-full text-left flex items-center gap-4 px-5 py-3 text-gray-600 hover:text-black hover:bg-gray-50 transition-colors group"
+                >
+                    <Heart className="w-4 h-4 text-gray-400 group-hover:text-black transition-colors" strokeWidth={1.5} />
+                    <span className="text-[11px] uppercase tracking-[0.15em] font-medium">Wishlist</span>
+                </button>
+
+                <div className="h-[1px] bg-gray-50 my-2 mx-5"></div>
                 
                 {/* --- CONDITIONAL AUTH BUTTONS --- */}
                 {userLoggedIn ? (
-                    <button onClick={handleLogout} className="w-full text-left flex items-center gap-3 px-3 py-2 text-red-400 rounded-md hover:bg-gray-700">
-                        <LogOut className="w-5 h-5" />
-                        <span>Logout</span>
+                    <button 
+                        onClick={handleLogout} 
+                        className="w-full text-left flex items-center gap-4 px-5 py-3 text-red-500 hover:bg-red-50 transition-colors group"
+                    >
+                        <LogOut className="w-4 h-4 opacity-70 group-hover:opacity-100" strokeWidth={1.5} />
+                        <span className="text-[11px] uppercase tracking-[0.15em] font-medium">Log Out</span>
                     </button>
                 ) : (
-                    <>
-                        <hr className="my-2 border-gray-700" />
-                        <button onClick={() => handleNavigate('/login')} className="w-full text-left flex items-center gap-3 px-3 py-2 text-gray-300 rounded-md hover:bg-gray-700">
-                            <LogIn className="w-5 h-5" />
-                            <span>Login</span>
+                    <div className="px-2 space-y-1">
+                        <button 
+                            onClick={() => handleNavigate('/login')} 
+                            className="w-full text-center bg-black text-white text-[10px] uppercase tracking-[0.2em] py-3 font-semibold hover:bg-gray-800 transition-all"
+                        >
+                            Login
                         </button>
-                        <button onClick={() => handleNavigate('/register')} className="w-full text-left flex items-center gap-3 px-3 py-2 text-gray-300 rounded-md hover:bg-gray-700">
-                            <UserPlus className="w-5 h-5" />
-                            <span>Register</span>
+                        <button 
+                            onClick={() => handleNavigate('/register')} 
+                            className="w-full text-center text-gray-500 text-[10px] uppercase tracking-[0.2em] py-3 font-medium hover:text-black transition-all"
+                        >
+                            Create Account
                         </button>
-                    </>
+                    </div>
                 )}
             </nav>
         </div>

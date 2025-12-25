@@ -1,3 +1,5 @@
+
+
 /* eslint-disable no-unused-vars */
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
@@ -14,26 +16,24 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Heart, Menu, Search, ShoppingBag, User, X, LoaderCircle } from 'lucide-react';
 import ProfileContainer from './ProfileContainer';
 
-
 const navLinks = [
     { name: 'Products', path: '/all' },
     { name: 'Store Locator', path: '/store-locator' },
 ];
 
-// --- New Search Results Component ---
 const SearchResults = ({ results, loading, query, onResultClick }) => {
     if (loading) {
         return (
-            <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-lg p-4 text-center">
-                <LoaderCircle className="w-6 h-6 animate-spin mx-auto text-gray-500" />
+            <div className="absolute top-full mt-2 w-full bg-white shadow-xl p-8 text-center border border-gray-100 z-[100]">
+                <LoaderCircle className="w-5 h-5 animate-spin mx-auto text-gray-900" />
             </div>
         );
     }
 
     if (query && results.length === 0) {
         return (
-            <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-lg p-4 text-center text-gray-500">
-                No results found for "{query}"
+            <div className="absolute top-full mt-2 w-full bg-white shadow-xl p-6 text-center text-[11px] tracking-widest text-gray-400 uppercase border border-gray-100 z-[100]">
+                No results for "{query}"
             </div>
         );
     }
@@ -41,13 +41,17 @@ const SearchResults = ({ results, loading, query, onResultClick }) => {
     if (results.length === 0) return null;
 
     return (
-        <div className="absolute top-full mt-2 w-full max-h-96 overflow-y-auto bg-white rounded-lg shadow-lg border z-20">
+        <div className="absolute top-full left-0 mt-2 w-full md:w-[400px] max-h-[70vh] overflow-y-auto bg-white shadow-2xl border border-gray-50 z-[100] rounded-sm">
+            <div className="p-3 border-b border-gray-50 text-[10px] tracking-[0.2em] text-gray-400 uppercase font-medium">Search Results</div>
             <ul>
                 {results.map(product => (
-                    <li key={product.id} onClick={() => onResultClick(product.id)} className="flex items-center gap-4 p-3 hover:bg-gray-100 cursor-pointer border-b last:border-b-0">
-                        <img src={product.imageUrls && product.imageUrls[0]} alt={product.name} className="w-12 h-16 object-cover rounded-md" />
+                    <li key={product.id} onClick={() => onResultClick(product.id)} className="flex items-center gap-4 p-4 hover:bg-[#fafafa] cursor-pointer transition-colors border-b border-gray-50 last:border-b-0">
+                        <div className="w-12 h-16 bg-gray-100 flex-shrink-0">
+                            <img src={product.imageUrls && product.imageUrls[0]} alt={product.name} className="w-full h-full object-cover" />
+                        </div>
                         <div className="flex-grow">
-                            <p className="font-semibold text-gray-800">{product.name}</p>
+                            <p className="text-[12px] uppercase tracking-wide font-medium text-gray-900">{product.name}</p>
+                            <p className="text-[11px] text-gray-400">₹{product.sale}</p>
                         </div>
                     </li>
                 ))}
@@ -56,38 +60,34 @@ const SearchResults = ({ results, loading, query, onResultClick }) => {
     );
 };
 
-
 const Header = () => {
     const navigate = useNavigate();
     const { cart } = useCart();
     const { wishlist } = useWishlist();
     const { currentUser } = useAuth();
-    const searchRef = useRef(null); // Ref for the search container
+    const searchRef = useRef(null);
 
-    // --- Component State ---
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-    // --- Search State ---
     const [allProducts, setAllProducts] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearchLoading, setIsSearchLoading] = useState(false);
     const [isSearchFocused, setIsSearchFocused] = useState(false);
 
-    // Fetch all products once on component mount for client-side search
     useEffect(() => {
         const fetchProductsForSearch = async () => {
             setIsSearchLoading(true);
-            const querySnapshot = await getDocs(collection(db, "products"));
-            const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setAllProducts(productsData);
+            try {
+                const querySnapshot = await getDocs(collection(db, "products"));
+                const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                setAllProducts(productsData);
+            } catch (err) { console.error(err); }
             setIsSearchLoading(false);
         };
         fetchProductsForSearch();
-    }, [setAllProducts]);
+    }, []);
 
-    // Effect to perform search when query changes
     useEffect(() => {
         if (searchQuery.trim() === '') {
             setSearchResults([]);
@@ -99,7 +99,6 @@ const Header = () => {
         setSearchResults(filtered);
     }, [searchQuery, allProducts]);
 
-    // Effect to handle clicks outside the search component to close results
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -110,20 +109,16 @@ const Header = () => {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-
-    // --- Memoized Calculations ---
     const totalCartItems = useMemo(() => cart.reduce((total, item) => total + item.quantity, 0), [cart]);
     const wishlistCount = wishlist.length;
 
-    // --- Handlers ---
     const toggleProfile = () => setIsProfileOpen(!isProfileOpen);
     const handleResultClick = (productId) => {
-        window.location.href = `/product/${productId}`;
+        navigate(`/product/${productId}`);
         setSearchQuery('');
         setIsSearchFocused(false);
     };
 
-    // Effect to lock body scroll when mobile menu is open
     useEffect(() => {
         document.body.style.overflow = isMenuOpen ? 'hidden' : 'auto';
         return () => { document.body.style.overflow = 'auto'; };
@@ -131,105 +126,152 @@ const Header = () => {
 
     return (
         <>
-            <header className="w-full text-black bg-white/95 backdrop-blur-lg shadow-md flex justify-between items-center py-2 px-4 md:px-8">
-                <div onClick={() => navigate('/')} className="cursor-pointer">
-                    <img src="/logo5-no.png" className="md:w-36 w-28 " alt="" />
-                    {/* <div className="w-32 h-16 bg-[url('/public/logo1.png')] bg-cover bg-center" /> */}
+            <header className="fixed top-0 left-0 w-full z-[80] bg-white/95 backdrop-blur-md border-b border-gray-50 h-16 md:h-20 flex justify-between items-center px-4 md:px-12">
+                {/* Logo Section */}
+                <div onClick={() => navigate('/')} className="cursor-pointer transition-opacity hover:opacity-80">
+                    <img src="/logo5-no.png" className="w-24 md:w-32 object-contain" alt="Sasha Logo" />
                 </div>
 
-                {/* Desktop Navigation & Search */}
-                <nav className="hidden lg:flex items-center gap-8">
-                    <ul className="flex items-center gap-6 uppercase text-sm font-medium text-gray-700">
+                {/* Desktop Center: Navigation */}
+                <nav className="hidden lg:flex items-center gap-12">
+                    <ul className="flex items-center gap-10 text-[11px] tracking-[0.2em] uppercase font-semibold text-gray-500">
                         {navLinks.map((link) => (
-                            <li key={link.name}><div onClick={() => navigate(link.path)} className="bg-gradient-to-r from-black to-gray-800 bg-no-repeat [background-position:0%_100%] [background-size:0%_2px] transition-all duration-300 hover:[background-size:100%_2px] hover:text-black cursor-pointer pb-1">{link.name}</div></li>
+                            <li key={link.name}>
+                                <div 
+                                    onClick={() => navigate(link.path)} 
+                                    className="hover:text-black transition-colors cursor-pointer relative group pb-1"
+                                >
+                                    {link.name}
+                                    <span className="absolute bottom-0 left-0 w-0 h-[1px] bg-black transition-all duration-300 group-hover:w-full"></span>
+                                </div>
+                            </li>
                         ))}
                     </ul>
-                    <div className="relative" ref={searchRef}>
-                        <input
-                            type="text"
-                            className="border border-gray-300 rounded-full pl-10 pr-4 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            placeholder="Search for products..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onFocus={() => setIsSearchFocused(true)}
-                        />
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+
+                    {/* Desktop Search Bar */}
+                    <div className="relative ml-4" ref={searchRef}>
+                        <div className={`flex items-center border-b ${isSearchFocused ? 'border-black' : 'border-gray-100'} transition-all duration-300`}>
+                            <Search className="text-gray-400" size={16} strokeWidth={1.5} />
+                            <input
+                                type="text"
+                                className="bg-transparent pl-3 pr-2 py-1 text-[12px] w-48 lg:w-56 focus:outline-none placeholder:text-gray-300 uppercase tracking-wider font-light"
+                                placeholder="SEARCH"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onFocus={() => setIsSearchFocused(true)}
+                            />
+                        </div>
                         {isSearchFocused && <SearchResults results={searchResults} loading={isSearchLoading} query={searchQuery} onResultClick={handleResultClick} />}
                     </div>
                 </nav>
 
-                {/* Desktop User Actions */}
-                <div className="hidden lg:flex items-center gap-6 text-gray-700">
-                    <div className="relative flex flex-col items-center gap-1 cursor-pointer" onClick={toggleProfile}>
-                        <User size={20} /><span className="text-xs font-medium">{currentUser?.displayName || 'Profile'}</span>
+                {/* Right: Actions */}
+                <div className="hidden lg:flex items-center gap-8 text-gray-900">
+                    <div className="relative group cursor-pointer flex items-center gap-1" onClick={toggleProfile}>
+                        <User size={18} strokeWidth={1.5} />
+                        <span className="text-[10px] tracking-widest font-medium uppercase text-gray-400 group-hover:text-black transition-colors">
+                            {currentUser?.user.displayName ? currentUser.user.displayName.split(' ')[0] : 'Account'}
+                        </span>
                     </div>
-                    <div className="relative flex flex-col items-center gap-1 cursor-pointer" onClick={() => navigate('/wishlist')}>
-                        <Heart size={20} /><span className="text-xs font-medium">Wishlist</span>
+
+                    <div className="relative cursor-pointer" onClick={() => navigate('/wishlist')}>
+                        <Heart size={18} strokeWidth={1.5} className="hover:text-red-500 transition-colors" />
                         {wishlistCount > 0 && (
-                            <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">{wishlistCount}</div>
+                            <span className="absolute -top-2 -right-2 text-[9px] font-bold text-gray-900">{wishlistCount}</span>
                         )}
                     </div>
-                    <div className="relative flex flex-col items-center gap-1 cursor-pointer" onClick={() => navigate('/cart')}>
-                        <ShoppingBag size={20} /><span className="text-xs font-medium">Cart</span>
+
+                    <div className="relative cursor-pointer group" onClick={() => navigate('/cart')}>
+                        <ShoppingBag size={18} strokeWidth={1.5} className="group-hover:text-black" />
                         {totalCartItems > 0 && (
-                            <div className="absolute -top-2 -right-3 bg-purple-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">{totalCartItems}</div>
+                            <span className="absolute -top-2 -right-2 text-[9px] font-bold text-white bg-black w-4 h-4 rounded-full flex items-center justify-center">{totalCartItems}</span>
                         )}
                     </div>
                 </div>
 
-                {/* Mobile Menu Button */}
-                <div className="lg:hidden flex items-center gap-4">
-                    <button onClick={() => setIsMenuOpen(true)} className="p-2">
-                        <Menu size={24} />
+                {/* Mobile Icons + Menu Toggle */}
+                <div className="lg:hidden flex items-center gap-5">
+                    <div className="relative" onClick={() => navigate('/cart')}>
+                        <ShoppingBag size={20} strokeWidth={1.5} />
+                        {totalCartItems > 0 && <span className="absolute -top-2 -right-2 text-[9px] bg-black text-white w-4 h-4 rounded-full flex items-center justify-center">{totalCartItems}</span>}
+                    </div>
+                    <button onClick={() => setIsMenuOpen(true)} className="p-1">
+                        <Menu size={22} strokeWidth={1.5} />
                     </button>
                 </div>
             </header>
 
             <ProfileContainer isOpen={isProfileOpen} onClose={toggleProfile} />
 
-            {/* Mobile Menu */}
+            {/* Mobile Sidebar Menu */}
             <AnimatePresence>
                 {isMenuOpen && (
-                    <motion.div
-                        initial={{ x: "100%" }}
-                        animate={{ x: 0 }}
-                        exit={{ x: "100%" }}
-                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                        className="fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-white shadow-2xl lg:hidden"
-                    >
-                        <div className="flex flex-col h-full p-6">
-                            <div className="flex justify-between items-center mb-8">
-                                <h2 className="text-xl font-bold">Menu</h2>
-                                <button onClick={() => setIsMenuOpen(false)} className="p-2"><X size={24} /></button>
-                            </div>
-                            <div className="relative mb-4" ref={searchRef}>
-                                    <input type="text" className="w-[70%] border border-gray-300 rounded-full pl-10 pr-4 py-2 text-sm" placeholder="Search..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} onFocus={() => setIsSearchFocused(true)} />
-                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-                                    {isSearchFocused && <SearchResults results={searchResults} loading={isSearchLoading} query={searchQuery} onResultClick={handleResultClick} />}
+                    <>
+                        <motion.div 
+                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                            onClick={() => setIsMenuOpen(false)}
+                            className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[90]"
+                        />
+                        <motion.div
+                            initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
+                            transition={{ type: "tween", duration: 0.3 }}
+                            className="fixed top-0 right-0 z-[100] h-full w-full max-w-[320px] bg-white shadow-2xl overflow-y-auto"
+                        >
+                            <div className="flex flex-col h-full">
+                                <div className="flex justify-between items-center p-6 border-b border-gray-50">
+                                    <span className="text-[11px] tracking-[0.3em] font-bold uppercase">Menu</span>
+                                    <button onClick={() => setIsMenuOpen(false)}><X size={20} strokeWidth={1.5} /></button>
                                 </div>
-                            <nav className="flex-grow">
-                                <ul className="flex flex-col space-y-6 text-lg">
-                                    {navLinks.map((link) => (
-                                        <li key={link.name}>
-                                            <div onClick={() => { navigate(link.path); setIsMenuOpen(false); }} className="cursor-pointer">{link.name}</div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </nav>
-                            
-                            <div className="space-y-6 border-t pt-6">
-                                {/* Mobile Search */}
-                                <div className="space-y-4 text-md">
                                 
-                                    <div className="flex items-center gap-4 cursor-pointer" onClick={() => { toggleProfile(); setIsMenuOpen(false); }}><User size={22} /><span>{currentUser?.displayName || 'Profile'}</span></div>
-                                    <div className="flex items-center gap-4 cursor-pointer" onClick={() => { navigate('/wishlist'); setIsMenuOpen(false); }}><Heart size={22} /><span>Wishlist ({wishlistCount})</span></div>
-                                    <div className="flex items-center gap-4 cursor-pointer" onClick={() => { navigate('/cart'); setIsMenuOpen(false); }}><ShoppingBag size={22} /><span>Cart ({totalCartItems})</span></div>
+                                <div className="p-6">
+                                    {/* Mobile Search */}
+                                    <div className="relative mb-8" ref={searchRef}>
+                                        <div className="flex items-center border-b border-gray-200 pb-2">
+                                            <Search size={16} className="text-gray-400" />
+                                            <input 
+                                                type="text" 
+                                                className="w-full pl-3 text-[13px] outline-none uppercase tracking-widest placeholder:text-gray-300" 
+                                                placeholder="SEARCH" 
+                                                value={searchQuery} 
+                                                onChange={(e) => setSearchQuery(e.target.value)} 
+                                                onFocus={() => setIsSearchFocused(true)} 
+                                            />
+                                        </div>
+                                        {isSearchFocused && <SearchResults results={searchResults} loading={isSearchLoading} query={searchQuery} onResultClick={handleResultClick} />}
+                                    </div>
+
+                                    <nav>
+                                        <ul className="space-y-6">
+                                            {navLinks.map((link) => (
+                                                <li key={link.name} onClick={() => { navigate(link.path); setIsMenuOpen(false); }}>
+                                                    <div className="text-[13px] tracking-[0.2em] font-medium uppercase text-gray-900 cursor-pointer">{link.name}</div>
+                                                </li>
+                                            ))}
+                                            <li onClick={() => { navigate('/wishlist'); setIsMenuOpen(false); }}>
+                                                <div className="text-[13px] tracking-[0.2em] font-medium uppercase text-gray-900 cursor-pointer flex justify-between">
+                                                    Wishlist <span>({wishlistCount})</span>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+
+                                <div className="mt-auto p-6 bg-[#fafafa]">
+                                    <button 
+                                        onClick={() => { toggleProfile(); setIsMenuOpen(false); }}
+                                        className="w-full bg-black text-white text-[11px] tracking-[0.2em] uppercase py-4 font-bold"
+                                    >
+                                        {currentUser ? 'My Account' : 'Login / Register'}
+                                    </button>
                                 </div>
                             </div>
-                        </div>
-                    </motion.div>
+                        </motion.div>
+                    </>
                 )}
             </AnimatePresence>
+            
+            {/* Spacer to push content below fixed header */}
+            <div className="h-16 md:h-20" />
         </>
     );
 };

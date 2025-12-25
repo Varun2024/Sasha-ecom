@@ -1,257 +1,41 @@
-
-// import React, { useState, useEffect } from 'react';
-// import { useNavigate, useLocation, Link } from 'react-router-dom';
-// import { useCart } from '../context/CartContext';
-// import { db, auth } from '../firebase/firebaseConfig';
-// import { updateDoc, doc, arrayUnion } from 'firebase/firestore';
-// import { toast, ToastContainer } from 'react-toastify';
-// // Note: The toastify CSS should be imported in your main app file (e.g., App.jsx or main.jsx)
-// import { Loader2, ShoppingBag, ArrowLeft } from 'lucide-react';
-
-// // Confirmation Modal Component (re-used for final confirmation)
-// const ConfirmationModal = ({ isOpen, onClose, onConfirm, isLoading }) => {
-//     if (!isOpen) return null;
-
-//     return (
-//         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-//             <div className="bg-gray-800 text-white rounded-lg shadow-xl p-8 max-w-sm w-full mx-4">
-//                 <h2 className="text-2xl font-bold mb-4 text-center">Confirm Your Order</h2>
-//                 <p className="text-gray-400 mb-6 text-center">
-//                     Please confirm to place your Cash on Delivery order. This action cannot be undone.
-//                 </p>
-//                 <div className="flex justify-center gap-4">
-//                     <button onClick={onClose} disabled={isLoading} className="px-6 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 transition-colors">
-//                         Cancel
-//                     </button>
-//                     <button onClick={onConfirm} disabled={isLoading} className="px-6 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors flex items-center gap-2">
-//                         {isLoading && <Loader2 className="animate-spin h-5 w-5" />}
-//                         Confirm & Place
-//                     </button>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default function CodCheckoutPage() {
-//     const navigate = useNavigate();
-//     const location = useLocation();
-//     const { cart, dispatch } = useCart();
-    
-//     const [isModalOpen, setIsModalOpen] = useState(false);
-//     const [isLoading, setIsLoading] = useState(false);
-
-//     // Get data passed from the previous page
-//     const [shippingDetails, setShippingDetails] = useState(null);
-//     const [totalAmount, setTotalAmount] = useState(0);
-
-//     useEffect(() => {
-//         if (location.state?.selectedAddress && location.state?.totalAmount) {
-//             setShippingDetails(location.state.selectedAddress);
-//             setTotalAmount(location.state.totalAmount);
-//         } else {
-//             // If no data is passed, redirect back to checkout to select an address
-//             toast.error("No address selected. Redirecting...");
-//             setTimeout(() => navigate('/checkout'), 2000);
-//         }
-//     }, [location.state, navigate]);
-    
-//     const handlePlaceOrderClick = () => {
-//         setIsModalOpen(true);
-//     };
-
-//     const handleConfirmOrder = async () => {
-//         if (!auth.currentUser) {
-//             toast.error("You must be logged in to place an order.");
-//             return;
-//         }
-
-//         setIsLoading(true);
-//         const toastId = toast.loading("Processing your order...");
-
-//         try {
-//             // Step 1: Generate a unique order ID client-side to pass to the delivery API
-//             const clientOrderId = `sasha-cod-${Date.now()}`;
-
-//             // Step 2: Call backend to create the delivery shipment first
-//             toast.update(toastId, { render: "Creating delivery shipment..." });
-//             // const deliveryResponse = await fetch('http://localhost:5000/api/create-shipment', {
-//             //     method: 'POST',
-//             //     headers: { 'Content-Type': 'application/json' },
-//             //     body: JSON.stringify({
-//             //         order: clientOrderId, // Use our client-generated ID
-//             //         destination_address: shippingDetails.address,
-//             //         destination_phone: shippingDetails.phone,
-//             //         payment_mode: "COD",
-//             //         destination_name: shippingDetails.fullName,
-//             //         destination_pincode: shippingDetails.zip,
-//             //         destination_city: shippingDetails.city, // As per docs example
-//             //         destination_state: shippingDetails.state, // As per docs example
-//             //         products_desc: cart.map(item => item.name).join(', '),
-//             //         hsn_code: "NA",
-//             //         cod_amount: totalAmount,
-//             //         total_amount: totalAmount,
-//             //         quantity: cart.reduce((sum, item) => sum + item.quantity, 0),
-//             //         // Adding required fields from Delhivery docs
-//             //         weight: 0.5, // Default weight in KG
-//             //         shipment_width: 200, // Default width in CM
-//             //         shipment_height: 200, // Default height in CM
-//             //     })
-//             // });
-
-//             // const deliveryResult = await deliveryResponse.json();
-//             // if (!deliveryResult.success) {
-//             //     console.log(deliveryResult.error || "Failed to create shipment.");
-//             //     throw new Error("ye vala "+ deliveryResult.error || "Failed to create shipment.");
-//             // }
-            
-//             // const waybill = deliveryResult.data?.packages?.[0]?.waybill;
-//             // if (!waybill) {
-//             //     throw new Error("Tracking number (Waybill) not found in the API response.");
-//             // }
-
-//             // // Step 3: Construct the final order object with all details, including the waybill
-//             const orderDetails = {
-//                 orderId: clientOrderId,
-//                 items: cart,
-//                 shippingAddress: shippingDetails,
-//                 paymentMethod: "COD",
-//                 totalAmount: totalAmount,
-//                 orderStatus: "Processing", // Order is immediately processing
-//                 orderDate: Date.now(),
-//             };
-
-//             // Step 4: Save the complete order object into the user's document
-//             toast.update(toastId, { render: "Saving order details..." });
-//             const userDocRef = doc(db, 'users', auth.currentUser.uid);
-//             await updateDoc(userDocRef, {
-//                 orders: arrayUnion(orderDetails)
-//             });
-            
-//             // Step 5: Success - clear cart and navigate
-//             toast.update(toastId, { render: "Order placed successfully!", type: "success", isLoading: false, autoClose: 5000 });
-//             dispatch({ type: 'CLEAR_CART' });
-//             navigate(`/order-success/${clientOrderId}`);
-
-//         } catch (error) {
-//             console.error("Order placement failed:", error);
-//             toast.update(toastId, { render: `Error: ${error.message}`, type: "error", isLoading: false, autoClose: 3000 ,hideProgressBar: true});
-//         } finally {
-//             setIsLoading(false);
-//             setIsModalOpen(false);
-//         }
-//     };
-    
-//     if (!shippingDetails) {
-//         return (
-//             <div className="flex justify-center items-center h-screen bg-gray-900 text-white">
-//                  <ToastContainer theme="dark" position="bottom-right" />
-//                 <Loader2 className="animate-spin h-8 w-8" />
-//             </div>
-//         );
-//     }
-
-//     return (
-//         <>
-//             <ToastContainer theme="dark" position="bottom-right" />
-//             <ConfirmationModal 
-//                 isOpen={isModalOpen}
-//                 onClose={() => setIsModalOpen(false)}
-//                 onConfirm={handleConfirmOrder}
-//                 isLoading={isLoading}
-//             />
-//             <div className="container mx-auto max-w-4xl px-4 py-16 text-white">
-//                 <Link to="/checkout" className="flex items-center gap-2 text-purple-400 hover:text-purple-300 mb-6">
-//                     <ArrowLeft size={20} /> Back to Address Selection
-//                 </Link>
-//                 <h1 className="text-4xl font-extrabold text-center mb-8">Confirm COD Order</h1>
-                
-//                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-//                     {/* Left Side: Details */}
-//                     <div className="bg-gray-800 p-8 rounded-lg shadow-2xl space-y-6">
-//                         <div>
-//                             <h2 className="text-xl font-semibold border-b border-gray-700 pb-2 mb-4">Shipping To:</h2>
-//                             <div className="text-gray-300">
-//                                 <p className="font-bold">{shippingDetails.fullName}</p>
-//                                 <p>{shippingDetails.address}, {shippingDetails.city}</p>
-//                                 <p>{shippingDetails.state}, {shippingDetails.zip}</p>
-//                                 <p>Phone: {shippingDetails.phone}</p>
-//                             </div>
-//                         </div>
-//                          <div>
-//                             <h2 className="text-xl font-semibold border-b border-gray-700 pb-2 mb-4">Payment Method:</h2>
-//                             <p className="font-bold text-purple-400">Cash on Delivery (COD)</p>
-//                         </div>
-//                     </div>
-
-//                     {/* Right Side: Order Summary */}
-//                     <div className="bg-gray-800 p-8 rounded-lg shadow-2xl">
-//                         <h2 className="text-xl font-semibold border-b border-gray-700 pb-2 mb-4">Order Summary</h2>
-//                         <div className="space-y-2">
-//                              {cart.map(item => (
-//                                 <div key={item.id} className="flex justify-between text-sm">
-//                                     <span className="text-gray-300">{item.name} x {item.quantity}</span>
-//                                     <span className="font-medium">₹{(item.sale * item.quantity).toFixed(2)}</span>
-//                                 </div>
-//                             ))}
-//                         </div>
-//                         <div className="border-t border-gray-700 mt-4 pt-4 space-y-2">
-//                             <div className="flex justify-between text-lg font-bold text-purple-400">
-//                                 <span>Total Amount to Pay:</span>
-//                                 <span>₹{totalAmount.toFixed(2)}</span>
-//                             </div>
-//                             <p className="text-xs text-gray-500 text-center pt-2">Includes all taxes and delivery charges.</p>
-//                         </div>
-//                         <button 
-//                             onClick={handlePlaceOrderClick} 
-//                             className="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition-colors duration-300 mt-6 flex items-center justify-center gap-2"
-//                         >
-//                            <ShoppingBag size={20} /> Confirm & Place Order
-//                         </button>
-//                     </div>
-//                 </div>
-//             </div>
-//         </>
-//     );
-// }
-
-
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { db, auth } from '../firebase/firebaseConfig';
 import { updateDoc, doc, arrayUnion } from 'firebase/firestore';
 import { toast, ToastContainer } from 'react-toastify';
-// Note: Ensure Toast CSS is imported in your main App file
-import { Loader2, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { Loader2, ShoppingBag, ArrowLeft, Check } from 'lucide-react';
 
-// Confirmation Modal Component
+// Refined Confirmation Modal Component
 const ConfirmationModal = ({ isOpen, onClose, onConfirm, isLoading }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
-            <div className="bg-gray-800 text-white rounded-lg shadow-xl p-8 max-w-sm w-full mx-4">
-                <h2 className="text-2xl font-bold mb-4 text-center">Confirm Your Order</h2>
-                <p className="text-gray-400 mb-6 text-center">
-                    Please confirm to place your Cash on Delivery order. This action cannot be undone.
-                </p>
-                <div className="flex justify-center gap-4">
-                    <button 
-                        onClick={onClose} 
-                        disabled={isLoading} 
-                        className="px-6 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 transition-colors"
-                    >
-                        Cancel
-                    </button>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+            <div className="bg-white text-gray-900 rounded-sm shadow-2xl p-8 max-w-sm w-full border border-gray-100">
+                <div className="text-center space-y-4">
+                    <div className="w-12 h-12 border border-black rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Check size={20} strokeWidth={1.5} />
+                    </div>
+                    <h2 className="text-sm font-semibold tracking-[0.2em] uppercase">Confirm Order</h2>
+                    <p className="text-[12px] text-gray-500 font-light leading-relaxed">
+                        Are you sure you want to place this Cash on Delivery order? This action will finalize your purchase.
+                    </p>
+                </div>
+                <div className="flex flex-col gap-3 mt-8">
                     <button 
                         onClick={onConfirm} 
                         disabled={isLoading} 
-                        className="px-6 py-2 rounded-lg bg-purple-600 hover:bg-purple-700 transition-colors flex items-center gap-2"
+                        className="w-full py-4 bg-black text-white text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-gray-800 transition-all flex items-center justify-center gap-2"
                     >
-                        {isLoading && <Loader2 className="animate-spin h-5 w-5" />}
-                        Confirm & Place
+                        {isLoading ? <Loader2 className="animate-spin h-4 w-4" /> : 'Confirm & Place Order'}
+                    </button>
+                    <button 
+                        onClick={onClose} 
+                        disabled={isLoading} 
+                        className="w-full py-3 text-[10px] text-gray-400 uppercase tracking-widest hover:text-black transition-colors"
+                    >
+                        Cancel
                     </button>
                 </div>
             </div>
@@ -266,80 +50,61 @@ export default function CodCheckoutPage() {
     
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-
-    // Get data passed from the previous page
     const [shippingDetails, setShippingDetails] = useState(null);
     const [totalAmount, setTotalAmount] = useState(0);
 
-    // Load data from navigation state on mount
     useEffect(() => {
         if (location.state?.selectedAddress && location.state?.totalAmount) {
             setShippingDetails(location.state.selectedAddress);
             setTotalAmount(location.state.totalAmount);
         } else {
-            // Fallback if accessed directly without state
-            toast.error("No address selected. Redirecting...");
+            toast.error("REDIRECTING TO CHECKOUT...");
             setTimeout(() => navigate('/checkout'), 2000);
         }
     }, [location.state, navigate]);
     
-    const handlePlaceOrderClick = () => {
-        setIsModalOpen(true);
-    };
-
     const handleConfirmOrder = async () => {
-        // 1. Validation
         if (!auth.currentUser) {
-            toast.error("You must be logged in to place an order.");
+            toast.error("PLEASE LOG IN TO CONTINUE.");
             return;
         }
 
         setIsLoading(true);
-        const toastId = toast.loading("Processing your order...");
+        const toastId = toast.loading("SYNCING WITH ATELIER...");
 
         try {
-            // 2. Generate Client-side ID
-            const clientOrderId = `sasha-cod-${Date.now()}`;
-
-            // 3. Construct the Order Object
+            const clientOrderId = `SASHA-COD-${Date.now()}`;
             const orderDetails = {
                 orderId: clientOrderId,
                 items: cart,
                 shippingAddress: shippingDetails,
                 paymentMethod: "COD",
                 totalAmount: totalAmount,
-                orderStatus: "Processing", // Initial status
+                orderStatus: "Processing",
                 orderDate: Date.now(),
-                waybill: null, // No waybill since we skipped the API
             };
 
-            // 4. Update Firestore
-            toast.update(toastId, { render: "Saving order details..." });
-            
             const userDocRef = doc(db, 'users', auth.currentUser.uid);
             await updateDoc(userDocRef, {
                 orders: arrayUnion(orderDetails)
             });
             
-            // 5. Success Handling
             toast.update(toastId, { 
-                render: "Order placed successfully!", 
+                render: "ORDER PLACED SUCCESSFULLY", 
                 type: "success", 
                 isLoading: false, 
-                autoClose: 5000 
+                autoClose: 2000 
             });
             
             dispatch({ type: 'CLEAR' });
-            navigate(`/orders`);
+            setTimeout(() => navigate(`/orders`), 1500);
 
         } catch (error) {
-            console.error("Order placement failed:", error);
             toast.update(toastId, { 
-                render: `Error: ${error.message}`, 
+                render: `ERROR: ${error.message}`, 
                 type: "error", 
                 isLoading: false, 
-                autoClose: 3000,
-                hideProgressBar: true 
+                autoClose: 3000 
             });
         } finally {
             setIsLoading(false);
@@ -349,74 +114,95 @@ export default function CodCheckoutPage() {
     
     if (!shippingDetails) {
         return (
-            <div className="flex justify-center items-center h-screen bg-gray-900 text-white">
-                 <ToastContainer theme="dark" position="bottom-right" />
-                <Loader2 className="animate-spin h-8 w-8" />
+            <div className="flex justify-center items-center h-screen bg-white">
+                <Loader2 className="animate-spin h-6 w-6 text-gray-200" />
             </div>
         );
     }
 
     return (
-        <>
-            <ToastContainer theme="dark" position="bottom-right" />
+        <div className="min-h-screen bg-[#fafafa] pt-8 pb-20 font-light">
+            <ToastContainer theme="light" position="bottom-center" />
             <ConfirmationModal 
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 onConfirm={handleConfirmOrder}
                 isLoading={isLoading}
             />
-            <div className="container mx-auto max-w-4xl px-4 py-16 text-white">
-                <Link to="/checkout" className="flex items-center gap-2 text-purple-400 hover:text-purple-300 mb-6">
-                    <ArrowLeft size={20} /> Back to Address Selection
+
+            <div className="container mx-auto max-w-5xl px-4">
+                <Link to="/checkout" className="inline-flex items-center gap-2 text-[11px] tracking-widest text-gray-400 uppercase hover:text-black mb-10 transition-colors">
+                    <ArrowLeft size={14} /> Back to Selection
                 </Link>
-                <h1 className="text-4xl font-extrabold text-center mb-8">Confirm COD Order</h1>
+
+                <div className="text-center mb-16">
+                    <h2 className="text-[10px] tracking-[0.4em] uppercase text-gray-400 font-bold mb-3 italic">Final Step</h2>
+                    <h1 className="text-3xl md:text-4xl font-light tracking-[0.1em] text-gray-900 uppercase">Review <span className="font-semibold">Order</span></h1>
+                    <div className="h-[1px] w-12 bg-black mx-auto mt-6"></div>
+                </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {/* Left Side: Details */}
-                    <div className="bg-gray-800 p-8 rounded-lg shadow-2xl space-y-6">
-                        <div>
-                            <h2 className="text-xl font-semibold border-b border-gray-700 pb-2 mb-4">Shipping To:</h2>
-                            <div className="text-gray-300">
-                                <p className="font-bold">{shippingDetails.fullName}</p>
-                                <p>{shippingDetails.address}, {shippingDetails.city}</p>
-                                <p>{shippingDetails.state}, {shippingDetails.zip}</p>
-                                <p>Phone: {shippingDetails.phone}</p>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+                    {/* Left Side: Summary */}
+                    <div className="lg:col-span-7 bg-white p-8 md:p-12 border border-gray-100 shadow-sm rounded-sm space-y-10">
+                        <section className="space-y-4">
+                            <h2 className="text-[11px] tracking-[0.3em] font-bold uppercase text-gray-900 border-b border-gray-50 pb-3">Shipping Details</h2>
+                            <div className="text-[13px] text-gray-500 space-y-1 uppercase tracking-wider leading-relaxed">
+                                <p className="font-semibold text-gray-900">{shippingDetails.fullName}</p>
+                                <p>{shippingDetails.address}</p>
+                                <p>{shippingDetails.city}, {shippingDetails.state} — {shippingDetails.zip}</p>
+                                <p className="mt-4 text-[11px] text-gray-400 font-normal">M: {shippingDetails.phone}</p>
                             </div>
-                        </div>
-                         <div>
-                            <h2 className="text-xl font-semibold border-b border-gray-700 pb-2 mb-4">Payment Method:</h2>
-                            <p className="font-bold text-purple-400">Cash on Delivery (COD)</p>
-                        </div>
+                        </section>
+
+                        <section className="space-y-4">
+                            <h2 className="text-[11px] tracking-[0.3em] font-bold uppercase text-gray-900 border-b border-gray-50 pb-3">Payment Method</h2>
+                            <div className="flex items-center gap-3">
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                <p className="text-[12px] font-medium tracking-[0.1em] text-gray-900 uppercase">Cash on Delivery (COD)</p>
+                            </div>
+                        </section>
                     </div>
 
-                    {/* Right Side: Order Summary */}
-                    <div className="bg-gray-800 p-8 rounded-lg shadow-2xl">
-                        <h2 className="text-xl font-semibold border-b border-gray-700 pb-2 mb-4">Order Summary</h2>
-                        <div className="space-y-2">
-                             {cart.map(item => (
-                                <div key={item.id} className="flex justify-between text-sm">
-                                    <span className="text-gray-300">{item.name} x {item.quantity}</span>
-                                    <span className="font-medium">₹{(item.sale * item.quantity).toFixed(2)}</span>
-                                </div>
-                            ))}
-                        </div>
-                        <div className="border-t border-gray-700 mt-4 pt-4 space-y-2">
-                            <div className="flex justify-between text-lg font-bold text-purple-400">
-                                <span>Total Amount to Pay:</span>
-                                <span>₹{totalAmount.toFixed(2)}</span>
+                    {/* Right Side: Totals */}
+                    <div className="lg:col-span-5 space-y-6">
+                        <div className="bg-white p-8 border border-gray-100 shadow-sm rounded-sm">
+                            <h2 className="text-[11px] tracking-[0.3em] font-bold uppercase text-gray-900 mb-6">Order Summary</h2>
+                            <div className="space-y-4 mb-8">
+                                {cart.map(item => (
+                                    <div key={item.id} className="flex justify-between items-center text-[12px]">
+                                        <div className="flex flex-col">
+                                            <span className="text-gray-900 font-medium uppercase tracking-tight">{item.name}</span>
+                                            <span className="text-gray-400 text-[10px] uppercase">Qty: {item.quantity}</span>
+                                        </div>
+                                        <span className="text-gray-900 font-light">₹{(item.sale * item.quantity).toFixed(2)}</span>
+                                    </div>
+                                ))}
                             </div>
-                            (₹100 COD Charge)
-                            <p className="text-xs text-gray-500 text-center pt-2">Includes all taxes and delivery charges.</p>
+                            
+                            <div className="border-t border-gray-50 pt-6 space-y-3 text-[13px]">
+                                <div className="flex justify-between text-gray-400 font-light italic">
+                                    <span>COD Collection Fee</span>
+                                    <span>₹100.00</span>
+                                </div>
+                                <div className="flex justify-between text-base font-semibold text-gray-900 pt-2 tracking-[0.1em]">
+                                    <span className="uppercase">To be paid:</span>
+                                    <span>₹{totalAmount.toFixed(2)}</span>
+                                </div>
+                            </div>
+
+                            <button 
+                                onClick={() => setIsModalOpen(true)} 
+                                className="w-full bg-black text-white text-[11px] font-bold tracking-[0.2em] uppercase py-5 mt-10 hover:bg-gray-800 transition-all flex items-center justify-center gap-3"
+                            >
+                                <ShoppingBag size={14} /> Finalize Order
+                            </button>
+                            <p className="text-[9px] text-gray-400 text-center mt-6 uppercase tracking-widest leading-relaxed">
+                                Prices inclusive of all taxes and door-step delivery charges.
+                            </p>
                         </div>
-                        <button 
-                            onClick={handlePlaceOrderClick} 
-                            className="w-full bg-green-600 text-white font-bold py-3 rounded-lg hover:bg-green-700 transition-colors duration-300 mt-6 flex items-center justify-center gap-2"
-                        >
-                           <ShoppingBag size={20} /> Confirm & Place Order
-                        </button>
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 }

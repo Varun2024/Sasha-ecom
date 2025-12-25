@@ -1,115 +1,79 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useMemo, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom'; // 1. IMPORT useNavigate
-// --- Firebase and Data ---
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { db } from '../../firebase/firebaseConfig';
 import { collection, getDocs } from 'firebase/firestore';
-
-// --- Contexts ---
 import { useCart } from '../../context/CartContext';
 import { useWishlist } from '../../context/WishlistContext';
-
-// --- UI Libraries ---
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { ChevronDown, ShoppingCart, Star, X, Filter, Heart } from 'lucide-react';
+import { ChevronDown, X, Filter, Heart, ArrowRight } from 'lucide-react';
 
-// --- Product Card Skeleton (Unchanged) ---
-const ProductCardSkeleton = () => (
-  <div className="bg-white rounded-lg shadow-md overflow-hidden animate-pulse">
-    <div className="w-full h-80 bg-gray-200"></div>
-    <div className="p-4">
-      <div className="h-6 w-3/4 bg-gray-200 rounded"></div>
-      <div className="flex items-center mt-2">
-        <div className="h-4 w-1/2 bg-gray-200 rounded"></div>
-      </div>
-      <div className="flex items-center justify-between mt-4">
-        <div className="h-8 w-1/3 bg-gray-200 rounded"></div>
-        <div className="h-10 w-2/5 bg-gray-200 rounded-lg"></div>
-      </div>
-    </div>
-  </div>
-);
-
-// --- ✅ Product Card Component (Upgraded) ---
-const ProductCard = ({ product, addCartItem, addWishlistItem, wishlist }) => {
-
-
-
+// --- Minimalist Product Card ---
+const ProductCard = ({ product, addWishlistItem, wishlist }) => {
+  const navigate = useNavigate();
   const isWishlisted = useMemo(() =>
     wishlist.some(item => item.id === product.id),
     [wishlist, product.id]
   );
 
-  const handleProductClick = () => {
-    // 3. Use navigate for consistency (or keep window.location.href if reload is essential)
-    window.location.href = `/product/${product.id}`;
-  };
-
-  // ✅ CHANGED: Logic now reads from the 'variants' array first.
-  let displayImage = 'https://placehold.co/600x800/f8f8f8/cccccc?text=Image+Not+Found';
-  
-  if (product.variants && product.variants.length > 0 && product.variants[0].imageUrls && product.variants[0].imageUrls.length > 0) {
-    // 1. Use the first image from the first variant
+  let displayImage = 'https://placehold.co/600x800/f8f8f8/cccccc?text=No+Image';
+  if (product.variants?.[0]?.imageUrls?.[0]) {
     displayImage = product.variants[0].imageUrls[0];
-  } 
-  // --- Fallback for OLD data structure ---
-  else if (product.imageUrls && product.imageUrls.length > 0) {
+  } else if (product.imageUrls?.[0]) {
     displayImage = product.imageUrls[0];
-  } else if (product.imageUrl) {
-    displayImage = product.imageUrl;
   }
-  // --- End of new logic ---
 
   return (
-    <div className=" rounded-lg shadow-md border-2 border-black overflow-hidden transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none group flex flex-col">
-      <div className="relative">
-        <div className="cursor-pointer" onClick={handleProductClick}>
+    <div className="group flex flex-col bg-white animate-in fade-in duration-700">
+      <div className="relative overflow-hidden bg-[#fafafa] aspect-[3/4]">
+        <div 
+          className="cursor-pointer h-full w-full" 
+          onClick={() => navigate(`/product/${product.id}`)}
+        >
           <img
             src={displayImage}
             alt={product.name}
-            className="w-full h-80 object-cover"
+            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 grayscale-[0.2] group-hover:grayscale-0"
           />
         </div>
-        <div className="absolute top-3 left-3 bg-white text-gray-800 text-xs font-semibold px-2.5 py-1 rounded-full">{product.category}</div>
+        
+        {/* Subtle Heart Overlay */}
         <button
           onClick={() => addWishlistItem(product)}
-          className="absolute top-3 right-3 bg-white p-2 rounded-full shadow-md text-gray-600 hover:scale-110 transition-all duration-200"
-          aria-label="Add to Wishlist"
+          className="absolute top-4 right-4 p-2 transition-all duration-300"
         >
-          <Heart className={`w-5 h-5 transition-colors ${isWishlisted ? 'fill-red-500 text-red-500' : 'hover:text-red-500'}`} />
+          <Heart 
+            size={20} 
+            strokeWidth={1.5}
+            className={`${isWishlisted ? 'fill-black text-black' : 'text-gray-400 hover:text-black'}`} 
+          />
         </button>
-      </div>
-      <div className="p-4 flex flex-col flex-grow justify-between">
-        <div>
-          <h3 className="md:text-lg  font-semibold text-gray-800 truncate" title={product.name}>{product.name}</h3>
-          <div className="flex items-center mt-1">
-            <div className="flex items-center text-yellow-500">{[...Array(5)].map((_, i) => (<Star key={i} className={`w-4 h-4 ${i < Math.round(product.rating) ? 'fill-current' : ''}`} />))}
-            </div>
-            <span className="text-gray-500 text-xs md:text-sm ml-2">({product.reviewCount || 0} reviews)</span>
-          </div>
+
+        {/* Quick View Link (Mobile Hidden) */}
+        <div className="absolute bottom-0 left-0 w-full p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 hidden md:block">
+           <button 
+             onClick={() => navigate(`/product/${product.id}`)}
+             className="w-full bg-white/90 backdrop-blur-sm text-black py-3 text-[10px] tracking-[0.2em] font-bold uppercase border border-gray-100 shadow-sm"
+           >
+             View Atelier Details
+           </button>
         </div>
-        <div className="flex items-center justify-between mt-4">
-          <div className="flex items-baseline gap-1">
-            <span className="md:text-2xl text-2xs font-bold text-gray-900">₹{product.sale}</span>
-            {product.mrp && <span className="line-through text-gray-500 text-xs md:text-sm">₹{product.mrp}</span>}
-          </div>
-          
-          {/* ✅ CHANGED: Button text and function. It now calls the (modified) addCartItem which navigates. */}
-          <button
-            onClick={() => addCartItem(product)} 
-            className="flex items-center justify-center bg-gray-900 text-white px-2 md:px-4 py-2 rounded-lg font-semibold text-xs md:text-sm hover:bg-gray-700 transition-colors duration-300"
-          >
-            <span className='text-xs md:text-sm'>See more</span>
-          </button>
+      </div>
+
+      <div className="py-4 px-1 space-y-1">
+        <p className="text-[9px] tracking-[0.2em] text-gray-400 uppercase font-semibold">{product.category}</p>
+        <h3 className="text-sm font-medium tracking-wide text-gray-900 uppercase truncate">{product.name}</h3>
+        <div className="flex items-center gap-3 pt-1">
+          <span className="text-sm font-semibold text-gray-900">₹{product.sale}</span>
+          {product.mrp && <span className="line-through text-gray-400 text-xs font-light">₹{product.mrp}</span>}
         </div>
       </div>
     </div>
   );
 };
 
-
-// --- Main Product Listing Page Component ---
+// --- Main Listing Page ---
 export default function ProductListingPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -117,15 +81,11 @@ export default function ProductListingPage() {
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState(5000);
   const [maxPrice, setMaxPrice] = useState(5000);
-  const { dispatch: cartDispatch } = useCart();
   const { wishlist, dispatch: wishlistDispatch } = useWishlist();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate(); // 4. Initialize navigate here as well
+  const navigate = useNavigate();
   const initialCategory = searchParams.get('category');
-
-  const [selectedCategories, setSelectedCategories] = useState(
-    initialCategory ? [initialCategory] : []
-  );
+  const [selectedCategories, setSelectedCategories] = useState(initialCategory ? [initialCategory] : []);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -133,18 +93,13 @@ export default function ProductListingPage() {
         const querySnapshot = await getDocs(collection(db, "products"));
         const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         setProducts(productsData);
-
         if (productsData.length > 0) {
           const max = Math.ceil(Math.max(...productsData.map(p => Number(p.mrp) || 0)));
           setMaxPrice(max);
           setPriceRange(max);
         }
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        toast.error("Failed to fetch products.");
-      } finally {
-        setLoading(false);
-      }
+      } catch (error) { toast.error("Error connecting to collections."); }
+      finally { setLoading(false); }
     };
     fetchProducts();
   }, []);
@@ -156,144 +111,129 @@ export default function ProductListingPage() {
       .filter(p => (Number(p.sale) || 0) <= priceRange)
       .filter(p => selectedCategories.length === 0 || selectedCategories.includes(p.category));
 
-    if (selectedCategories.length > 0) {
-      filtered = filtered.filter(p => selectedCategories.includes(p.category));
-    }
     switch (sortOption) {
       case 'price-asc': filtered.sort((a, b) => (Number(a.sale) || 0) - (Number(b.sale) || 0)); break;
       case 'price-desc': filtered.sort((a, b) => (Number(b.sale) || 0) - (Number(a.sale) || 0)); break;
       case 'rating': filtered.sort((a, b) => (b.rating || 0) - (a.rating || 0)); break;
-      case 'newest': filtered.reverse(); break;
       default: break;
     }
     return filtered;
   }, [sortOption, selectedCategories, products, priceRange]);
 
-  const handleCategoryChange = (category) => {
-    setSelectedCategories(prev => prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]);
-  };
-
-  const handleClearFilters = () => {
-    setSelectedCategories([]);
-    setPriceRange(maxPrice);
-    setSortOption('featured');
-  };
-
-  // ✅ CHANGED: This function now navigates to the product page instead of adding to cart.
-  const addCartItem = (product) => {
-    // This button can't add to cart directly.
-    // It must navigate to the product page to force variant selection.
-    toast.info("Please select your options on the product page.", { autoClose: 2500 });
-    
-    // 5. Use navigate to go to the product details page
-    navigate(`/product/${product.id}`);
-  };
-
-  // This function is correct, as wishlist applies to the whole product
   const addWishlistItem = (product) => {
     const isWishlisted = wishlist.some(item => item.id === product.id);
     if (isWishlisted) {
       wishlistDispatch({ type: 'REMOVE_ITEM', payload: product.id });
-      toast.error(`${product.name} removed from wishlist.`);
+      toast.info("REMOVED FROM CURATION", { theme: 'light' });
     } else {
       wishlistDispatch({ type: 'ADD_ITEM', payload: product });
-      toast.success(`${product.name} added to wishlist!`);
+      toast.success("ADDED TO CURATION", { theme: 'light' });
     }
   };
 
-  // --- JSX (Unchanged) ---
   return (
-    <div className="bg-slate-50 min-h-screen">
-      <ToastContainer position="bottom-right" autoClose={2000} hideProgressBar={true} theme='dark' />
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <header className="text-center mb-12 mt-10">
-          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 tracking-tight">
-            Explore Our Collection
-          </h1>
-          <p className="mt-4 max-w-2xl mx-auto text-lg text-gray-600">
-            Find the perfect items to fit your style.
-          </p>
+    <div className="bg-white min-h-screen pt-12 pb-20 font-light">
+      <ToastContainer position="bottom-center" autoClose={1500} hideProgressBar theme="light" />
+      
+      <div className="container mx-auto px-4 md:px-12 lg:px-20">
+        {/* Editorial Header */}
+        <header className="text-center mb-16">
+          <h2 className="text-[10px] tracking-[0.4em] uppercase text-gray-400 font-bold mb-3 italic">Discover</h2>
+          <h1 className="text-3xl md:text-5xl font-light tracking-[0.1em] text-gray-900 uppercase">The <span className="font-semibold">Collections</span></h1>
+          <div className="h-[1px] w-12 bg-black mx-auto mt-6"></div>
         </header>
-        <div className="md:hidden mb-4">
-          <button onClick={() => setShowFilters(!showFilters)} className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-white rounded-lg shadow-md text-gray-700 font-semibold">
-            <Filter className="w-5 h-5" />{showFilters ? 'Hide' : 'Show'} Filters
-          </button>
-        </div>
-        <div className="flex flex-col md:flex-row items-start gap-8 w-full ">
-          <aside className={`w-full md:w-1/4 lg:w-1/5 p-6 bg-white rounded-lg shadow-md md:sticky md:top-24 border-2 border-gray-400 ${showFilters ? 'block' : 'hidden'} md:block`}>
-            <div className="flex justify-between items-center mb-6 ">
-              <h2 className="text-xl font-bold text-gray-800">Filters</h2>
-              <button onClick={() => setShowFilters(false)} className="md:hidden cursor-pointer"><X className="w-6 h-6 text-gray-600" /></button>
-            </div>
-            <div className="mb-6">
-              <label htmlFor="sort-options" className="block text-sm font-medium text-gray-700 mb-2">Sort by</label>
-              <div className="relative">
-                <select id="sort-options" value={sortOption} onChange={(e) => setSortOption(e.target.value)} className="w-full appearance-none bg-gray-50 border border-gray-300 rounded-lg py-2 pl-3 pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+
+        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-12">
+          
+          {/* Sidebar Filters */}
+          <aside className={`lg:col-span-3 space-y-10 ${showFilters ? 'block' : 'hidden'} lg:block`}>
+            <div className="space-y-8 sticky top-32">
+              
+              {/* Sort Section */}
+              <div className="space-y-4">
+                <h3 className="text-[11px] tracking-[0.3em] uppercase font-bold text-gray-900 border-b border-gray-100 pb-3">Refine By</h3>
+                <select 
+                  value={sortOption} 
+                  onChange={(e) => setSortOption(e.target.value)}
+                  className="w-full bg-transparent text-[12px] uppercase tracking-widest outline-none cursor-pointer py-2 border-b border-transparent focus:border-black transition-all"
+                >
                   <option value="featured">Featured</option>
                   <option value="price-asc">Price: Low to High</option>
                   <option value="price-desc">Price: High to Low</option>
-                  <option value="rating">Customer Rating</option>
-                  <option value="newest">Newest</option>
+                  <option value="rating">Top Rated</option>
                 </select>
-                <ChevronDown className="w-5 h-5 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
-            </div>
-            <div className="mb-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Price Range</h3>
-              <div className="space-y-2">
-                <input type="range" min="0" max={maxPrice} value={priceRange} onChange={(e) => setPriceRange(Number(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer " />
-                <div className="flex justify-between text-xs text-gray-500">
-                  <span>₹0</span>
-                  <span>Up to ₹{priceRange}</span>
+
+              {/* Category Section */}
+              <div className="space-y-4">
+                <h3 className="text-[11px] tracking-[0.3em] uppercase font-bold text-gray-900">Categories</h3>
+                <div className="flex flex-col gap-3">
+                  {allCategories.map(cat => (
+                    <label key={cat} className="flex items-center gap-3 group cursor-pointer">
+                      <input 
+                        type="checkbox" 
+                        checked={selectedCategories.includes(cat)}
+                        onChange={() => setSelectedCategories(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat])}
+                        className="w-3 h-3 accent-black border-gray-200"
+                      />
+                      <span className="text-[11px] uppercase tracking-widest text-gray-500 group-hover:text-black transition-colors">
+                        {cat}
+                      </span>
+                    </label>
+                  ))}
                 </div>
               </div>
-            </div>
-            <div className="mb-6">
-              <h3 className="text-sm font-medium text-gray-700 mb-2">Category</h3>
-              <div className="space-y-2">
-                {allCategories.map(category => (
-                  <div key={category} className="flex items-center">
-                    <input id={`category-${category}`} type="checkbox" checked={selectedCategories.includes(category)} onChange={() => handleCategoryChange(category)} className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                    <label htmlFor={`category-${category}`} className="ml-3 text-sm text-gray-600">{category.toUpperCase()}</label>
-                  </div>
-                ))}
+
+              {/* Price Range */}
+              <div className="space-y-4 pt-4">
+                <h3 className="text-[11px] tracking-[0.3em] uppercase font-bold text-gray-900">Price Cap</h3>
+                <input 
+                  type="range" min="0" max={maxPrice} value={priceRange} 
+                  onChange={(e) => setPriceRange(Number(e.target.value))} 
+                  className="w-full accent-black h-1 bg-gray-100 rounded-lg appearance-none cursor-pointer" 
+                />
+                <div className="flex justify-between text-[10px] tracking-widest text-gray-400 uppercase">
+                  <span>₹0</span>
+                  <span className="text-black font-medium">Up to ₹{priceRange}</span>
+                </div>
               </div>
+
+              <button 
+                onClick={() => { setSelectedCategories([]); setPriceRange(maxPrice); }}
+                className="text-[9px] tracking-[0.3em] uppercase text-gray-400 hover:text-black underline underline-offset-4 transition-all"
+              >
+                Reset All
+              </button>
             </div>
-            <button onClick={handleClearFilters} className="w-full text-sm text-center text-gray-500 hover:text-gray-800 font-medium">
-              Clear All Filters
-            </button>
           </aside>
-          <main className='w-full md:w-3/4 lg:w-4/5'>
-            {selectedCategories.length > 0 && (
-              <div className="mb-4 flex flex-wrap items-center gap-2">
-                <span className="text-sm font-medium">Active:</span>
-                {selectedCategories.map(cat => (
-                  <div key={cat} className="flex items-center gap-1.5 bg-gray-200 text-gray-700 text-xs font-semibold px-2.5 py-1 rounded-full">
-                    {cat} <X className="w-3 h-3 cursor-pointer" onClick={() => handleCategoryChange(cat)} />
-                  </div>
+
+          {/* Product Grid */}
+          <main className="lg:col-span-9">
+            {/* Mobile Filter Toggle */}
+            <div className="lg:hidden mb-8 border-y border-gray-100 py-4 flex justify-between items-center">
+              <button onClick={() => setShowFilters(!showFilters)} className="text-[11px] tracking-[0.2em] uppercase font-bold flex items-center gap-2">
+                <Filter size={14} /> {showFilters ? 'Close Filters' : 'Filter & Sort'}
+              </button>
+              <span className="text-[10px] text-gray-400 uppercase tracking-widest">{filteredAndSortedProducts.length} Results</span>
+            </div>
+
+            {loading ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-12">
+                {[...Array(6)].map((_, i) => (
+                   <div key={i} className="aspect-[3/4] bg-gray-50 animate-pulse rounded-sm" />
                 ))}
               </div>
-            )}
-            {loading ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => <ProductCardSkeleton key={i} />)}
+            ) : filteredAndSortedProducts.length > 0 ? (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-12 md:gap-x-10 md:gap-y-16">
+                {filteredAndSortedProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} addWishlistItem={addWishlistItem} wishlist={wishlist} />
+                ))}
               </div>
             ) : (
-              <>
-                
-                {filteredAndSortedProducts.length > 0 ? (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
-                    {filteredAndSortedProducts.map((product) => (
-                      <ProductCard key={product.id} product={product} addCartItem={addCartItem} addWishlistItem={addWishlistItem} wishlist={wishlist} />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-16 bg-white rounded-lg shadow-md">
-                    <h3 className="text-xl font-semibold text-gray-800">No Products Found</h3>
-                    <p className="text-gray-500 mt-2">Try adjusting your filters to find what you're looking for.</p>
-                  </div>
-                )}
-              </>
+              <div className="py-32 text-center space-y-4">
+                <p className="text-[11px] tracking-[0.4em] uppercase text-gray-400">No pieces found in this range</p>
+                <button onClick={() => setPriceRange(maxPrice)} className="text-xs uppercase underline underline-offset-8 font-medium">Clear All Filters</button>
+              </div>
             )}
           </main>
         </div>
