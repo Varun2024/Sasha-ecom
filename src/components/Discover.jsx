@@ -101,9 +101,9 @@ const ProductMarquee = () => {
     };
 
     return (
-        <section className="mx-4 rounded-3xl my-10 bg-gray-200 py-12 sm:py-16 h-screen justify-center flex flex-col border-2">
+        <section className="mx-4 rounded-3xl my-10 py-12 sm:py-16 h-screen justify-center flex flex-col">
             <div className="max-w-7xl mx-auto px-4">
-                <h2 className="text-3xl md:text-8xl font-bold text-center text-gray-800 mb-8">
+                <h2 className="text-3xl md:text-6xl font-bold text-center text-gray-800 mb-16">
                     Discover Our Products
                 </h2>
             </div>

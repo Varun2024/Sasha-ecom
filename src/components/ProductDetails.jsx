@@ -263,7 +263,7 @@ export default function ProductDetailsPage() {
         <div className="min-h-screen">
             <div className="container mx-auto px-4 py-8">
                 <ToastContainer autoClose={3000} hideProgressBar={true} theme="dark" />
-                <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20 mt-10">
+                <div className="bg-white/10 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-white/20">
                     <div className="grid lg:grid-cols-2 gap-8 p-8">
 
                         {/* --- Image Gallery --- */}

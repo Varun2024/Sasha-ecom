@@ -77,7 +77,7 @@ export const Hero = () => {
     }
 
     return (
-        <div className="relative overflow-hidden mt-20 md:h-[90vh] flex items-center bg-neutral-900 rounded-2xl mx-4 border-2 transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:rounded-2xl active:shadow-none">
+        <div className="relative overflow-hidden md:h-[90vh] flex items-center  ">
             {/* SLIDING CONTAINER FOR IMAGES */}
             <motion.div
                 drag="x"

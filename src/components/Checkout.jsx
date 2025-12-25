@@ -10,7 +10,7 @@ import { arrayUnion, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
 import DataContext from '../context/Context';
 
-const SHIPPING_COST = 50.00; // Fixed shipping cost for simplicity
+const SHIPPING_COST = 100.00; // Fixed shipping cost for simplicity
 
 // A component to display the current step in the checkout process
 const CheckoutStep = ({ number, title, active }) => (
@@ -207,7 +207,7 @@ export default function CheckoutPage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    amount: amountInPaise,
+                    amount: amountInPaise ,
                     customerName: selectedAddress.fullName,
                     customerPhone: selectedAddress.phone,
                     customerEmail: selectedAddress.email || currentUser.user.email,

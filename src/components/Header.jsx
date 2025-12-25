@@ -131,7 +131,7 @@ const Header = () => {
 
     return (
         <>
-            <header className="fixed top-0 z-40 w-full text-black bg-white/80 backdrop-blur-lg shadow-md flex justify-between items-center py-2 px-4 md:px-8">
+            <header className="w-full text-black bg-white/95 backdrop-blur-lg shadow-md flex justify-between items-center py-2 px-4 md:px-8">
                 <div onClick={() => navigate('/')} className="cursor-pointer">
                     <img src="/logo5-no.png" className="md:w-36 w-28 " alt="" />
                     {/* <div className="w-32 h-16 bg-[url('/public/logo1.png')] bg-cover bg-center" /> */}

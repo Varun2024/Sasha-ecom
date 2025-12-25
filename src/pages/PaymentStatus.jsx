@@ -39,6 +39,10 @@ const PaymentStatus = () => {
         return;
       }
 
+      if (status === 'failure') {
+        return; // Do not create order if payment failed
+      }
+
       try {
 
         // Retrieve cart and address from localStorage, where CheckoutPage should have saved them
