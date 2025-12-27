@@ -3,7 +3,7 @@ import ProductCard from './ProductCard';
 import { useNavigate } from 'react-router-dom';
 import DataContext from '../context/Context';
 import { useContext, useEffect, useState } from 'react';
-import { collection, getDocs, limit, query } from 'firebase/firestore';
+import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
 
 const NewInSection = () => {
@@ -15,7 +15,7 @@ const NewInSection = () => {
         const fetchProducts = async () => {
             try {
                 // Optimized query fetching only the required 4 items
-                const q = query(collection(db, 'products'), limit(4));
+                const q = query(collection(db, 'products'), orderBy('id', 'desc'), limit(4));  
                 const res = await getDocs(q);
                 const productsData = res.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 setProducts(productsData);
@@ -28,7 +28,7 @@ const NewInSection = () => {
 
     const handleClick = (product) => {
         setProductData(product);
-        navigate(`/product/${product.id}`);
+        window.open(`/product/${product.id}`);
         localStorage.setItem("productData", JSON.stringify(product));
     }
 

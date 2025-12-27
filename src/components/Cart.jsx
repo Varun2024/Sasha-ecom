@@ -62,7 +62,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
                         <p className="text-sm font-semibold text-gray-900 tracking-wider">₹{(item.sale * item.quantity).toFixed(2)}</p>
                         <button
                             onClick={() => onRemove(item.id, item.name)}
-                            className="text-[9px] tracking-[0.2em] uppercase text-gray-300 hover:text-red-500 transition-colors mt-2"
+                            className="text-[9px] tracking-[0.2em] uppercase text-red-300 hover:text-red-500 transition-colors mt-2"
                         >
                             Remove
                         </button>

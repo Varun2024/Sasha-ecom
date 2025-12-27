@@ -46,8 +46,8 @@ const HorizontalScrollCarousel = () => {
                 const categoryMap = new Map();
                 products.forEach(product => {
                     if (product.category && !categoryMap.has(product.category)) {
-                        const firstImage = (product.imageUrls && product.imageUrls.length > 0)
-                            ? product.imageUrls[0]
+                        const firstImage = (product.variants && product.variants.length > 0 && product.variants[0].imageUrls && product.variants[0].imageUrls.length > 0)
+                            ? product.variants[0].imageUrls[0]
                             : 'https://placehold.co/600x800/fafafa/cccccc?text=Atelier';
 
                         categoryMap.set(product.category, {

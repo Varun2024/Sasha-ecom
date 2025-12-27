@@ -17,7 +17,9 @@ import { Heart, Menu, Search, ShoppingBag, User, X, LoaderCircle } from 'lucide-
 import ProfileContainer from './ProfileContainer';
 
 const navLinks = [
-    { name: 'Products', path: '/all' },
+    { name: 'Home', path: '/' },
+    { name: 'Shop', path: '/all' },
+    // { name: 'New Arrivals', path: '' },
     { name: 'Store Locator', path: '/store-locator' },
 ];
 
@@ -42,7 +44,7 @@ const SearchResults = ({ results, loading, query, onResultClick }) => {
 
     return (
         <div className="absolute top-full left-0 mt-2 w-full md:w-[400px] max-h-[70vh] overflow-y-auto bg-white shadow-2xl border border-gray-50 z-[100] rounded-sm">
-            <div className="p-3 border-b border-gray-50 text-[10px] tracking-[0.2em] text-gray-400 uppercase font-medium">Search Results</div>
+            <div className="p-3 border-b border-gray-300 text-[10px] tracking-[0.2em] text-gray-400 uppercase font-medium">Search Results</div>
             <ul>
                 {results.map(product => (
                     <li key={product.id} onClick={() => onResultClick(product.id)} className="flex items-center gap-4 p-4 hover:bg-[#fafafa] cursor-pointer transition-colors border-b border-gray-50 last:border-b-0">
@@ -126,7 +128,7 @@ const Header = () => {
 
     return (
         <>
-            <header className="fixed top-0 left-0 w-full z-[80] bg-white/95 backdrop-blur-md border-b border-gray-50 h-16 md:h-20 flex justify-between items-center px-4 md:px-12">
+            <header className="fixed top-0 left-0 w-full z-[80] bg-white/95 backdrop-blur-md border-b border-gray-200 h-16 md:h-20 flex justify-between items-center px-4 md:px-12">
                 {/* Logo Section */}
                 <div onClick={() => navigate('/')} className="cursor-pointer transition-opacity hover:opacity-80">
                     <img src="/logo5-no.png" className="w-24 md:w-32 object-contain" alt="Sasha Logo" />
@@ -138,7 +140,7 @@ const Header = () => {
                         {navLinks.map((link) => (
                             <li key={link.name}>
                                 <div 
-                                    onClick={() => navigate(link.path)} 
+                                    onClick={() => window.location.href = link.path} 
                                     className="hover:text-black transition-colors cursor-pointer relative group pb-1"
                                 >
                                     {link.name}
@@ -150,12 +152,12 @@ const Header = () => {
 
                     {/* Desktop Search Bar */}
                     <div className="relative ml-4" ref={searchRef}>
-                        <div className={`flex items-center border-b ${isSearchFocused ? 'border-black' : 'border-gray-100'} transition-all duration-300`}>
+                        <div className={`flex items-center border-b bg-cyan-50/50 ${isSearchFocused ? 'border-black' : 'border-gray-100'} transition-all duration-300`}>
                             <Search className="text-gray-400" size={16} strokeWidth={1.5} />
                             <input
                                 type="text"
-                                className="bg-transparent pl-3 pr-2 py-1 text-[12px] w-48 lg:w-56 focus:outline-none placeholder:text-gray-300 uppercase tracking-wider font-light"
-                                placeholder="SEARCH"
+                                className="bg-transparent pl-3 pr-2 py-1 text-[12px] w-48 lg:w-56 focus:outline-none placeholder:text-gray-400 tracking-wider font-light"
+                                placeholder="Search for products..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 onFocus={() => setIsSearchFocused(true)}

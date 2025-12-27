@@ -29,7 +29,8 @@ const ProductCard = ({ product, addWishlistItem, wishlist }) => {
       <div className="relative overflow-hidden bg-[#fafafa] aspect-[3/4]">
         <div 
           className="cursor-pointer h-full w-full" 
-          onClick={() => navigate(`/product/${product.id}`)}
+          // onClick={() => window.location.href = `/product/${product.id}`}
+          onClick={() => window.open(`/product/${product.id}`, '_blank','noopener,noreferrer')}
         >
           <img
             src={displayImage}

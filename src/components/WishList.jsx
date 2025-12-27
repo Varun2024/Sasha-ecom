@@ -70,7 +70,7 @@ const WishlistItem = ({ item }) => {
                 </button>
                 <button 
                     onClick={handleRemove} 
-                    className="flex items-center justify-center gap-2 text-[10px] tracking-widest uppercase text-gray-300 hover:text-red-500 transition-colors py-2"
+                    className="flex items-center justify-center gap-2 text-[10px] tracking-widest uppercase text-red-300 hover:text-red-500 transition-colors py-2"
                 >
                     <Trash2 className="w-3.5 h-3.5" /> Remove
                 </button>
