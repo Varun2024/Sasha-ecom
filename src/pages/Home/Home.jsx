@@ -33,10 +33,6 @@ const Home = () => {
             {/* 4. Categorical Discovery */}
             <section className="bg-[#fcfcfc] border-y border-gray-50">
                 <div className="container mx-auto px-4 md:px-12">
-                    <div className="mb-12 text-center">
-                        <h2 className="text-[10px] tracking-[0.4em] uppercase text-gray-400 font-bold mb-2">Collections</h2>
-                        <h3 className="text-xl md:text-2xl font-light tracking-widest uppercase text-gray-900">Shop by Category</h3>
-                    </div>
                     <ShopByCategory />
                 </div>
             </section>

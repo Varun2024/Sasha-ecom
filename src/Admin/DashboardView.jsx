@@ -1,176 +1,47 @@
-// import React, { useState, useEffect } from 'react';
-// import { collection, getDocs } from 'firebase/firestore';
-// import { db } from '../firebase/firebaseConfig';
-// // --- Helper Components & Functions ---
-
-// const LoadingSpinner = () => (
-//     <div className="text-center py-20">
-//         <svg className="animate-spin h-10 w-10 text-indigo-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-//             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-//             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-//         </svg>
-//         <p className="mt-4 text-gray-600 font-medium">Loading dashboard data...</p>
-//     </div>
-// );
-
-// const getStatusColor = (status) => {
-//     switch (status) {
-//         case "Shipped": return "bg-blue-100 text-blue-800";
-//         case "Processing": return "bg-yellow-100 text-yellow-800";
-//         case "Delivered": return "bg-green-100 text-green-800";
-//         case "Pending": return "bg-orange-100 text-orange-800";
-//         case "Completed": return "bg-green-100 text-green-800";
-//         default: return "bg-gray-100 text-gray-800";
-//     }
-// };
-
-// const SummaryCard = ({ title, value, change, changeType }) => (
-//      <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 ">
-//         <p className="text-sm font-medium text-gray-500">{title}</p>
-//         <p className="mt-2 text-3xl font-bold text-gray-900">{value}</p>
-//         {change && (
-//             <p className={`mt-1 text-sm ${changeType === 'increase' ? 'text-green-600' : 'text-red-600'}`}>
-//                 {change} vs last month
-//             </p>
-//         )}
-//     </div>
-// );
-
-// // --- Main Component ---
-// const DashboardView = () => {
-//     const [summaryData, setSummaryData] = useState([]);
-//     const [recentOrders, setRecentOrders] = useState([]);
-//     const [loading, setLoading] = useState(true);
-//     const [error, setError] = useState(null);
-
-//     useEffect(() => {
-//         if (!db) {
-//             setLoading(false);
-//             setError("Firestore database instance is not available.");
-//             return;
-//         }
-
-//         const fetchDashboardData = async () => {
-//             setLoading(true);
-//             try {
-//                 const usersCollectionRef = collection(db, "users");
-//                 const querySnapshot = await getDocs(usersCollectionRef);
-                
-//                 const allOrders = [];
-//                 const totalCustomers = querySnapshot.size;
-
-//                 querySnapshot.forEach((userDoc) => {
-//                     const userData = userDoc.data();
-//                     if (userData.orders && Array.isArray(userData.orders)) {
-//                         userData.orders.forEach((order, index) => {
-//                              const total = order.items.reduce((sum, item) => sum + (parseFloat(item.sale) || 0), 0);
-//                             allOrders.push({
-//                                 ...order,
-//                                 id: `${userDoc.id}-ORD${String(index + 1).padStart(3, '0')}`,
-//                                 customer: userData.firstName || 'N/A',
-//                                 date: userData.createdAt?.toDate().toLocaleDateString() || 'N/A',
-//                                 total: total,
-//                                 status: order.status || 'Completed',
-//                                 firestoreDate: userData.createdAt?.toDate() || new Date(0)
-//                             });
-//                         });
-//                     }
-//                 });
-
-//                 allOrders.sort((a, b) => b.firestoreDate - a.firestoreDate);
-                
-//                 // Calculate summary metrics
-//                 const totalRevenue = allOrders.reduce((sum, order) => sum + order.total, 0);
-//                 const totalOrdersCount = allOrders.length;
-//                 const pendingOrders = allOrders.filter(o => o.status === 'Pending' || o.status === 'Processing').length;
-
-//                 const calculatedSummary = [
-//                     { title: 'Total Revenue', value: `₹${totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
-//                     { title: 'Total Orders', value: totalOrdersCount },
-//                     { title: 'Total Customers', value: totalCustomers },
-//                     { title: 'Pending Orders', value: pendingOrders },
-//                 ];
-                
-//                 setSummaryData(calculatedSummary);
-//                 setRecentOrders(allOrders.slice(0, 5));
-
-//             } catch (err) {
-//                 console.error("Error fetching dashboard data:", err);
-//                 setError("Failed to fetch dashboard data.");
-//             } finally {
-//                 setLoading(false);
-//             }
-//         };
-
-//         fetchDashboardData();
-//     }, []);
-
-
-//     if (loading) return <LoadingSpinner />;
-    
-//     if (error) return <p className="text-red-500 text-center py-10">{error}</p>;
-
-//     return (
-//         <div className="space-y-8 relative top-10 h-screen px-6 md:px-10 lg:px-20 pb-10">
-//             {/* Summary Cards */}
-//             <div className=" grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-//                 {summaryData.map((item, index) => (
-//                     <SummaryCard key={index} {...item} />
-//                 ))}
-//             </div>
-
-//             {/* Recent Orders Table */}
-//             <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300">
-//                 <h3 className="text-xl font-semibold text-gray-800 mb-4">Recent Orders</h3>
-//                 <div className="overflow-x-auto">
-//                     <table className="w-full text-left">
-//                         <thead>
-//                             <tr className="border-b bg-gray-50">
-//                                 <th className="p-4 text-sm font-semibold text-gray-600">Order ID</th>
-//                                 <th className="p-4 text-sm font-semibold text-gray-600">Customer</th>
-//                                 <th className="p-4 text-sm font-semibold text-gray-600 hidden md:table-cell">Date</th>
-//                                 <th className="p-4 text-sm font-semibold text-gray-600">Total</th>
-//                                 <th className="p-4 text-sm font-semibold text-gray-600">Status</th>
-//                             </tr>
-//                         </thead>
-//                         <tbody>
-//                             {recentOrders.length > 0 ? recentOrders.map((order) => (
-//                                 <tr key={order.id} className="border-b hover:bg-gray-50">
-//                                     <td className="p-4 text-sm text-gray-800 font-medium">{order.id.split('-')[1]}</td>
-//                                     <td className="p-4 text-sm text-gray-600">{order.customer}</td>
-//                                     <td className="p-4 text-sm text-gray-600 hidden md:table-cell">{order.date}</td>
-//                                     <td className="p-4 text-sm text-gray-800 font-medium">₹{order.total.toFixed(2)}</td>
-//                                     <td className="p-4 text-sm">
-//                                         <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
-//                                             {order.status}
-//                                         </span>
-//                                     </td>
-//                                 </tr>
-//                             )) : (
-//                                 <tr>
-//                                     <td colSpan="5" className="text-center py-10 text-gray-500">No recent orders found.</td>
-//                                 </tr>
-//                             )}
-//                         </tbody>
-//                     </table>
-//                 </div>
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default DashboardView;
-
-
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
+import { TrendingUp, ShoppingBag, Users, Clock, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
-// --- Helper Components & Functions (No changes here) ---
-const LoadingSpinner = () => ( <div className="text-center py-20"> <svg className="animate-spin h-10 w-10 text-indigo-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"> <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle> <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path> </svg> <p className="mt-4 text-gray-600 font-medium">Loading dashboard data...</p> </div> );
-const getStatusColor = (status) => { switch (status) { case "Shipped": return "bg-blue-100 text-blue-800"; case "Processing": return "bg-yellow-100 text-yellow-800"; case "Delivered": return "bg-green-100 text-green-800"; case "Pending": return "bg-orange-100 text-orange-800"; case "Completed": return "bg-green-100 text-green-800"; default: return "bg-gray-100 text-gray-800"; } };
-const SummaryCard = ({ title, value, change, changeType }) => ( <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300 "> <p className="text-sm font-medium text-gray-500">{title}</p> <p className="mt-2 text-3xl font-bold text-gray-900">{value}</p> {change && ( <p className={`mt-1 text-sm ${changeType === 'increase' ? 'text-green-600' : 'text-red-600'}`}> {change} vs last month </p> )} </div> );
+// --- Minimalist Helper Components ---
+const LoadingSpinner = () => (
+    <div className="flex flex-col items-center justify-center py-32 space-y-4">
+        <div className="w-8 h-8 border-2 border-gray-100 border-t-black rounded-full animate-spin"></div>
+        <p className="text-[10px] tracking-[0.3em] uppercase text-gray-400 font-bold">Synchronizing Data...</p>
+    </div>
+);
 
+const getStatusStyles = (status) => {
+    switch (status) {
+        case "Delivered":
+        case "Completed":
+            return "text-green-600 bg-green-50";
+        case "Processing":
+            return "text-amber-600 bg-amber-50";
+        case "Shipped":
+            return "text-blue-600 bg-blue-50";
+        default:
+            return "text-gray-500 bg-gray-50";
+    }
+};
+
+const SummaryCard = ({ title, value, icon: Icon }) => (
+    <div className="bg-white p-8 border border-gray-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] rounded-sm group hover:border-black transition-all duration-500">
+        <div className="flex justify-between items-start">
+            <p className="text-[10px] tracking-[0.2em] uppercase font-bold text-gray-400">{title}</p>
+            <Icon size={16} className="text-gray-300 group-hover:text-black transition-colors" strokeWidth={1.5} />
+        </div>
+        <p className="mt-4 text-2xl font-light tracking-tight text-gray-900 uppercase italic">
+            {value}
+        </p>
+        <div className="mt-4 flex items-center gap-2">
+            <span className="flex items-center text-[9px] font-bold text-green-600 uppercase tracking-widest">
+                <ArrowUpRight size={10} className="mr-1" /> 12%
+            </span>
+            <span className="text-[9px] text-gray-300 uppercase tracking-widest font-medium">Growth Index</span>
+        </div>
+    </div>
+);
 
 // --- Main Component ---
 const DashboardView = () => {
@@ -183,132 +54,111 @@ const DashboardView = () => {
         const fetchDashboardData = async () => {
             setLoading(true);
             try {
-                const usersCollectionRef = collection(db, "users");
-                const querySnapshot = await getDocs(usersCollectionRef);
-                
+                const querySnapshot = await getDocs(collection(db, "users"));
                 const allOrders = [];
-                // ➕ ADDED: A Set to track processed order IDs to prevent duplicates
                 const processedOrderIds = new Set();
                 const totalCustomers = querySnapshot.size;
 
-                for (const userDoc of querySnapshot.docs) {
+                querySnapshot.docs.forEach(userDoc => {
                     const userData = userDoc.data();
                     if (userData.orders && Array.isArray(userData.orders)) {
                         userData.orders.forEach((order) => {
-                            // ✅ MODIFIED: Get the real transaction ID from the order object
                             const transactionId = order.orderId;
-
-                            // ✅ ADDED: A critical check to ensure the ID is valid
-                            if (typeof transactionId !== 'string' || transactionId.length === 0) {
-                                console.warn("Skipping an order because it's missing a valid transaction ID.", order);
-                                return; // Skip to the next order
-                            }
-                            
-                            // Process the order only if its ID hasn't been seen before
-                            if (!processedOrderIds.has(transactionId)) {
+                            if (transactionId && !processedOrderIds.has(transactionId)) {
                                 const total = order.items.reduce((sum, item) => sum + (parseFloat(item.sale) || 0), 0);
                                 allOrders.push({
                                     ...order,
-                                    // ✅ CHANGED: Use the real transaction ID
                                     id: transactionId,
-                                    customer: userData.firstName || 'N/A',
-                                    // ✅ CHANGED: Use the order's own date field, not the user's creation date
-                                    date: order.date?.toDate().toLocaleDateString() || 'N/A',
+                                    customer: userData.firstName || userData.displayName || 'Guest',
+                                    date: order.orderDate ? new Date(order.orderDate).toLocaleDateString('en-GB') : 'Recently',
                                     total: total,
-                                    status: order.status || 'Completed',
-                                    firestoreDate: order.date?.toDate() || new Date(0)
+                                    status: order.orderStatus || 'Confirmed',
+                                    rawDate: order.orderDate || 0
                                 });
-
-                                // ➕ ADDED: Mark this ID as processed
                                 processedOrderIds.add(transactionId);
                             }
                         });
                     }
-                }
+                });
 
-                // Sort all unique orders by date
-                allOrders.sort((a, b) => b.firestoreDate - a.firestoreDate);
-                
-                // Calculate summary metrics from the de-duplicated list
+                allOrders.sort((a, b) => b.rawDate - a.rawDate);
                 const totalRevenue = allOrders.reduce((sum, order) => sum + order.total, 0);
-                const totalOrdersCount = allOrders.length;
-                const pendingOrders = allOrders.filter(o => o.status === 'Pending' || o.status === 'Processing').length;
 
-                const calculatedSummary = [
-                    { title: 'Total Revenue', value: `₹${totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}` },
-                    { title: 'Total Orders', value: totalOrdersCount },
-                    { title: 'Total Customers', value: totalCustomers },
-                    { title: 'Pending Orders', value: pendingOrders },
-                ];
-                
-                setSummaryData(calculatedSummary);
-                setRecentOrders(allOrders.slice(0, 5));
-
+                setSummaryData([
+                    { title: 'Total Revenue', value: `₹${totalRevenue.toLocaleString('en-IN')}`, icon: TrendingUp },
+                    { title: 'Total Orders', value: allOrders.length, icon: ShoppingBag },
+                    { title: 'Registered Users', value: totalCustomers, icon: Users },
+                    { title: 'Active Queues', value: allOrders.filter(o => o.status === 'Processing').length, icon: Clock },
+                ]);
+                setRecentOrders(allOrders.slice(0, 8));
             } catch (err) {
-                console.error("Error fetching dashboard data:", err);
-                setError("Failed to fetch dashboard data.");
+                setError("FAILED TO RETRIEVE METRICS");
             } finally {
                 setLoading(false);
             }
         };
-
-        if (db) {
-            fetchDashboardData();
-        } else {
-            setLoading(false);
-            setError("Firestore database instance is not available.");
-        }
+        fetchDashboardData();
     }, []);
 
-
     if (loading) return <LoadingSpinner />;
-    
-    if (error) return <p className="text-red-500 text-center py-10">{error}</p>;
+    if (error) return <p className="text-center py-20 text-[11px] tracking-widest text-red-400 uppercase">{error}</p>;
 
     return (
-        <div className="space-y-8 relative top-10 h-screen px-6 md:px-10 lg:px-20 pb-10">
-            {/* Summary Cards */}
-            <div className=" grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="animate-in fade-in duration-700">
+            {/* KPI GRID */}
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {summaryData.map((item, index) => (
                     <SummaryCard key={index} {...item} />
                 ))}
             </div>
 
-            {/* Recent Orders Table */}
-            <div className="bg-white p-6 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Recent Orders</h3>
+            {/* RECENT ACTIVITY */}
+            <div className="bg-white border border-gray-100 rounded-sm shadow-sm overflow-hidden">
+                <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-[#fafafa]">
+                    <div>
+                        <h3 className="text-[11px] tracking-[0.4em] uppercase font-bold text-gray-900">Recent Transactions</h3>
+                        <p className="text-[9px] tracking-widest text-gray-400 uppercase mt-1">Live Atelier Feed</p>
+                    </div>
+                    <button className="text-[10px] tracking-widest uppercase font-bold text-gray-400 hover:text-black transition-colors border-b border-gray-200">
+                        View All
+                    </button>
+                </div>
+
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
                         <thead>
-                            <tr className="border-b bg-gray-50">
-                                <th className="p-4 text-sm font-semibold text-gray-600">Order ID</th>
-                                <th className="p-4 text-sm font-semibold text-gray-600">Customer</th>
-                                <th className="p-4 text-sm font-semibold text-gray-600 hidden md:table-cell">Date</th>
-                                <th className="p-4 text-sm font-semibold text-gray-600">Total</th>
-                                <th className="p-4 text-sm font-semibold text-gray-600">Status</th>
+                            <tr className="bg-white border-b border-gray-50">
+                                <th className="p-6 text-[10px] tracking-[0.2em] uppercase font-bold text-gray-400">Order Ref</th>
+                                <th className="p-6 text-[10px] tracking-[0.2em] uppercase font-bold text-gray-400">Client</th>
+                                <th className="p-6 text-[10px] tracking-[0.2em] uppercase font-bold text-gray-400 hidden md:table-cell">Date</th>
+                                <th className="p-6 text-[10px] tracking-[0.2em] uppercase font-bold text-gray-400">Value</th>
+                                <th className="p-6 text-[10px] tracking-[0.2em] uppercase font-bold text-gray-400 text-right">Fulfillment</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            {recentOrders.length > 0 ? recentOrders.map((order) => (
-                                <tr key={order.id} className="border-b hover:bg-gray-50">
-                                    {/* ✅ CHANGED: Display a truncated version of the real ID */}
-                                    <td className="p-4 text-sm text-gray-800 font-medium" title={order.id}>
-                                        {order.id.substring(0, 8)}...
+                        <tbody className="divide-y divide-gray-50">
+                            {recentOrders.map((order) => (
+                                <tr key={order.id} className="group hover:bg-[#fafafa] transition-colors">
+                                    <td className="p-6">
+                                        <span className="text-[12px] font-medium tracking-tighter text-gray-900 uppercase">
+                                            #{order.id.substring(order.id.length - 8)}
+                                        </span>
                                     </td>
-                                    <td className="p-4 text-sm text-gray-600">{order.customer}</td>
-                                    <td className="p-4 text-sm text-gray-600 hidden md:table-cell">{order.date}</td>
-                                    <td className="p-4 text-sm text-gray-800 font-medium">₹{order.total.toFixed(2)}</td>
-                                    <td className="p-4 text-sm">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
+                                    <td className="p-6">
+                                        <span className="text-[12px] font-medium text-gray-900 uppercase tracking-tight">{order.customer}</span>
+                                    </td>
+                                    <td className="p-6 hidden md:table-cell">
+                                        <span className="text-[11px] text-gray-400 font-light uppercase tracking-widest">{order.date}</span>
+                                    </td>
+                                    <td className="p-6">
+                                        <span className="text-[12px] font-bold text-gray-900">₹{order.total.toLocaleString('en-IN')}</span>
+                                    </td>
+                                    <td className="p-6 text-right">
+                                        <span className={`px-3 py-1 text-[9px] font-bold tracking-[0.2em] uppercase rounded-full ${getStatusStyles(order.status)}`}>
                                             {order.status}
                                         </span>
                                     </td>
                                 </tr>
-                            )) : (
-                                <tr>
-                                    <td colSpan="5" className="text-center py-10 text-gray-500">No recent orders found.</td>
-                                </tr>
-                            )}
+                            ))}
                         </tbody>
                     </table>
                 </div>

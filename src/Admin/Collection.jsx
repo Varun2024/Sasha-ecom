@@ -1,299 +1,276 @@
-import { Trash2, UploadCloud } from "lucide-react";
+/* eslint-disable no-unused-vars */
+import { Trash2, UploadCloud, X, ImageIcon, Calendar, Layers } from "lucide-react";
 import { useEffect, useState } from "react";
 import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query } from "firebase/firestore";
-import { db } from "../firebase/firebaseConfig"; // make sure this path is correct
+import { db } from "../firebase/firebaseConfig";
 import { serverTimestamp } from "firebase/firestore";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 
 const CollectionsView = () => {
-  const [description, setDescription] = useState("");
-  const [files, setFiles] = useState([]);
-  const [previews, setPreviews] = useState([]);
-  const [collections, setCollections] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isUploading, setIsUploading] = useState(false);
-  const [selectedCollection, setSelectedCollection] = useState(null);
-  // ✅ Fetch collections from Firestore
-  useEffect(() => {
-    const fetchCollections = async () => {
-      setIsLoading(true);
-      try {
-        const q = query(collection(db, "collections"), orderBy("createdAt", "desc"));
-        const querySnapshot = await getDocs(q);
+    const [description, setDescription] = useState("");
+    const [files, setFiles] = useState([]);
+    const [previews, setPreviews] = useState([]);
+    const [collections, setCollections] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [isUploading, setIsUploading] = useState(false);
+    const [selectedCollection, setSelectedCollection] = useState(null);
 
-        const data = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+    // ✅ REFINED FETCH: Ensures selectedCollection is set after state update
+    useEffect(() => {
+        const fetchCollections = async () => {
+            setIsLoading(true);
+            try {
+                const q = query(collection(db, "collections"), orderBy("createdAt", "desc"));
+                const querySnapshot = await getDocs(q);
+                const data = querySnapshot.docs.map((doc) => ({
+                    id: doc.id,
+                    ...doc.data(),
+                }));
+                
+                setCollections(data);
+                // Set the default view to the most recent collection
+                if (data.length > 0) {
+                    setSelectedCollection(data[0]);
+                }
+            } catch (err) {
+                console.error("Error fetching collections:", err);
+                toast.error("COULD NOT SYNC ARCHIVE");
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchCollections();
+    }, []);
 
-        setCollections(data);
-        if (data.length > 0) {
-          setSelectedCollection(data[0]);
-        }
-      } catch (err) {
-        console.error("Error fetching collections:", err);
-      } finally {
-        setIsLoading(false);
-      }
+    const handleCollectionSelect = (e) => {
+        const collectionId = e.target.value;
+        const collectionToView = collections.find(c => c.id === collectionId);
+        setSelectedCollection(collectionToView);
     };
 
-    fetchCollections();
-  }, []);
-
-  const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
-    setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
-
-    selectedFiles.forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviews((prevPreviews) => [
-          ...prevPreviews,
-          { src: reader.result, name: file.name },
-        ]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const removePreview = (name) => {
-    setFiles(files.filter((f) => f.name !== name));
-    setPreviews(previews.filter((p) => p.name !== name));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (files.length === 0 || !description) {
-      alert("Please add at least one image and a description.");
-      return;
-    }
-    setIsUploading(true);
-
-    try {
-      // ✅ 1. Upload images to backend → Cloudinary
-      const uploadPromises = files.map(async (file) => {
-        const formData = new FormData();
-        formData.append("image", file); // must match multer field name
-
-        const res = await fetch("https://sasha-backend.onrender.com/api/upload", {
-          method: "POST",
-          body: formData,
+    const handleFileChange = (e) => {
+        const selectedFiles = Array.from(e.target.files);
+        setFiles((prevFiles) => [...prevFiles, ...selectedFiles]);
+        selectedFiles.forEach((file) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviews((prevPreviews) => [
+                    ...prevPreviews,
+                    { src: reader.result, name: file.name },
+                ]);
+            };
+            reader.readAsDataURL(file);
         });
+    };
 
-        if (!res.ok) {
-          throw new Error(`Upload failed: ${res.statusText}`);
+    const removePreview = (name) => {
+        setFiles(files.filter((f) => f.name !== name));
+        setPreviews(previews.filter((p) => p.name !== name));
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (files.length === 0 || !description) {
+            toast.error("ASSETS AND DESCRIPTION REQUIRED");
+            return;
         }
+        setIsUploading(true);
+        const toastId = toast.loading("UPLOADING TO ATELIER...");
 
-        const data = await res.json();
-        return data.data.url; // Cloudinary URL from backend
-      });
+        try {
+            const uploadPromises = files.map(async (file) => {
+                const formData = new FormData();
+                formData.append("image", file);
+                const res = await fetch("https://sasha-backend.onrender.com/api/upload", {
+                    method: "POST",
+                    body: formData,
+                });
+                if (!res.ok) throw new Error("Upload failed");
+                const data = await res.json();
+                return data.data.url;
+            });
 
-      const imageUrls = await Promise.all(uploadPromises);
+            const imageUrls = await Promise.all(uploadPromises);
 
-      // ✅ 2. Save collection in Firestore
-      const docRef = await addDoc(collection(db, "collections"), {
-        description,
-        imageUrls,
-        createdAt: serverTimestamp(),
-      });
+            const docRef = await addDoc(collection(db, "collections"), {
+                description,
+                imageUrls,
+                createdAt: serverTimestamp(),
+            });
 
-      const newCollection = {
-        id: docRef.id,
-        description,
-        imageUrls,
-        createdAt: new Date().toISOString(),
-      };
+            const newColl = { 
+                id: docRef.id, 
+                description, 
+                imageUrls, 
+                createdAt: { toDate: () => new Date() } 
+            };
 
-      setCollections((prev) => [newCollection, ...prev]);
-      setSelectedCollection(newCollection);
-      // ✅ 3. Reset form
-      setDescription("");
-      setFiles([]);
-      setPreviews([]);
-      alert("Collection saved successfully!");
-    } catch (error) {
-      console.error("Failed to save collection:", error);
-      alert("An error occurred. Please try again.");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-  const handleDelete = async (collectionId) => {
-    if (!window.confirm("Are you sure you want to delete this collection? This action cannot be undone.")) {
-      return;
-    }
-    try {
-      await deleteDoc(doc(db, "collections", collectionId));
-      const updatedCollections = collections.filter(c => c.id !== collectionId);
-      setCollections(updatedCollections);
+            setCollections((prev) => [newColl, ...prev]);
+            setSelectedCollection(newColl);
+            setDescription("");
+            setFiles([]);
+            setPreviews([]);
+            toast.update(toastId, { render: "COLLECTION PUBLISHED", type: "success", isLoading: false, autoClose: 2000 });
+        } catch (error) {
+            toast.update(toastId, { render: "PUBLISH FAILED", type: "error", isLoading: false, autoClose: 3000 });
+        } finally {
+            setIsUploading(false);
+        }
+    };
 
-      // Set selected collection to the new first one, or null if empty
-      setSelectedCollection(updatedCollections.length > 0 ? updatedCollections[0] : null);
-      toast.success("Collection deleted successfully!");
-    } catch (error) {
-      console.error("Error deleting collection:", error);
-      toast.error("Failed to delete collection.");
-    }
-  };
+    const handleDelete = async (collectionId) => {
+        if (!window.confirm("PERMANENTLY REMOVE THIS COLLECTION?")) return;
+        try {
+            await deleteDoc(doc(db, "collections", collectionId));
+            const updated = collections.filter(c => c.id !== collectionId);
+            setCollections(updated);
+            setSelectedCollection(updated.length > 0 ? updated[0] : null);
+            toast.success("REMOVED FROM ARCHIVE");
+        } catch (error) {
+            toast.error("DELETE FAILED");
+        }
+    };
 
-  const handleCollectionSelect = (e) => {
-    const collectionId = e.target.value;
-    const collectionToView = collections.find(c => c.id === collectionId);
-    setSelectedCollection(collectionToView);
-  };
-  return (
-    <div className="space-y-8">
-      {/* Add New Collection */}
-      <div className="bg-white p-6 rounded-xl shadow-sm">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">
-          Add New Collection
-        </h3>
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Collection Description
-            </label>
-            <textarea
-              id="description"
-              rows="3"
-              className="w-full p-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., Spring 2025 Collection"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            ></textarea>
-          </div>
+    return (
+        <div className="max-w-7xl pb-20 animate-in fade-in duration-700 h-full">
+            <ToastContainer position="bottom-right" theme="light" />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Collection Images
-            </label>
-            <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-              <div className="space-y-1 text-center">
-                <UploadCloud className="mx-auto h-12 w-12 text-gray-400" />
-                <div className="flex text-sm text-gray-600">
-                  <label
-                    htmlFor="file-upload"
-                    className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
-                  >
-                    <span>Upload files</span>
-                    <input
-                      id="file-upload"
-                      name="file-upload"
-                      type="file"
-                      className="sr-only"
-                      multiple
-                      onChange={handleFileChange}
-                      accept="image/*"
-                    />
-                  </label>
-                  <p className="pl-1">or drag and drop</p>
+            {/* --- SECTION: ARCHIVE BROWSER (Now at the top for quick access) --- */}
+            <section className="bg-white border border-gray-100 shadow-sm rounded-sm overflow-hidden">
+                <div className="p-8 border-b border-gray-50 flex flex-col md:flex-row justify-between items-center gap-6 bg-[#fafafa]">
+                    <div className="flex items-center gap-4">
+                        <Layers size={20} strokeWidth={1.5} className="text-gray-400" />
+                        <h3 className="text-[11px] tracking-[0.4em] uppercase font-bold text-gray-900">Collection Archive</h3>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 w-full md:w-auto">
+                        <select
+                            value={selectedCollection?.id || ''}
+                            onChange={handleCollectionSelect}
+                            className="w-full md:w-80 bg-white border border-gray-200 px-4 py-2.5 text-[11px] tracking-widest uppercase font-medium outline-none focus:border-black transition-all appearance-none cursor-pointer"
+                        >
+                            {collections.length === 0 && <option>No Collections Found</option>}
+                            {collections.map(c => (
+                                <option key={c.id} value={c.id}>
+                                    {c.description.substring(0, 35)}...
+                                </option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
-                <p className="text-xs text-gray-500">
-                  PNG, JPG, GIF up to 10MB
-                </p>
-              </div>
-            </div>
-          </div>
 
-          {previews.length > 0 && (
-            <div>
-              <h4 className="text-sm font-medium text-gray-700 mb-2">
-                Image Previews:
-              </h4>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
-                {previews.map((preview, index) => (
-                  <div key={index} className="relative group">
-                    <img
-                      src={preview.src}
-                      alt="Preview"
-                      className="h-24 w-24 object-cover rounded-md"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removePreview(preview.name)}
-                      className="absolute top-0 right-0 m-1 bg-red-500 text-white rounded-full h-5 w-5 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      &times;
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+                <div className="p-8 md:p-12">
+                    {isLoading ? (
+                        <div className="py-20 text-center text-[10px] tracking-[0.4em] uppercase text-gray-300 animate-pulse">Synchronizing Atelier...</div>
+                    ) : selectedCollection ? (
+                        <div className="space-y-12 animate-in slide-in-from-bottom-4 duration-700">
+                            <div className="flex flex-col md:flex-row justify-between items-start gap-8">
+                                <div className="max-w-3xl border-l border-gray-900 pl-6">
+                                    <p className="text-lg md:text-xl font-light text-gray-800 leading-relaxed italic">
+                                        "{selectedCollection.description}"
+                                    </p>
+                                    <div className="flex items-center gap-4 mt-6">
+                                        <Calendar size={12} className="text-gray-400" />
+                                        <p className="text-[9px] tracking-[0.2em] text-gray-400 uppercase font-bold">
+                                            Published: {selectedCollection.createdAt?.toDate ? selectedCollection.createdAt.toDate().toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : 'Recently'}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => handleDelete(selectedCollection.id)}
+                                    className="px-6 py-3 border border-red-50 text-red-400 hover:bg-red-500 hover:text-white transition-all text-[10px] tracking-widest uppercase font-bold flex items-center gap-2"
+                                >
+                                    <Trash2 size={12} /> Remove Collection
+                                </button>
+                            </div>
 
-          <div className="text-right">
-            <button
-              type="submit"
-              disabled={isUploading}
-              className="inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400"
-            >
-              {isUploading ? "Saving..." : "Save Collection"}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {/* Existing Collections */}
-      <div className="bg-white p-6 rounded-xl shadow-sm">
-        <h3 className="text-xl font-semibold text-gray-800 mb-4">
-          Existing Collections
-        </h3>
-        {isLoading ? (
-          <p>Loading collections...</p>
-        ) : collections.length === 0 ? (
-          <p className="text-gray-500">No collections yet.</p>
-        ) : (
-          <div className="space-y-6">
-            {/* Collection Selector Dropdown */}
-            <div>
-              <label htmlFor="collection-select" className="block text-sm font-medium text-gray-700 mb-1">
-                Select a collection to view
-              </label>
-              <select
-                id="collection-select"
-                value={selectedCollection?.id || ''}
-                onChange={handleCollectionSelect}
-                className="w-full p-2 border rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                {collections.map(c => (
-                  <option key={c.id} value={c.id}>
-                    {c.description.substring(0, 80)}... (
-                    {c.createdAt?.toDate().toLocaleDateString()})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Selected Collection Display */}
-            {selectedCollection && (
-              <div className="p-4 border rounded-lg bg-slate-50 relative">
-                <p className="text-gray-700 mb-4">{selectedCollection.description}</p>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4">
-                  {selectedCollection.imageUrls.map((url, index) => (
-                    <img
-                      key={index}
-                      src={url}
-                      alt={`Collection Image ${index + 1}`}
-                      className="h-24 w-24 object-cover rounded-md"
-                    />
-                  ))}
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 md:gap-10">
+                                {selectedCollection.imageUrls?.map((url, index) => (
+                                    <div key={index} className="aspect-[3/4] overflow-hidden bg-[#fafafa] group relative">
+                                        <img
+                                            src={url}
+                                            alt="Sasha Archive Asset"
+                                            className="h-full w-full object-cover transition-transform duration-1000 grayscale-[0.4] group-hover:grayscale-0 group-hover:scale-110"
+                                        />
+                                        <div className="absolute inset-0 border border-black/5 pointer-events-none"></div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="py-24 text-center border-2 border-dashed border-gray-50">
+                            <ImageIcon size={40} strokeWidth={1} className="mx-auto text-gray-200 mb-4" />
+                            <p className="text-[10px] tracking-[0.4em] uppercase text-gray-400">The archive is currently empty</p>
+                        </div>
+                    )}
                 </div>
-                <button
-                  onClick={() => handleDelete(selectedCollection.id)}
-                  className="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 bg-red-100 text-red-600 font-semibold rounded-lg hover:bg-red-200 transition-colors text-sm"
-                >
-                  <Trash2 size={16} /> Delete
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+            </section>
+
+            {/* --- SECTION: NEW CURATION --- */}
+            <section className="bg-white border border-gray-100 shadow-sm rounded-sm max-w-4xl mx-auto">
+                <div className="p-8 border-b border-gray-50 bg-[#fafafa] text-center">
+                    <h3 className="text-[11px] tracking-[0.4em] uppercase font-bold text-gray-900">New Curation</h3>
+                    <p className="text-[9px] tracking-[0.2em] text-gray-400 uppercase mt-2">Add latest photographic assets</p>
+                </div>
+
+                <form onSubmit={handleSubmit} className="p-8 md:p-12 space-y-12">
+                    <div className="space-y-4">
+                        <label className="text-[10px] tracking-[0.3em] uppercase font-bold text-gray-400">Collection Narrative</label>
+                        <input
+                            type="text"
+                            className="w-full border-b border-gray-100 py-3 text-sm outline-none focus:border-black transition-colors bg-transparent placeholder:text-gray-200 font-light tracking-wide"
+                            placeholder="E.G., NOIR SERIES: AUTUMN WINTER 2025"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="space-y-6">
+                        <label className="text-[10px] tracking-[0.3em] uppercase font-bold text-gray-400">High-Res Assets</label>
+                        <div className="group relative border border-dashed border-gray-200 rounded-sm hover:border-black transition-all duration-500 py-16 flex flex-col items-center justify-center bg-[#fcfcfc]">
+                            <input
+                                id="file-upload"
+                                type="file"
+                                className="absolute inset-0 opacity-0 cursor-pointer"
+                                multiple
+                                onChange={handleFileChange}
+                                accept="image/*"
+                            />
+                            <UploadCloud className="text-gray-300 group-hover:text-black transition-colors mb-4" size={32} strokeWidth={1} />
+                            <p className="text-[10px] tracking-widest uppercase font-medium text-gray-400">Select collection files</p>
+                        </div>
+                    </div>
+
+                    {previews.length > 0 && (
+                        <div className="grid grid-cols-4 md:grid-cols-6 gap-4">
+                            {previews.map((preview, index) => (
+                                <div key={index} className="relative aspect-[3/4] group overflow-hidden border border-gray-100">
+                                    <img src={preview.src} alt="New Asset" className="h-full w-full object-cover grayscale-[0.6] group-hover:grayscale-0 transition-all duration-500" />
+                                    <button
+                                        type="button"
+                                        onClick={() => removePreview(preview.name)}
+                                        className="absolute top-2 right-2 bg-black text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        <X size={10} />
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
+                    <div className="pt-6">
+                        <button
+                            type="submit"
+                            disabled={isUploading}
+                            className="w-full bg-black text-white text-[11px] font-bold tracking-[0.3em] uppercase py-5 hover:bg-gray-800 transition-all disabled:bg-gray-100 disabled:text-gray-300"
+                        >
+                            {isUploading ? "Syncing..." : "Finalize Curation"}
+                        </button>
+                    </div>
+                </form>
+            </section>
+        </div>
+    );
 };
 
 export default CollectionsView;

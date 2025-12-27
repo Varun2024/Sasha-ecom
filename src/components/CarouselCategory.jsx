@@ -1,19 +1,22 @@
-
-
-
 /* eslint-disable no-unused-vars */
 import { motion, useTransform, useScroll } from "framer-motion";
-import { useRef, useState, useEffect } from "react"; // ADDED: useState, useEffect
+import { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { collection, getDocs } from "firebase/firestore"; // ADDED: Firestore imports
-import { db } from "../firebase/firebaseConfig"; // ADDED: Adjust this path to your Firebase config
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase/firebaseConfig";
 
 const ShopByCategory = () => {
     return (
-        <div className="rounded-4xl mb-8 md:max-w-full mx-4 md:mx-6 bg-[#e0ddd9] border-2">
-            <div className=" mt-10 flex flex-col justify-center items-center ">
-                <div className="font-semibold uppercase text-neutral-500 mt-10 md:text-7xl text-3xl">
-                    Shop By Category
+        <div className="bg-white py-12 md:py-20">
+            <div className="container mx-auto px-4 md:px-12 mb-10">
+                <div className="flex flex-col">
+                    <h2 className="text-[10px] tracking-[0.4em] uppercase text-gray-400 font-bold mb-3 italic">
+                        Collections
+                    </h2>
+                    <h3 className="text-2xl md:text-4xl font-light tracking-widest uppercase text-gray-900">
+                        Shop By <span className="font-semibold">Category</span>
+                    </h3>
+                    <div className="h-[1px] w-12 bg-black mt-6"></div>
                 </div>
             </div>
             <HorizontalScrollCarousel />
@@ -27,13 +30,12 @@ const HorizontalScrollCarousel = () => {
         target: targetRef,
     });
 
-    const x = useTransform(scrollYProgress, [0, 1], ["10%", "-45%"]);
+    // Adjusted transform for a smoother "magazine slide" feel
+    const x = useTransform(scrollYProgress, [0, 1], ["1%", "-60%"]);
 
-    // ADDED: State for dynamic cards and loading
     const [cards, setCards] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    // ADDED: Fetch products and derive categories
     useEffect(() => {
         const fetchCategories = async () => {
             setLoading(true);
@@ -41,27 +43,23 @@ const HorizontalScrollCarousel = () => {
                 const productsSnapshot = await getDocs(collection(db, "products"));
                 const products = productsSnapshot.docs.map(doc => doc.data());
 
-                // Process products to get unique categories with a representative image
                 const categoryMap = new Map();
                 products.forEach(product => {
                     if (product.category && !categoryMap.has(product.category)) {
-                        // Use the first image of the first product found for that category
                         const firstImage = (product.imageUrls && product.imageUrls.length > 0)
                             ? product.imageUrls[0]
-                            : 'https://placehold.co/450x450/e0ddd9/cccccc?text=Image+Not+Found';
+                            : 'https://placehold.co/600x800/fafafa/cccccc?text=Atelier';
 
                         categoryMap.set(product.category, {
                             id: categoryMap.size + 1,
                             title: product.category,
                             img: firstImage,
-                            // CHANGED: The href now points to the filtered product list page
                             href: `/all?category=${encodeURIComponent(product.category)}`
                         });
                     }
                 });
                 
                 setCards(Array.from(categoryMap.values()));
-
             } catch (error) {
                 console.error("Error fetching categories: ", error);
             } finally {
@@ -73,15 +71,17 @@ const HorizontalScrollCarousel = () => {
     }, []);
 
     return (
-        <section ref={targetRef} className="md:h-[300vh] h-[350vh]">
-            <div className="sticky top-20 md:top-10 flex h-[30%] items-center overflow-hidden">
+        <section ref={targetRef} className="relative h-[300vh] bg-white">
+            <div className="sticky top-0 flex h-screen items-center overflow-hidden">
                 {loading ? (
-                    <div className="w-full text-center text-neutral-500">Loading Categories...</div>
+                    <div className="w-full text-center text-[10px] tracking-widest uppercase text-gray-400 animate-pulse">
+                        Loading Atelier Categories...
+                    </div>
                 ) : (
-                    <motion.div style={{ x }} className="flex gap-4">
-                        {cards.map((card) => {
-                            return <Card card={card} key={card.id} />;
-                        })}
+                    <motion.div style={{ x }} className="flex gap-6 pl-4 md:pl-12">
+                        {cards.map((card) => (
+                            <Card card={card} key={card.id} />
+                        ))}
                     </motion.div>
                 )}
             </div>
@@ -89,28 +89,36 @@ const HorizontalScrollCarousel = () => {
     );
 };
 
-
 const Card = ({ card }) => {
     const navigate = useNavigate();
     return (
         <div
             key={card.id}
-            // CHANGED: The onClick now uses the dynamic href from the card object
-            onClick={() => window.location.href = card.href}
-            className="group relative md:h-[450px] md:w-[450px] h-[300px] w-[350px] overflow-hidden bg-neutral-200 rounded-4xl cursor-pointer"
+            onClick={() => navigate(card.href)}
+            className="group relative md:h-[550px] md:w-[400px] h-[400px] w-[300px] overflow-hidden bg-[#fafafa] rounded-sm cursor-pointer border border-gray-50"
         >
+            {/* Image Layer */}
             <div
                 style={{
                     backgroundImage: `url(${card.img})`,
                     backgroundSize: "cover",
                     backgroundPosition: "center",
                 }}
-                className="absolute inset-0 z-0 transition-transform duration-300 group-hover:scale-110"
+                className="absolute inset-0 z-0 transition-transform duration-1000 grayscale-[0.2] group-hover:grayscale-0 group-hover:scale-105"
             ></div>
-            <div className="absolute inset-0 z-10 grid place-content-center bg-black/30">
-                <p className="bg-gradient-to-br from-white/20 to-white/0 p-8 text-3xl font-black uppercase text-white backdrop-blur-lg">
-                    {card.title}
+            
+            {/* Subtle Gradient Overlay */}
+            <div className="absolute inset-0 z-10 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+            {/* Title Layer - Positioned at bottom like a magazine label */}
+            <div className="absolute inset-0 z-20 flex flex-col justify-end p-8 md:p-10">
+                <p className="text-white text-[10px] tracking-[0.4em] uppercase font-bold mb-2 translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                    Explore
                 </p>
+                <h4 className="text-white text-2xl md:text-3xl font-light tracking-widest uppercase">
+                    {card.title}
+                </h4>
+                <div className="w-0 group-hover:w-12 h-[1px] bg-white mt-4 transition-all duration-700"></div>
             </div>
         </div>
     );

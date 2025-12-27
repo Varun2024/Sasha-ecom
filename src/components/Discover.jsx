@@ -1,118 +1,110 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
-// Helper Component: Loading skeleton for product cards
+import { useNavigate } from 'react-router-dom';
+
+// Helper Component: Elegant Loading Skeleton
 const ProductCardSkeleton = () => (
-    <div className="flex-shrink-0 w-64 mx-4 bg-gray-200 rounded-xl animate-pulse">
-        <div className="h-40 bg-gray-300 rounded-t-xl"></div>
-        <div className="p-4 space-y-3">
-            <div className="h-4 bg-gray-300 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+    <div className="flex-shrink-0 w-64 mx-6 bg-white border border-gray-100 animate-pulse">
+        <div className="aspect-[3/4] bg-gray-100"></div>
+        <div className="p-4 space-y-3 text-center">
+            <div className="h-3 bg-gray-100 mx-auto w-3/4"></div>
+            <div className="h-3 bg-gray-100 mx-auto w-1/2"></div>
         </div>
     </div>
 );
 
-// Helper Component: Actual Product Card
+// Helper Component: Minimalist Product Card
 const ProductCard = ({ product }) => {
-    const discountPercentage = Math.round(((product.mrp - product.sale) / product.mrp) * 100) || 0;
+    const navigate = useNavigate();
+    
+    let displayImage = 'https://placehold.co/600x800/f8f8f8/cccccc?text=No+Image';
+    if (product.imageUrls && product.imageUrls.length > 0) {
+        displayImage = product.imageUrls[0];
+    } else if (product.imageUrl) {
+        displayImage = product.imageUrl;
+    }
+
     return (
-        <div className="flex-shrink-0 border-2 w-64 h-80 mx-4 bg-white rounded-xl shadow-md overflow-hidden group transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] hover:rounded-md hover:shadow-[4px_4px_0px_black] active:translate-x-[0px] active:translate-y-[0px] active:rounded-xl active:shadow-none">
-            <div className="h-40 overflow-hidden">
+        <div className="flex-shrink-0 w-64 mx-6 group cursor-pointer" onClick={() => navigate(`/product/${product.id}`)}>
+            <div className="aspect-[3/4] overflow-hidden bg-[#fafafa] relative border border-gray-50">
                 <img
-                    onClick={() => window.location.href = `/product/${product.id}`}
-                    src={product.imageUrls && product.imageUrls[0] || 'https://placehold.co/600x400/F1F5F9/334155?text=Product'}
+                    src={displayImage}
                     alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    onError={(e) => { e.target.onerror = null; e.target.src = 'https://placehold.co/600x400/F1F5F9/334155?text=Product'; }}
+                    className="w-full h-full object-cover grayscale-[0.2] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
                 />
+                {/* Subtle Overlay Badge */}
+                {product.sale < product.mrp && (
+                    <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1">
+                        <p className="text-[10px] tracking-widest font-bold uppercase text-gray-900 italic">Limited</p>
+                    </div>
+                )}
             </div>
-            <div className="p-4" >
-                <h3 className="text-lg font-semibold text-gray-800 truncate">{product.name || 'Product Name'}</h3>
-                <div className="flex flex-col items-center justify-between mt-2">
-                    <p className="text-lg text-gray-800">₹{product.sale?.toLocaleString('en-IN') || '0.00'}</p>
-                    <p className='text-sm line-through text-gray-500'>₹{product.mrp}</p>
-                    <p className='text-sm text-green-600'>{discountPercentage}% Off</p>
+            <div className="py-5 px-1 text-center space-y-1">
+                <h3 className="text-[11px] tracking-[0.2em] uppercase font-semibold text-gray-900 truncate">
+                    {product.name}
+                </h3>
+                <div className="flex items-center justify-center gap-3">
+                    <p className="text-[13px] font-medium text-gray-900 uppercase">₹{product.sale}</p>
+                    {product.mrp > product.sale && (
+                        <p className="text-[11px] text-gray-400 line-through font-light italic">₹{product.mrp}</p>
+                    )}
                 </div>
             </div>
         </div>
     );
 }
 
-// --- Main Component ---
 const ProductMarquee = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-
     useEffect(() => {
-        if (!db) {
-            setLoading(false);
-            setError("Firestore database instance is not available.");
-            return;
-        }
-
         const fetchProducts = async () => {
             try {
-                const productsCollectionRef = collection(db, "products");
-                const querySnapshot = await getDocs(productsCollectionRef);
+                const querySnapshot = await getDocs(collection(db, "products"));
                 const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 setProducts(productsData);
             } catch (err) {
-                console.error("Error fetching products:", err);
-                setError("Failed to fetch products.");
+                setError("Collections currently unavailable.");
             } finally {
                 setLoading(false);
             }
         };
-
         fetchProducts();
     }, []);
 
-
-    // To create a seamless loop, we duplicate the products array.
-    const marqueeProducts = products.length > 0 ? [...products, ...products] : [];
-
-    const renderMarqueeContent = () => {
-        if (loading) {
-            // Display 8 skeletons while loading
-            return (
-                <div className="flex">
-                    {Array.from({ length: 8 }).map((_, index) => <ProductCardSkeleton key={index} />)}
-                </div>
-            );
-        }
-        if (error) {
-            return <p className="text-red-500 text-center py-10">{error}</p>;
-        }
-        if (products.length === 0) {
-            return <p className="text-gray-500 text-center py-10">No products to display.</p>;
-        }
-        // The `animate-marquee` class will apply the scrolling animation
-        return (
-            <div className="flex animate-marquee group-hover:[animation-play-state:paused] mt-5">
-                {marqueeProducts.map((product, index) => (
-                    <ProductCard key={`${product.id}-${index}`} product={product} />
-                ))}
-
-            </div>
-
-        );
-    };
+    const marqueeProducts = products.length > 0 ? [...products, ...products, ...products] : [];
 
     return (
-        <section className="mx-4 rounded-3xl my-10 py-12 sm:py-16 h-screen justify-center flex flex-col">
-            <div className="max-w-7xl mx-auto px-4">
-                <h2 className="text-3xl md:text-6xl font-bold text-center text-gray-800 mb-16">
-                    Discover Our Products
-                </h2>
+        <section className="bg-white py-24 overflow-hidden border-y border-gray-50">
+            {/* Editorial Header */}
+            <div className="container mx-auto px-4 mb-16">
+                <div className="text-center">
+                    <h2 className="text-[10px] tracking-[0.4em] uppercase text-gray-400 font-bold mb-3 italic">Curations</h2>
+                    <h3 className="text-2xl md:text-3xl font-light tracking-widest uppercase text-gray-900">Discover More</h3>
+                    <div className="h-[1px] w-12 bg-black mx-auto mt-6"></div>
+                </div>
             </div>
-            <div className="relative w-full overflow-hidden group">
-                {/* Fades on the edges for a clean look */}
-                <div className="absolute top-0 bottom-0 left-0 w-24 bg-gradient-to-r from-gray-50 to-transparent z-10 pointer-events-none"></div>
-                <div className="absolute top-0 bottom-0 right-0 w-24 bg-gradient-to-l from-gray-50 to-transparent z-10 pointer-events-none"></div>
 
-                {renderMarqueeContent()}
+            {/* Marquee Wrapper */}
+            <div className="relative w-full overflow-hidden group">
+                {/* Edge Fades */}
+                <div className="absolute top-0 bottom-0 left-0 w-32 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none"></div>
+                <div className="absolute top-0 bottom-0 right-0 w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none"></div>
+
+                <div className="flex animate-marquee hover:[animation-play-state:paused] py-4">
+                    {loading ? (
+                        Array.from({ length: 8 }).map((_, i) => <ProductCardSkeleton key={i} />)
+                    ) : error ? (
+                        <p className="w-full text-center text-[11px] tracking-widest text-red-400 uppercase">{error}</p>
+                    ) : (
+                        marqueeProducts.map((product, index) => (
+                            <ProductCard key={`${product.id}-${index}`} product={product} />
+                        ))
+                    )}
+                </div>
             </div>
         </section>
     );
