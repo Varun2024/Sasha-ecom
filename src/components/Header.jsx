@@ -42,6 +42,7 @@ const SearchResults = ({ results, loading, query, onResultClick }) => {
 
     if (results.length === 0) return null;
 
+
     return (
         <div className="absolute top-full left-0 mt-2 w-full md:w-[400px] max-h-[70vh] overflow-y-auto bg-white shadow-2xl border border-gray-50 z-[100] rounded-sm">
             <div className="p-3 border-b border-gray-300 text-[10px] tracking-[0.2em] text-gray-400 uppercase font-medium">Search Results</div>
@@ -49,7 +50,7 @@ const SearchResults = ({ results, loading, query, onResultClick }) => {
                 {results.map(product => (
                     <li key={product.id} onClick={() => onResultClick(product.id)} className="flex items-center gap-4 p-4 hover:bg-[#fafafa] cursor-pointer transition-colors border-b border-gray-50 last:border-b-0">
                         <div className="w-12 h-16 bg-gray-100 flex-shrink-0">
-                            <img src={product.imageUrls && product.imageUrls[0]} alt={product.name} className="w-full h-full object-cover" />
+                            <img src={product.imageUrls && product.imageUrls[0] && product.variants?.[0]?.imageUrls?.[0]} alt={product.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-grow">
                             <p className="text-[12px] uppercase tracking-wide font-medium text-gray-900">{product.name}</p>
