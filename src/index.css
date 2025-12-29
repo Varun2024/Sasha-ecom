@@ -34,3 +34,11 @@ body {
   animation: marquee 40s linear infinite;
 }
 
+.animate-marquee-reverse-mobile {
+  animation: marquee-reverse 10s linear infinite;
+}
+
+.animate-marquee-mobile {
+  animation: marquee 10s linear infinite;
+}
+

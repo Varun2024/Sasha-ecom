@@ -66,7 +66,7 @@ export default function ProductDetailsPage() {
 
     const addCartItem = (buyNow = false) => {
         if (!selectedVariant) return toast.error("PLEASE SELECT A COLOR");
-        if (!userLoggedIn) return toast.error("PLEASE LOGIN TO CONTINUE");
+        if (!userLoggedIn) return (toast.error("PLEASE LOGIN TO CONTINUE"), navigate('/login'));
         if (selectedVariant.sizes?.length > 0 && !selectedSize) return toast.error("PLEASE SELECT A SIZE");
 
         const cartItem = {
