@@ -82,7 +82,8 @@ const DashboardView = () => {
                 });
 
                 allOrders.sort((a, b) => b.rawDate - a.rawDate);
-                const totalRevenue = allOrders.reduce((sum, order) => sum + order.total, 0);
+
+                const totalRevenue = allOrders.reduce((sum, order) => sum + (order.paymentMethod === "COD" ? order.total + 100 : order.total + 50), 0);
 
                 setSummaryData([
                     { title: 'Total Revenue', value: `₹${totalRevenue.toLocaleString('en-IN')}`, icon: TrendingUp },
@@ -150,7 +151,7 @@ const DashboardView = () => {
                                         <span className="text-[11px] text-gray-400 font-light uppercase tracking-widest">{order.date}</span>
                                     </td>
                                     <td className="p-6">
-                                        <span className="text-[12px] font-bold text-gray-900">₹{order.total.toLocaleString('en-IN')}</span>
+                                        <span className="text-[12px] font-bold text-gray-900">₹{order.paymentMethod === "COD"? (order.total + 100).toLocaleString('en-IN') : (order.total+50).toLocaleString('en-IN')}</span>
                                     </td>
                                     <td className="p-6 text-right">
                                         <span className={`px-3 py-1 text-[9px] font-bold tracking-[0.2em] uppercase rounded-full ${getStatusStyles(order.status)}`}>

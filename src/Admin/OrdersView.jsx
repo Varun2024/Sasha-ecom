@@ -64,7 +64,7 @@ const OrderRow = ({ order, onStatusUpdate, paymentMethod }) => {
                     <span className="text-[11px] text-gray-400 font-light uppercase tracking-widest">{order.date}</span>
                 </td>
                 <td className="p-6">
-                    <span className="text-[12px] font-bold text-gray-900 uppercase tracking-tight">₹{order.total.toFixed(2)}</span>
+                    <span className="text-[12px] font-bold text-gray-900 uppercase tracking-tight">₹{order.paymentMethod === "COD"? (order.total + 100).toFixed(2) : (order.total+50).toFixed(2)}</span>
                 </td>
                 <td className="p-6">
                     <span className={`px-3 py-1 text-[9px] font-bold tracking-[0.2em] uppercase rounded-full ${getStatusStyles(order.status)}`}>
@@ -132,8 +132,8 @@ const OrderRow = ({ order, onStatusUpdate, paymentMethod }) => {
                                             </button>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-2 px-2 text-[10px] tracking-widest text-gray-400 uppercase">
-                                        <CreditCard size={12} strokeWidth={1.5} /> {order.paymentMethod || 'Prepaid'}
+                                    <div className="flex items-center gap-2 px-2 text-[12px] tracking-widest text-gray-600 uppercase">
+                                        <CreditCard size={15} strokeWidth={1.5} /> {order.paymentMethod || 'Prepaid'}
                                     </div>
                                 </div>
                             </div>
