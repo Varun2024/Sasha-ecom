@@ -54,6 +54,8 @@ const ProductCard = ({ product }) => {
     );
 }
 
+
+
 const MoreLikeProducts = ({ currentCategory, currentProductId }) => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
