@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/firebaseConfig';
-import { TrendingUp, ShoppingBag, Users, Clock, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { TrendingUp, ShoppingBag, Users, Clock, ArrowUpRight, ArrowDownRight, icons } from 'lucide-react';
 
 // --- Minimalist Helper Components ---
 const LoadingSpinner = () => (
@@ -36,7 +36,7 @@ const SummaryCard = ({ title, value, icon: Icon }) => (
         </p>
         <div className="mt-4 flex items-center gap-2">
             <span className="flex items-center text-[9px] font-bold text-green-600 uppercase tracking-widest">
-                <ArrowUpRight size={10} className="mr-1" /> 12%
+                {Icon}<ArrowUpRight size={10} className="mr-1" /> 12%
             </span>
             <span className="text-[9px] text-gray-300 uppercase tracking-widest font-medium">Growth Index</span>
         </div>
